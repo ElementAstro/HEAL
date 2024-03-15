@@ -10,7 +10,7 @@ from src.component.style_sheet import StyleSheet
 from src.component.common import (MessageDownload,MessageNINA, MessagePHD2, MessageSharpCap, MessageLunarCore, MessageLunarCoreRes, HyperlinkCard_LunarCore, HyperlinkCard_Tool,
                                        HyperlinkCard_Environment, MessageLauncher, MessagePython, MessageGit, MessageJava, MessageMongoDB,
                                        MessageFiddler, MessageMitmdump)
-
+from src.icon.astro import AstroIcon
 
 class Download(ScrollArea):
     Nav = Pivot
@@ -29,18 +29,18 @@ class Download(ScrollArea):
         # 启动器组件，通常用于修复启动器问题
         self.LauncherInterface = SettingCardGroup('启动器', self.scrollWidget)
         self.LauncherRepoCard = HyperlinkCard(
-            'https://github.com/ElementAstro/Lithium',
+            'https://github.com/ElementAstro/HEAL',
             'Hello-ElementAstro-Launcher',
             FIF.LINK,
             '项目仓库',
             '打开HEAL项目仓库'
         )
-        self.LauncherDownloadCard = PrimaryPushSettingCard(
-            '详细信息',
-            FIF.DOWNLOAD,
-            '项目下载',
-            '下载Hello-ElementAstro-Launcher启动器'
-        )
+        #self.LauncherDownloadCard = PrimaryPushSettingCard(
+        #    '详细信息',
+        #    FIF.DOWNLOAD,
+        #    '项目下载',
+        #    '下载Hello-ElementAstro-Launcher启动器'
+        #)
         self.LauncherResourceCard = PrimaryPushSettingCard(
             '启动器资源',
             FIF.MENU,
@@ -48,7 +48,8 @@ class Download(ScrollArea):
             '下载启动器相关资源'
         )
         self.EnvironmentInterface = SettingCardGroup('环境', self.scrollWidget)
-        self.EnvironmentRepoCard = HyperlinkCard_Environment(
+        """
+         self.EnvironmentRepoCard = HyperlinkCard_Environment(
             'https://www.python.org/',
             'Python',
             'https://git-scm.com/download/win',
@@ -61,61 +62,126 @@ class Download(ScrollArea):
             '项目仓库',
             '打开各环境仓库'
         )
+        """
+        
         self.PythonDownloadCard = PrimaryPushSettingCard(
             '详细信息',
             FIF.DOWNLOAD,
             '项目下载',
             '下载Python安装包'
         )
-        self.GitDownloadCard = PrimaryPushSettingCard(
-            '详细信息',
-            FIF.DOWNLOAD,
-            '项目下载',
-            '下载Git安装包'
-        )
+        #self.GitDownloadCard = PrimaryPushSettingCard(
+        #    '详细信息',
+        #    FIF.DOWNLOAD,
+        #    '项目下载',
+        #    '下载Git安装包'
+        #)
         self.CompilerDownloadCard = PrimaryPushSettingCard(
             '详细信息',
             FIF.DOWNLOAD,
             '项目下载',
             '下载编译环境'
         )
-        self.JavaDownloadCard = PrimaryPushSettingCard(
-            '详细信息',
-            FIF.DOWNLOAD,
-            '项目下载',
-            '下载Java安装包'
-        )
+        #self.JavaDownloadCard = PrimaryPushSettingCard(
+        #    '详细信息',
+        #    FIF.DOWNLOAD,
+        ##    '下载Java安装包'
+        #)
         #self.MongoDBDownloadCard = PrimaryPushSettingCard(
         #    '详细信息',
         #    FIF.DOWNLOAD,
         #    '项目下载',
         #    '下载MongoDB安装包'
         #)
+
+        self.DriverInterface = SettingCardGroup('驱动', self.scrollWidget)
+
+        self.ASCOMRepoCard = HyperlinkCard(
+            'https://www.ascom-standards.org/Downloads/Index.htm',
+            '官网',
+            AstroIcon.ASCOM,
+            'ASCOM',
+            'ASCOM is a consortium of astronomy software developers, vendors, and users.'
+        )
+        self.INDIRepoCard = HyperlinkCard(
+            'https://www.indilib.org/get-indi.html',
+            '官网',
+            AstroIcon.INDI,
+            'INDI',
+            'INDI Library is an open source software to control astronomical equipment. It is based on the Instrument Neutral Distributed Interface (INDI) protocol and acts as a bridge between software clients and hardware devices.'
+        )
+        self.INDIGORepoCard = HyperlinkCard(
+            'https://indigo-astronomy.org/',
+            '官网',
+            AstroIcon.INDIGO,
+            'INDIGO',
+            'INDIGO is a universal control software for professional and hobbyist astronomy. It is designed to be used with a wide range of devices, including cameras, telescopes, mounts, and other control devices.'
+        )
         self.ThirdpartyInterface = SettingCardGroup('第三方软件', self.scrollWidget)
 
         self.NINARepoCard = HyperlinkCard(
             'https://nighttime-imaging.eu/download/',
             '官网',
-            FIF.DOWNLOAD,
+            AstroIcon.NINA,
             'NINA',
             'NIGHTTIME IMAGING "N" ASTRONOMY - An astrophotography imaging suite'
         )
         self.PHD2RepoCard = HyperlinkCard(
             'https://openphdguiding.org/downloads/',
             '官网',
-            FIF.DOWNLOAD,
+            AstroIcon.PHD,
             'PHD2',
             'PHD2 is telescope guiding software that simplifies the process of tracking a guide star, letting you concentrate on other aspects of deep-sky imaging or spectroscopy.'
         )
-
         self.SharpCapRepoCard = HyperlinkCard(
             'https://github.com/ElementAstro/SharpCap',
             '官网',
-            FIF.DOWNLOAD,
+            AstroIcon.SharpCap,
             'SharpCap',
             'SharpCap is an easy-to-use and powerful astronomy camera capture tool. It supports a wide range of dedicated astronomy cameras as well as webcams and USB frame grabbers.'
         )
-
+        self.APTRepoCard = HyperlinkCard(
+            'https://astrophotography.app/downloads.php',
+            '官网',
+            AstroIcon.APT,
+            'APT',
+            'Can control DSLR & CMOS camera,includes image acquisition tools,Now ToupTek Astro Camera is fully compatible with this software'
+        )
+        self.MaximDLRepoCard = HyperlinkCard(
+            'https://www.cyanogen.com/product/maxim-dl/',
+            '官网',
+            AstroIcon.MaximDL,
+            'MaximDL',
+            'MaxIm DL is the complete integrated solution for all of your astronomical imaging needs.'
+        )
+        self.THESkyRepoCard = HyperlinkCard(
+            'https://www.bisque.com/product-category/software',
+            '官网',
+            AstroIcon.TheSky,
+            'THESky',
+            'An essential tool for astronomical discovery and observation.'
+        )
+        self.VoyagerRepoCard = HyperlinkCard(
+            'https://software.starkeeper.it/',
+            '官网',
+            AstroIcon.Voyager,
+            'Voyager',
+            'A systems integration software,interfacing third-part software products.'
+        )
+        self.SGPRepoCard = HyperlinkCard(
+            'https://www.sequencegeneratorpro.com/sgpro',
+            '官网',
+            AstroIcon.SGP,
+            'SGP',
+            'The best in class automation software for astrophotography.'
+        )
+        self.FireCaptureRepoCard = HyperlinkCard(
+            'https://www.firecapture.de/',
+            '官网',
+            AstroIcon.FireCpature,
+            'FireCapture',
+            'Can control Telescope,EFW,has Autoguiding and Autorun features,Now ToupTek Astro Camera is fully compatible with this software'
+        )
         
         self.ToolInterface = SettingCardGroup('工具', self.scrollWidget)
         self.ToolRepoCard = HyperlinkCard_Tool(
@@ -140,6 +206,15 @@ class Download(ScrollArea):
             '下载代理工具Mitmdump'
         )
 
+        self.ResourceInterface = SettingCardGroup('资源', self.scrollWidget)
+        self.ResourceRepoCard = HyperlinkCard(
+            'https://github.com/ElementAstro/LunarCore',
+            'LunarCore',
+            FIF.LINK,
+            '项目仓库',
+            '打开LunarCore仓库'
+        )
+
         self.__initWidget()
 
     def __initWidget(self):
@@ -158,19 +233,31 @@ class Download(ScrollArea):
     def __initLayout(self):
         # 项绑定到栏目
         self.LauncherInterface.addSettingCard(self.LauncherRepoCard)
-        self.LauncherInterface.addSettingCard(self.LauncherDownloadCard)
+        #self.LauncherInterface.addSettingCard(self.LauncherDownloadCard)
         self.LauncherInterface.addSettingCard(self.LauncherResourceCard)
         # 环境
-        self.EnvironmentInterface.addSettingCard(self.EnvironmentRepoCard)
+        #self.EnvironmentInterface.addSettingCard(self.EnvironmentRepoCard)
         self.EnvironmentInterface.addSettingCard(self.PythonDownloadCard)
-        self.EnvironmentInterface.addSettingCard(self.GitDownloadCard)
-        self.EnvironmentInterface.addSettingCard(self.CompilerDownloadCard)
-        self.EnvironmentInterface.addSettingCard(self.JavaDownloadCard)
+        #self.EnvironmentInterface.addSettingCard(self.GitDownloadCard)
+        #self.EnvironmentInterface.addSettingCard(self.CompilerDownloadCard)
+        #self.EnvironmentInterface.addSettingCard(self.JavaDownloadCard)
         #self.EnvironmentInterface.addSettingCard(self.MongoDBDownloadCard)
+        #设备驱动
+        self.DriverInterface.addSettingCard(self.ASCOMRepoCard)
+        self.DriverInterface.addSettingCard(self.INDIRepoCard)
+        self.DriverInterface.addSettingCard(self.INDIGORepoCard)
+
         # 第三方软件下载
+        
         self.ThirdpartyInterface.addSettingCard(self.NINARepoCard)
         self.ThirdpartyInterface.addSettingCard(self.PHD2RepoCard)
         self.ThirdpartyInterface.addSettingCard(self.SharpCapRepoCard)
+        self.ThirdpartyInterface.addSettingCard(self.APTRepoCard)
+        self.ThirdpartyInterface.addSettingCard(self.THESkyRepoCard)
+        self.ThirdpartyInterface.addSettingCard(self.MaximDLRepoCard)
+        self.ThirdpartyInterface.addSettingCard(self.VoyagerRepoCard)
+        self.ThirdpartyInterface.addSettingCard(self.SGPRepoCard)
+        self.ThirdpartyInterface.addSettingCard(self.FireCaptureRepoCard)
         # 其他
         #self.LunarCoreInterface.addSettingCard(self.LunarCoreRepoCard)
         #self.LunarCoreInterface.addSettingCard(self.LunarCoreDownloadCard)
@@ -178,18 +265,23 @@ class Download(ScrollArea):
         self.ToolInterface.addSettingCard(self.ToolRepoCard)
         self.ToolInterface.addSettingCard(self.DownloadFiddlerCard)
         self.ToolInterface.addSettingCard(self.DownloadMitmdumpCard)
-
+        #self.ResourceInterface.addSettingCard(self.ResourceInterface)
+        self.ResourceInterface.addSettingCard(self.ResourceRepoCard)
         # 目前无法做到导航栏各个页面独立分组 , 故隐藏组标题
         self.LauncherInterface.titleLabel.setHidden(True)
         self.EnvironmentInterface.titleLabel.setHidden(True)
+        self.DriverInterface.titleLabel.setHidden(True)
         self.ThirdpartyInterface.titleLabel.setHidden(True)
         self.ToolInterface.titleLabel.setHidden(True)
+        self.ResourceInterface.titleLabel.setHidden(True)
 
         # 栏绑定界面
         self.addSubInterface(self.LauncherInterface, 'LauncherInterface','启动器', icon=FIF.HOME)
         self.addSubInterface(self.EnvironmentInterface, 'EnvironmentInterface','环境', icon=FIF.IOT)
+        self.addSubInterface(self.DriverInterface, 'DriverInterface','设备驱动', icon=FIF.IOT)
         self.addSubInterface(self.ThirdpartyInterface, 'ThirdpartyInterface','第三方软件', icon=FIF.APPLICATION)
         self.addSubInterface(self.ToolInterface, 'ToolInterface','工具', icon=FIF.TAG)
+        self.addSubInterface(self.ResourceInterface, 'ResourceInterface','资源', icon=FIF.TILES)
 
         # 初始化配置界面
         self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignLeft)
@@ -202,12 +294,12 @@ class Download(ScrollArea):
         qrouter.setDefaultRouteKey(self.stackedWidget, self.LauncherInterface.objectName())
         
     def __connectSignalToSlot(self):
-        self.LauncherDownloadCard.clicked.connect(lambda: self.download_check('launcher'))
+        #self.LauncherDownloadCard.clicked.connect(lambda: self.download_check('launcher'))
         self.LauncherResourceCard.clicked.connect(lambda: self.download_check('launcherres'))
         self.PythonDownloadCard.clicked.connect(lambda: self.download_check('python'))
-        self.GitDownloadCard.clicked.connect(lambda: self.download_check('git'))
+        #self.GitDownloadCard.clicked.connect(lambda: self.download_check('git'))
         self.CompilerDownloadCard.clicked.connect(lambda: self.download_check('compiler'))
-        self.JavaDownloadCard.clicked.connect(lambda: self.download_check('java'))
+        #self.JavaDownloadCard.clicked.connect(lambda: self.download_check('java'))
         #self.MongoDBDownloadCard.clicked.connect(lambda: self.download_check('mongodb'))
         #self.NINADownloadCard.clicked.connect(lambda: self.download_check('nina'))
         #self.PHD2DownloadCard.clicked.connect(lambda: self.download_check('phd2'))
