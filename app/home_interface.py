@@ -6,7 +6,7 @@ from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QPixmap, QPainter, QPainterPath, QFont
 from qfluentwidgets import FluentIcon as FIF
 from qfluentwidgets import TogglePushButton, PrimaryPushButton, setCustomStyleSheet, InfoBar, InfoBarPosition
-from src.module.config import cfg
+from app.module.config import cfg
 
 
 class RoundedImageWithText(QWidget):
@@ -37,7 +37,10 @@ class Home(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 10, 10, 10)
 
-        image_widget = RoundedImageWithText("./src/image/bg_home_" + str(random.randint(1, 4)) + ".png")
+        if cfg.randomHomeBg.value:
+            image_widget = RoundedImageWithText("./src/image/bg_home_" + str(random.randint(1, 3)) + ".png")
+        else:
+            image_widget = RoundedImageWithText("./src/image/bg_home_1.png")
         image_widget.setFixedSize(1160, 350)
         image_layout = QVBoxLayout()
         image_layout.addWidget(image_widget)
@@ -48,7 +51,9 @@ class Home(QWidget):
         row, col = 0, 0
         for name in cfg.SERVER_NAMES:
             name_addspace = '   '+ name
-            button_server = TogglePushButton(FIF.TAG, name_addspace, self)
+            icon = cfg.SERVER.get(name, {}).get("icon")
+            icon_attr = getattr(FIF, icon) if icon and icon != "" else FIF.TAG
+            button_server = TogglePushButton(icon_attr, name_addspace, self)
             button_server.setObjectName(name)
             button_server.setFixedSize(270, 70)
             button_server.setIconSize(QSize(18, 18))

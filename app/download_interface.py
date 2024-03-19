@@ -5,9 +5,10 @@ from PySide6.QtCore import Qt
 from qfluentwidgets import FluentIcon as FIF
 from qfluentwidgets import (Pivot, qrouter, ScrollArea, SettingCardGroup,
                             PrimaryPushSettingCard, HyperlinkCard, InfoBar, InfoBarPosition)
-from src.module.config import cfg
-from src.component.style_sheet import StyleSheet
-from src.component.common import (MessageDownload,MessageNINA, MessagePHD2, MessageSharpCap, MessageLunarCore, MessageLunarCoreRes, HyperlinkCard_LunarCore, HyperlinkCard_Tool,
+from app.module.config import cfg
+from app.component.style_sheet import StyleSheet
+from app.component.setting_group import SettingCardGroup
+from app.component.message_download import (MessageDownload,MessageNINA, MessagePHD2, MessageSharpCap, MessageLunarCore, MessageLunarCoreRes, HyperlinkCard_LunarCore, HyperlinkCard_Tool,
                                        HyperlinkCard_Environment, MessageLauncher, MessagePython, MessageGit, MessageJava, MessageMongoDB,
                                        MessageFiddler, MessageMitmdump)
 from src.icon.astro import AstroIcon
@@ -27,7 +28,7 @@ class Download(ScrollArea):
 
         # 添加项 , 名字会隐藏
         # 启动器组件，通常用于修复启动器问题
-        self.LauncherInterface = SettingCardGroup('启动器', self.scrollWidget)
+        self.LauncherInterface = SettingCardGroup(self.scrollWidget)
         self.LauncherRepoCard = HyperlinkCard(
             'https://github.com/ElementAstro/HEAL',
             'Hello-ElementAstro-Launcher',
@@ -47,7 +48,7 @@ class Download(ScrollArea):
             '资源下载',
             '下载启动器相关资源'
         )
-        self.EnvironmentInterface = SettingCardGroup('环境', self.scrollWidget)
+        self.EnvironmentInterface = SettingCardGroup(self.scrollWidget)
         """
          self.EnvironmentRepoCard = HyperlinkCard_Environment(
             'https://www.python.org/',
@@ -94,7 +95,7 @@ class Download(ScrollArea):
         #    '下载MongoDB安装包'
         #)
 
-        self.DriverInterface = SettingCardGroup('驱动', self.scrollWidget)
+        self.DriverInterface = SettingCardGroup(self.scrollWidget)
 
         self.ASCOMRepoCard = HyperlinkCard(
             'https://www.ascom-standards.org/Downloads/Index.htm',
@@ -117,7 +118,7 @@ class Download(ScrollArea):
             'INDIGO',
             'INDIGO is a universal control software for professional and hobbyist astronomy. It is designed to be used with a wide range of devices, including cameras, telescopes, mounts, and other control devices.'
         )
-        self.ThirdpartyInterface = SettingCardGroup('第三方软件', self.scrollWidget)
+        self.ThirdpartyInterface = SettingCardGroup(self.scrollWidget)
 
         self.NINARepoCard = HyperlinkCard(
             'https://nighttime-imaging.eu/download/',
@@ -183,7 +184,7 @@ class Download(ScrollArea):
             'Can control Telescope,EFW,has Autoguiding and Autorun features,Now ToupTek Astro Camera is fully compatible with this software'
         )
         
-        self.ToolInterface = SettingCardGroup('工具', self.scrollWidget)
+        self.ToolInterface = SettingCardGroup(self.scrollWidget)
         self.ToolRepoCard = HyperlinkCard_Tool(
             'https://www.telerik.com/fiddler#fiddler-classic',
             'Fiddler',
@@ -206,7 +207,7 @@ class Download(ScrollArea):
             '下载代理工具Mitmdump'
         )
 
-        self.ResourceInterface = SettingCardGroup('资源', self.scrollWidget)
+        self.ResourceInterface = SettingCardGroup(self.scrollWidget)
         self.ResourceRepoCard = HyperlinkCard(
             'https://github.com/ElementAstro/LunarCore',
             'LunarCore',
@@ -267,13 +268,6 @@ class Download(ScrollArea):
         self.ToolInterface.addSettingCard(self.DownloadMitmdumpCard)
         #self.ResourceInterface.addSettingCard(self.ResourceInterface)
         self.ResourceInterface.addSettingCard(self.ResourceRepoCard)
-        # 目前无法做到导航栏各个页面独立分组 , 故隐藏组标题
-        self.LauncherInterface.titleLabel.setHidden(True)
-        self.EnvironmentInterface.titleLabel.setHidden(True)
-        self.DriverInterface.titleLabel.setHidden(True)
-        self.ThirdpartyInterface.titleLabel.setHidden(True)
-        self.ToolInterface.titleLabel.setHidden(True)
-        self.ResourceInterface.titleLabel.setHidden(True)
 
         # 栏绑定界面
         self.addSubInterface(self.LauncherInterface, 'LauncherInterface','启动器', icon=FIF.HOME)

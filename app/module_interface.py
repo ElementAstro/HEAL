@@ -5,7 +5,7 @@ from PySide6.QtCore import Qt
 from qfluentwidgets import FluentIcon as FIF
 from qfluentwidgets import (Pivot, qrouter, ScrollArea, SettingCardGroup, PushButton, TextEdit,
                             PrimaryPushSettingCard, InfoBar, InfoBarPosition)
-from src.component.style_sheet import StyleSheet
+from .component.style_sheet import StyleSheet
 
 
 class Module(ScrollArea):
@@ -22,7 +22,7 @@ class Module(ScrollArea):
         self.stackedWidget = QStackedWidget(self)
 
         # 添加项 , 名字会隐藏
-        self.LauncherInterface = SettingCardGroup('配置', self.scrollWidget)
+        self.LauncherInterface = SettingCardGroup(self.scrollWidget)
         self.settingConfigCard = PrimaryPushSettingCard(
             '打开文件',
             FIF.LABEL,
@@ -35,7 +35,7 @@ class Module(ScrollArea):
             '个性化',
             '自定义个性化配置'
         )
-        self.LunarCoreInterface = SettingCardGroup('LunarCore', self.scrollWidget)
+        self.LunarCoreInterface = SettingCardGroup(self.scrollWidget)
         self.bannersConfigCard = PrimaryPushSettingCard(
             '打开文件',
             FIF.LABEL,
