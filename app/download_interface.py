@@ -1,5 +1,7 @@
+import json
 import os
 import subprocess
+from loguru import logger
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QStackedWidget
 from PySide6.QtCore import Qt
 from qfluentwidgets import FluentIcon as FIF
@@ -17,6 +19,9 @@ class Download(ScrollArea):
     Nav = Pivot
     def __init__(self, text: str, parent=None):
         super().__init__(parent=parent)
+
+        logger.debug(f'Loading Download Interface: {text}')
+        
         self.parent = parent
         self.setObjectName(text.replace(' ', '-'))
         self.scrollWidget = QWidget()
@@ -25,6 +30,74 @@ class Download(ScrollArea):
         # 栏定义
         self.pivot = self.Nav(self)
         self.stackedWidget = QStackedWidget(self)
+
+        # 加载下载界面
+        with open('./config/interface/download.json', mode='r', encoding="utf-8") as f:
+            try:
+                self.interface = json.load(f)
+                logger.debug(f'Loading JSON file: {f.name}: {self.interface}')
+            except (IOError, json.JSONDecodeError) as e:
+                logger.error(f'Error loading JSON file: {e}')
+                raise
+
+        for section in self.interface.get('sections', []):
+            section_title = section.get('title')
+            if not section_title:
+                logger.warning('Section title missing')
+                continue
+            setattr(self, section_title, SettingCardGroup(self.scrollWidget))
+            icon_value = section.get('icon') if section.get('icon') else "FIF.HOME"
+            section_icon = getattr(FIF,icon_value[4:])
+
+            
+            #section_interface = SettingCardGroup(self.scrollWidget)
+    
+            for item in section.get('items', []):
+                item_type = item.get('type')
+                
+                if not item_type:
+                    logger.warning('Item type missing')
+                    continue
+                
+                if item_type == 'hyperlink':
+                    required_fields = ['url', 'text', 'icon', 'title', 'content']
+                elif item_type == 'primary_push_setting':
+                    required_fields = ['text', 'icon', 'title', 'content']
+                else:
+                    logger.warning(f'Unknown item type: {item_type}')
+                    continue
+                
+                if not all(field in item for field in required_fields):
+                    logger.error(f'Missing required fields for {item_type.capitalize()}')
+                    continue
+                if (item["icon"][:4] == 'FIF.'):
+                    if hasattr(FIF, item['icon'][4:]):
+                        logger.info(f'Found icon: {item["icon"]}')
+                        item['icon'] = getattr(FIF, item['icon'][4:])
+                    else:
+                        logger.error(f'Unknown icon: {item["icon"]}')
+                        item['icon'] = getattr(FIF, 'DOWNLOAD')
+                elif item['icon'].startwith('Astro.'):
+                    if hasattr(AstroIcon, item['icon'][5:]):
+                        logger.info(f'Found icon: {item["icon"]}')
+                        item['icon'] = getattr(AstroIcon, item['icon'][5:])
+                    else:
+                        logger.error(f'Unknown icon: {item["icon"]}')
+                        item['icon'] = getattr(AstroIcon, 'DOWNLOAD')
+                else:
+                    logger.error(f'Unknown icon: {item["icon"]}')
+                
+                card_args = {field: item[field] for field in required_fields}
+                
+                if item_type == 'hyperlink':
+                    card = HyperlinkCard(**card_args)
+                elif item_type == 'primary_push_setting':
+                    card = PrimaryPushSettingCard(**card_args)
+                getattr(self, section_title).addSettingCard(card)
+                #section_interface
+            
+            self.addSubInterface(getattr(self, section_title), section_title, section_title, icon=section_icon)
+
 
         # 添加项 , 名字会隐藏
         # 启动器组件，通常用于修复启动器问题

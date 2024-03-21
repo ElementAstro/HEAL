@@ -4,11 +4,12 @@ import glob
 import random
 import hashlib
 import subprocess
+from loguru import logger
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import Qt, QSize, QUrl
+from PySide6.QtCore import Qt, QSize, QUrl, QEvent
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
-from qfluentwidgets import MSFluentWindow, NavigationItemPosition, setTheme, Theme, InfoBar, InfoBarPosition, SplashScreen
+from qfluentwidgets import MSFluentWindow, NavigationItemPosition, setTheme, Theme, InfoBar, InfoBarPosition, SplashScreen, MessageBox, MessageDialog
 from qfluentwidgets import FluentIcon as FIF
 from app.home_interface import Home
 from app.download_interface import Download
@@ -17,6 +18,7 @@ from app.config_interface import Config
 from app.toolkit_interface import Toolkit
 from app.command_interface import Command
 from app.setting_interface import Setting
+from app.faq_interface import FAQ
 from app.module.config import cfg
 from app.module.check_update import checkUpdate
 from app.component.message_login import MessageLogin
@@ -25,6 +27,8 @@ from app.component.message_login import MessageLogin
 class Main(MSFluentWindow):
     def __init__(self):
         super().__init__()
+        self.installEventFilter(self)
+
         setTheme(cfg.themeMode.value)
         self.initMainWindow()
 
@@ -34,6 +38,7 @@ class Main(MSFluentWindow):
         self.configInterface = Config('Config Interface', self)
         self.toolkitInterface = Toolkit('Toolkit Interface', self)
         self.commandInterface = Command('Command Interface', self)
+        self.faqInterface = FAQ("FAQ Interface", self)
         self.settingInterface = Setting('Setting Interface', self)
 
         self.initNavigation()
@@ -65,6 +70,7 @@ class Main(MSFluentWindow):
             selectable=False,
             position=NavigationItemPosition.BOTTOM
         )
+        self.addSubInterface(self.faqInterface, FIF.BOOK_SHELF, 'FAQ', FIF.BOOK_SHELF, NavigationItemPosition.BOTTOM)
         self.addSubInterface(self.settingInterface, FIF.SETTING, '设置', FIF.SETTING, NavigationItemPosition.BOTTOM)
 
     def initMainWindow(self):
@@ -189,3 +195,26 @@ class Main(MSFluentWindow):
                 duration=3000,
                 parent=self
             )
+
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.KeyPress:
+            key = event.key()
+            if key == Qt.Key_Escape:
+                logger.info('Escape')
+                '''reply = MessageDialog('确认', '确定要执行这个操作吗？', self).show()
+                reply.show()
+                if reply.yesSignal:
+                    logger.info('Exit')
+                    sys.exit()
+                else:
+                    logger.info('Cancel')'''
+                sys.exit()
+            elif Qt.Key_F1:
+                logger.info('F1')
+                self.w.show()
+                self.w.activateWindow()
+                self.w.raise_()
+                self.w.setFocus()
+        return super().eventFilter(obj, event)
+    
+        

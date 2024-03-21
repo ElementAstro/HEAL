@@ -1,0 +1,45 @@
+{
+  "sections": [
+    {
+      "title": "启动器",
+      "icon": "FIF.HOME",
+      "items": [
+        {
+          "type": "hyperlink",
+          "url": "https://github.com/ElementAstro/HEAL",
+          "text": "Hello-ElementAstro-Launcher",
+          "icon": "FIF.LINK",
+          "title": "项目仓库",
+          "content": "打开HEAL项目仓库"
+        },
+        {
+          "type": "primary_push_setting",
+          "text": "启动器资源",
+          "icon": "FIF.MENU",
+          "title": "资源下载",
+          "content": "下载启动器相关资源"
+        }
+      ]
+    },
+    {
+      "title": "环境",
+      "icon": "FIF.IOT",
+      "items": [
+        {
+          "type": "primary_push_setting",
+          "text": "详细信息",
+          "icon": "FIF.DOWNLOAD",
+          "title": "项目下载",
+          "content": "下载Python安装包"
+        },
+        {
+          "type": "primary_push_setting",
+          "text": "详细信息",
+          "icon": "FIF.DOWNLOAD",
+          "title": "项目下载",
+          "content": "下载编译环境"
+        }
+      ]
+    }
+  ]
+}
