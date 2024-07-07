@@ -1,0 +1,125 @@
+[
+  {
+      "type": "link",
+      "title": "项目仓库",
+      "content": "打开各环境仓库",
+      "links": {
+          "Git": "https://git-scm.com/download/win",
+          "Java": "https://www.oracle.com/java/technologies/javase-downloads.html",
+          "MongoDB": "https://www.mongodb.com/try/download/community",
+          "Node.js": "https://nodejs.org/en/download/",
+          "Python": "https://www.python.org/downloads/"
+      }
+  },
+  {
+      "type": "download",
+      "title": "Git",
+      "content": "下载Git安装包",
+      "options": [
+          {
+              "name": "Windows x64",
+              "key": "git_windows_x64"
+          },
+          {
+              "name": "Windows x86",
+              "key": "git_windows_x86"
+          },
+          {
+              "name": "macOS",
+              "key": "git_macos"
+          },
+          {
+              "name": "Linux",
+              "key": "git_linux"
+          }
+      ]
+  },
+  {
+      "type": "download",
+      "title": "Java",
+      "content": "下载Java安装包",
+      "options": [
+          {
+              "name": "JDK 17",
+              "key": "java_jdk_17"
+          },
+          {
+              "name": "JDK 11 (LTS)",
+              "key": "java_jdk_11"
+          },
+          {
+              "name": "JDK 8 (LTS)",
+              "key": "java_jdk_8"
+          }
+      ]
+  },
+  {
+      "type": "download",
+      "title": "MongoDB",
+      "content": "下载MongoDB数据库",
+      "options": [
+          {
+              "name": "Windows x64",
+              "key": "mongodb_windows_x64"
+          },
+          {
+              "name": "Windows x86",
+              "key": "mongodb_windows_x86"
+          },
+          {
+              "name": "macOS",
+              "key": "mongodb_macos"
+          },
+          {
+              "name": "Linux",
+              "key": "mongodb_linux"
+          }
+      ]
+  },
+  {
+      "type": "download",
+      "title": "Node.js",
+      "content": "下载Node.js安装包",
+      "options": [
+          {
+              "name": "Windows x64",
+              "key": "nodejs_windows_x64"
+          },
+          {
+              "name": "Windows x86",
+              "key": "nodejs_windows_x86"
+          },
+          {
+              "name": "macOS",
+              "key": "nodejs_macos"
+          },
+          {
+              "name": "Linux",
+              "key": "nodejs_linux"
+          }
+      ]
+  },
+  {
+      "type": "download",
+      "title": "Python",
+      "content": "下载Python安装包",
+      "options": [
+          {
+              "name": "Windows x64",
+              "key": "python_windows_x64"
+          },
+          {
+              "name": "Windows x86",
+              "key": "python_windows_x86"
+          },
+          {
+              "name": "macOS",
+              "key": "python_macos"
+          },
+          {
+              "name": "Linux",
+              "key": "python_linux"
+          }
+      ]
+  }
+]

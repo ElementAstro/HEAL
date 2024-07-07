@@ -1,0 +1,24 @@
+{
+  "PASSWORD": "lethe loves firefly",
+  "UID": "10001",
+  "KEY": "lethe",
+  "SERVER_URL": "127.0.0.1:443",
+  "ROUTE_APPLY": "/api/fireflylauncherlethe/apply",
+  "ROUTE_VERIFY": "/api/fireflylauncherlethe/verify",
+  "ROUTE_REMOTE": "/api/fireflylauncherlethe/remote",
+  "PROXY_PORT": "7890",
+  "SERVER": {
+    "LunarCore": {
+      "ICON": "",
+      "COMMAND": "cd ./server/LunarCore/ && start java.exe -jar LunarCore.jar"
+    },
+    "Grasscutter": {
+      "ICON": "",
+      "COMMAND": "cd ./server/Grasscutter/ && start java.exe -jar grasscutter.jar"
+    },
+    "Hutao-GS": {
+      "ICON": "",
+      "COMMAND": "cd ./server/HuTao-GS/ && start START-DEV.bat"
+    }
+  }
+}

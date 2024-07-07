@@ -1,77 +1,78 @@
 import os
 import sys
+import json
 import glob
 import random
+import winreg
 import hashlib
 import subprocess
-from loguru import logger
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import Qt, QSize, QUrl, QEvent
+from PySide6.QtCore import Qt, QSize, QUrl
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
-from qfluentwidgets import MSFluentWindow, NavigationItemPosition, setTheme, Theme, InfoBar, InfoBarPosition, SplashScreen, MessageBox, MessageDialog
-from qfluentwidgets import FluentIcon as FIF
+from qfluentwidgets import (
+    MSFluentWindow, NavigationItemPosition, setTheme, Theme, InfoBar,
+    PrimaryPushButton, InfoBarPosition, SplashScreen, HyperlinkButton,
+    InfoBarIcon, FluentIcon
+)
 from app.home_interface import Home
-from app.download_interface import Download
-from app.config_interface import Config
-#from app.module_interface import Module
-from app.toolkit_interface import Toolkit
-from app.command_interface import Command
+from app.launcher_interface import Launcher
+from app.environment_interface import Environment
+from app.proxy_interface import Proxy
 from app.setting_interface import Setting
-from app.faq_interface import FAQ
-from app.module.config import cfg
-from app.module.check_update import checkUpdate
-from app.component.message_login import MessageLogin
+from app.model.config import cfg, Info
+from app.model.check_update import checkUpdate
+from app.model.login_card import MessageLogin
 
 
 class Main(MSFluentWindow):
     def __init__(self):
         super().__init__()
-        self.installEventFilter(self)
-
         setTheme(cfg.themeMode.value)
+
         self.initMainWindow()
-
-        self.homeInterface = Home('Home Interface', self)
-        #self.moduleInterface = Module('Module Interface', self)
-        self.downloadInterface = Download('Download Interface', self)
-        self.configInterface = Config('Config Interface', self)
-        self.toolkitInterface = Toolkit('Toolkit Interface', self)
-        self.commandInterface = Command('Command Interface', self)
-        self.faqInterface = FAQ("FAQ Interface", self)
-        self.settingInterface = Setting('Setting Interface', self)
-
         self.initNavigation()
-        self.checkFont()
-        # 加载界面结束
+        self.handleFontCheck()
+
         self.splashScreen.finish()
+
         checkUpdate(self)
         if cfg.useLogin.value:
-            self.incorrect_count = 1
-            self.w = MessageLogin(self)
-            self.w.show()
-            self.w.passwordEntered.connect(self.checkLogin)
+            self.count_pwd = 1
+            self.login_card = MessageLogin(self)
+            self.login_card.show()
+            self.login_card.passwordEntered.connect(self.handleLogin)
         else:
             if cfg.useAudio.value:
-                self.mediaPlay('success')
-    
+                self.handleMediaPlay('success')
+
     def initNavigation(self):
-        self.addSubInterface(self.homeInterface, FIF.HOME, '主页', FIF.HOME_FILL)
-        #self.addSubInterface(self.moduleInterface, FIF.MODULE, '模块', FIF.DEVELOPER_TOOLS)
-        self.addSubInterface(self.downloadInterface, FIF.DOWNLOAD, '下载', FIF.DOWNLOAD)
-        self.addSubInterface(self.configInterface, FIF.SEARCH_MIRROR, '配置', FIF.SEARCH_MIRROR)
-        self.addSubInterface(self.toolkitInterface, FIF.APPLICATION, '工具', FIF.APPLICATION)
-        self.addSubInterface(self.commandInterface, FIF.COMMAND_PROMPT, '命令', FIF.COMMAND_PROMPT)
+        self.homeInterface = Home('HomeInterface', self)
+        self.launcherInterface = Launcher('LauncherInterface', self)
+        self.environmentInterface = Environment('EnvironmentInterface', self)
+        self.proxyInterface = Proxy('ProxyInterface', self)
+        self.settingInterface = Setting('SettingInterface', self)
+
+        interfaces = [
+            (self.homeInterface, FluentIcon.HOME, self.tr('主页'), FluentIcon.HOME_FILL),
+            (self.launcherInterface, FluentIcon.PLAY, self.tr('启动器'), FluentIcon.PLAY),
+            (self.environmentInterface, FluentIcon.DICTIONARY, self.tr('环境'), FluentIcon.DICTIONARY),
+            (self.proxyInterface, FluentIcon.CERTIFICATE, self.tr('代理'), FluentIcon.CERTIFICATE),
+            (self.settingInterface, FluentIcon.SETTING, self.tr('设置'), FluentIcon.SETTING, NavigationItemPosition.BOTTOM)
+        ]
+
+        for interface, icon, text, fillIcon, *position in interfaces:
+            position = position[0] if position else NavigationItemPosition.TOP
+            self.addSubInterface(interface, icon, text, fillIcon, position)
+
         self.navigationInterface.addItem(
             routeKey='theme',
-            icon=FIF.CONSTRACT,
-            text='主题',
-            onClick=self.changeTheme,
+            icon=FluentIcon.CONSTRACT,
+            text=self.tr('主题'),
+            onClick=self.handleThemeChanged,
             selectable=False,
             position=NavigationItemPosition.BOTTOM
         )
-        self.addSubInterface(self.faqInterface, FIF.BOOK_SHELF, 'FAQ', FIF.BOOK_SHELF, NavigationItemPosition.BOTTOM)
-        self.addSubInterface(self.settingInterface, FIF.SETTING, '设置', FIF.SETTING, NavigationItemPosition.BOTTOM)
 
     def initMainWindow(self):
         self.titleBar.maxBtn.setHidden(True)
@@ -79,104 +80,91 @@ class Main(MSFluentWindow):
         self.titleBar.setDoubleClickEnabled(False)
         self.setResizeEnabled(False)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowMaximizeButtonHint)
+
         self.setWindowTitle(cfg.APP_NAME)
         self.setFixedSize(1280, 768)
         self.setWindowIcon(QIcon('./src/image/icon.ico'))
 
-        # 启用加载界面
         self.splashScreen = SplashScreen(self.windowIcon(), self)
-        self.splashScreen.setIconSize(QSize(128, 128))
+        self.splashScreen.setIconSize(QSize(200, 200))
         self.splashScreen.raise_()
 
-        # 居中显示
         desktop = QApplication.screens()[0].availableGeometry()
         w, h = desktop.width(), desktop.height()
-        self.move(w//2 - self.width()//2, h//2 - self.height()//2)
+        self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
 
-        # 显示加载界面
-        self.showNormal()
+        self.show()
         QApplication.processEvents()
 
-    def checkFont(self):
-        font_path = os.path.expandvars('%UserProfile%\AppData\Local\Microsoft\Windows\Fonts\zh-cn.ttf')
-        if not os.path.exists(font_path):
+    def handleFontCheck(self):
+        isSetupFont = False
+        registry_keys = [
+            (winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"),
+            (winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows NT\CurrentVersion\Fonts")
+        ]
+        try:
+            for hkey, sub_key in registry_keys:
+                with winreg.ConnectRegistry(None, hkey) as reg:
+                    with winreg.OpenKey(reg, sub_key) as reg_key:
+                        i = 0
+                        while True:
+                            try:
+                                name, _, _ = winreg.EnumValue(reg_key, i)
+                                if cfg.APP_FONT.lower() in name.lower():
+                                    isSetupFont = True
+                                i += 1
+                            except OSError:
+                                break
+        except Exception as e:
+            Info(self, 'E', 3000, self.tr('检查字体失败: '), str(e))
+
+        if not isSetupFont:
             subprocess.run('cd src/patch/font && start zh-cn.ttf', shell=True)
             sys.exit()
 
-    def checkLogin(self, password):
-        md5_hash = hashlib.md5(password.encode()).hexdigest()[8:24].upper()
-        # if md5_hash == 'EE1FC4FB7AD2BE1C':
-        if password == '':
-            InfoBar.success(
-                title='登录成功',
-                content='',
-                orient=Qt.Horizontal,
-                isClosable=True,
-                position=InfoBarPosition.TOP,
-                duration=1000,
-                parent=self
-            )
+    def handleLogin(self, pwd):
+        with open('config/config.json', 'r', encoding='utf-8') as file:
+            config = json.load(file)
+        local_pwd = config['PASSWORD']
+        if local_pwd == pwd:
+            Info(self, 'S', 1000, self.tr('登录成功!'))
             if cfg.useAudio.value:
-                self.mediaPlay('success')
-            self.w.close()
+                self.handleMediaPlay('success')
+            self.login_card.close()
         else:
-            InfoBar.error(
-                title=f'密码错误{self.incorrect_count}次',
-                content='',
-                orient=Qt.Horizontal,
-                isClosable=True,
-                position=InfoBarPosition.TOP,
-                duration=3000,
-                parent=self
-            )
-            self.incorrect_count += 1
+            Info(self, 'E', 3000, self.tr('密码错误!'), self.tr('次数: ') + str(self.count_pwd))
+            self.count_pwd += 1
             if cfg.useAudio.value:
-                self.mediaPlay('error')
+                self.handleMediaPlay('error')
 
-    def changeTheme(self):
-        if cfg.themeMode.value == Theme.DARK:
-            setTheme(Theme.LIGHT)
-            cfg.themeMode.value = Theme.LIGHT
-            cfg.save()
-        else:
-            setTheme(Theme.DARK)
-            cfg.themeMode.value = Theme.DARK
-            cfg.save()
+    def handleThemeChanged(self):
+        theme = Theme.LIGHT if cfg.themeMode.value == Theme.DARK else Theme.DARK
+        setTheme(theme)
+        cfg.themeMode.value = theme
+        cfg.save()
 
     def handleUpdate(self, status, info):
         if status == 2:
-            InfoBar.warning(
-                title=f'检测到新版本: {info}',
-                content="",
+            update_info = InfoBar(
+                icon=InfoBarIcon.WARNING,
+                title=self.tr('检测到新版本: ') + info,
+                content='',
                 orient=Qt.Horizontal,
                 isClosable=True,
                 position=InfoBarPosition.TOP,
-                duration=3000,
+                duration=-1,
                 parent=self
             )
+            update_button = HyperlinkButton(cfg.URL_LATEST, self.tr('前往下载'))
+            update_info.addWidget(update_button)
+            update_info.show()
         elif status == 1:
-            InfoBar.success(
-                title=f'当前是最新版本: {info}',
-                content="",
-                orient=Qt.Horizontal,
-                isClosable=True,
-                position=InfoBarPosition.TOP,
-                duration=1000,
-                parent=self
-            )
+            Info(self, 'S', 1000, self.tr('当前是最新版本: ') + info)
         elif status == 0:
-            InfoBar.error(
-                title=f'检测更新失败: {info}',
-                content="",
-                orient=Qt.Horizontal,
-                isClosable=True,
-                position=InfoBarPosition.TOP,
-                duration=3000,
-                parent=self
-            )
-    
-    def mediaPlay(self, status):
-        try:
+            Info(self, 'E', 3000, self.tr('检测更新失败: ') + info)
+
+    def handleMediaPlay(self, status):
+        if os.path.exists('src/audio'):
             self.player = QMediaPlayer()
             self.audioOutput = QAudioOutput()
             self.player.setAudioOutput(self.audioOutput)
@@ -185,9 +173,10 @@ class Main(MSFluentWindow):
             audio_play = QUrl.fromLocalFile(random.choice(audio_list))
             self.player.setSource(audio_play)
             self.player.play()
-        except:
-            InfoBar.error(
-                title='未找到语音，请重新下载！',
+        else:
+            file_error = InfoBar(
+                icon=InfoBarIcon.ERROR,
+                title=self.tr('未找到语音!'),
                 content='',
                 orient=Qt.Horizontal,
                 isClosable=True,
@@ -195,26 +184,7 @@ class Main(MSFluentWindow):
                 duration=3000,
                 parent=self
             )
-
-    def eventFilter(self, obj, event):
-        if event.type() == QEvent.KeyPress:
-            key = event.key()
-            if key == Qt.Key_Escape:
-                logger.info('Escape')
-                '''reply = MessageDialog('确认', '确定要执行这个操作吗？', self).show()
-                reply.show()
-                if reply.yesSignal:
-                    logger.info('Exit')
-                    sys.exit()
-                else:
-                    logger.info('Cancel')'''
-                sys.exit()
-            elif Qt.Key_F1:
-                logger.info('F1')
-                self.w.show()
-                self.w.activateWindow()
-                self.w.raise_()
-                self.w.setFocus()
-        return super().eventFilter(obj, event)
-    
-        
+            file_error_button = PrimaryPushButton(self.tr('前往下载'))
+            file_error_button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
+            file_error.addWidget(file_error_button)
+            file_error.show()
