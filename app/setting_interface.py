@@ -145,11 +145,15 @@ class Setting(ScrollArea):
         self.ProxyInterface.addSettingCard(self.chinaCard)
 
         # 栏绑定界面
-        self.addSubInterface(self.PersonalInterface, 'PersonalInterface', self.tr('程序'), icon=FluentIcon.SETTING)
-        self.addSubInterface(self.FunctionInterface, 'FunctionInterface', self.tr('功能'), icon=FluentIcon.TILES)
-        self.addSubInterface(self.ProxyInterface, 'ProxyInterface', self.tr('代理'), icon=FluentIcon.CERTIFICATE)
+        self.addSubInterface(self.PersonalInterface, 'PersonalInterface', self.tr(
+            '程序'), icon=FluentIcon.SETTING)
+        self.addSubInterface(self.FunctionInterface, 'FunctionInterface', self.tr(
+            '功能'), icon=FluentIcon.TILES)
+        self.addSubInterface(self.ProxyInterface, 'ProxyInterface', self.tr(
+            '代理'), icon=FluentIcon.CERTIFICATE)
         self.AboutInterface = About('AboutInterface', self)
-        self.addSubInterface(self.AboutInterface, 'AboutInterface', self.tr('关于'), icon=FluentIcon.INFO)
+        self.addSubInterface(self.AboutInterface, 'AboutInterface', self.tr(
+            '关于'), icon=FluentIcon.INFO)
 
         # 初始化配置界面
         self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignLeft)
@@ -159,7 +163,8 @@ class Setting(ScrollArea):
         self.stackedWidget.currentChanged.connect(self.onCurrentIndexChanged)
         self.stackedWidget.setCurrentWidget(self.PersonalInterface)
         self.pivot.setCurrentItem(self.PersonalInterface.objectName())
-        qrouter.setDefaultRouteKey(self.stackedWidget, self.PersonalInterface.objectName())
+        qrouter.setDefaultRouteKey(
+            self.stackedWidget, self.PersonalInterface.objectName())
 
     def __initInfo(self):
         port = get_json('./config/config.json', 'PROXY_PORT')
@@ -167,10 +172,14 @@ class Setting(ScrollArea):
         self.proxyPortCard.setDisabled(not cfg.proxyStatus.value)
 
     def __connectSignalToSlot(self):
-        self.themeColorCard.colorChanged.connect(lambda c: setThemeColor(c, lazy=True))
-        self.zoomCard.comboBox.currentIndexChanged.connect(self.restart_application)
-        self.languageCard.comboBox.currentIndexChanged.connect(self.restart_application)
-        self.updateOnStartUpCard.clicked.connect(lambda: checkUpdate(self.parent))
+        self.themeColorCard.colorChanged.connect(
+            lambda c: setThemeColor(c, lazy=True))
+        self.zoomCard.comboBox.currentIndexChanged.connect(
+            self.restart_application)
+        self.languageCard.comboBox.currentIndexChanged.connect(
+            self.restart_application)
+        self.updateOnStartUpCard.clicked.connect(
+            lambda: checkUpdate(self.parent))
         self.restartCard.clicked.connect(self.restart_application)
 
         self.autoCopyCard.checkedChanged.connect(
@@ -251,9 +260,11 @@ class AboutBackground(QWidget):
 
         painter.setPen(Qt.white)
         painter.setFont(QFont(cfg.APP_FONT, 45))
-        painter.drawText(self.rect().adjusted(0, -30, 0, 0), Qt.AlignHCenter | Qt.AlignVCenter, cfg.APP_NAME)
+        painter.drawText(self.rect().adjusted(0, -30, 0, 0),
+                         Qt.AlignHCenter | Qt.AlignVCenter, cfg.APP_NAME)
         painter.setFont(QFont(cfg.APP_FONT, 30))
-        painter.drawText(self.rect().adjusted(0, 120, 0, 0), Qt.AlignHCenter | Qt.AlignVCenter, cfg.APP_VERSION)
+        painter.drawText(self.rect().adjusted(0, 120, 0, 0),
+                         Qt.AlignHCenter | Qt.AlignVCenter, cfg.APP_VERSION)
 
 
 class About(QWidget):
@@ -276,14 +287,16 @@ class About(QWidget):
             link_button.setFixedSize(260, 70)
             link_button.setIconSize(QSize(16, 16))
             link_button.setFont(QFont(cfg.APP_FONT, 12))
-            setCustomStyleSheet(link_button, 'PushButton{border-radius: 12px}', 'PushButton{border-radius: 12px}')
+            setCustomStyleSheet(
+                link_button, 'PushButton{border-radius: 12px}', 'PushButton{border-radius: 12px}')
 
         self.__initLayout()
         self.__connectSignalToSlot()
 
     def __initLayout(self):
         self.image_layout = QVBoxLayout()
-        self.image_layout.addWidget(self.about_image, alignment=Qt.AlignHCenter)
+        self.image_layout.addWidget(
+            self.about_image, alignment=Qt.AlignHCenter)
 
         self.info_button_layout = QHBoxLayout()
         self.info_button_layout.addWidget(self.link_writer)
@@ -298,7 +311,11 @@ class About(QWidget):
         self.setLayout(self.main_layout)
 
     def __connectSignalToSlot(self):
-        self.link_writer.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(cfg.URL_WRITER)))
-        self.link_repo.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(cfg.URL_REPO)))
-        self.link_releases.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(cfg.URL_RELEASES)))
-        self.link_issues.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(cfg.URL_ISSUES)))
+        self.link_writer.clicked.connect(
+            lambda: QDesktopServices.openUrl(QUrl(cfg.URL_WRITER)))
+        self.link_repo.clicked.connect(
+            lambda: QDesktopServices.openUrl(QUrl(cfg.URL_REPO)))
+        self.link_releases.clicked.connect(
+            lambda: QDesktopServices.openUrl(QUrl(cfg.URL_RELEASES)))
+        self.link_issues.clicked.connect(
+            lambda: QDesktopServices.openUrl(QUrl(cfg.URL_ISSUES)))

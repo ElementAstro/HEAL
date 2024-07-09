@@ -21,7 +21,8 @@ def get_latest_version() -> Optional[str]:
 
     try:
         response = requests.get(url, headers=headers, proxies=proxies)
-        response.raise_for_status()  # Raises an HTTPError if the HTTP request returned an unsuccessful status code
+        # Raises an HTTPError if the HTTP request returned an unsuccessful status code
+        response.raise_for_status()
         release_info = response.json()
         return release_info.get('tag_name')
     except requests.RequestException as e:
@@ -44,7 +45,8 @@ class UpdateThread(QThread):
     def run(self) -> None:
         if not os.path.exists('firefly-launcher.py'):
             latest_version = get_latest_version()
-            installed_version = get_json('./config/version.json', 'APP_VERSION')
+            installed_version = get_json(
+                './config/version.json', 'APP_VERSION')
             if latest_version and installed_version:
                 if latest_version > installed_version:
                     self.update_signal.emit(2, str(latest_version))

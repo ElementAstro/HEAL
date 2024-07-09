@@ -8,15 +8,15 @@
   "ROUTE_REMOTE": "/api/fireflylauncherlethe/remote",
   "PROXY_PORT": "7890",
   "SERVER": {
-    "LunarCore": {
+    "NINA": {
       "ICON": "",
       "COMMAND": "cd ./server/LunarCore/ && start java.exe -jar LunarCore.jar"
     },
-    "Grasscutter": {
+    "PHD2": {
       "ICON": "",
       "COMMAND": "cd ./server/Grasscutter/ && start java.exe -jar grasscutter.jar"
     },
-    "Hutao-GS": {
+    "Astap": {
       "ICON": "",
       "COMMAND": "cd ./server/HuTao-GS/ && start START-DEV.bat"
     }

@@ -96,8 +96,9 @@ class Config(QConfig):
     chinaStatus = ConfigItem("Proxy", "ChinaStatus", False, BoolValidator())
     useRemote = ConfigItem("Command", "useRemote", False, BoolValidator())
 
-    APP_NAME = "Firefly Launcher (Lethe)"
-    APP_VERSION = get_version_type(get_json('./config/version.json', 'APP_VERSION'))
+    APP_NAME = "Hello ElementAstro Launcher"
+    APP_VERSION = get_version_type(
+        get_json('./config/version.json', 'APP_VERSION'))
     APP_FONT = "SDK_SC_Web"
 
     ############### LINK CONFIG ###############

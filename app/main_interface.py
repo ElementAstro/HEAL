@@ -4,8 +4,8 @@ import json
 import glob
 import random
 import winreg
-import hashlib
 import subprocess
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QSize, QUrl
@@ -17,15 +17,23 @@ from qfluentwidgets import (
 )
 from app.home_interface import Home
 from app.launcher_interface import Launcher
+from app.download_interface import Download
 from app.environment_interface import Environment
 from app.proxy_interface import Proxy
 from app.setting_interface import Setting
+from app.module_interface import Module
+from app.tool_interface import Tools
+
 from app.model.config import cfg, Info
 from app.model.check_update import checkUpdate
 from app.model.login_card import MessageLogin
 
 
 class Main(MSFluentWindow):
+    # 自定义信号
+    reload_signal = Signal()
+    shutdown_signal = Signal()
+
     def __init__(self):
         super().__init__()
         setTheme(cfg.themeMode.value)
@@ -49,16 +57,30 @@ class Main(MSFluentWindow):
     def initNavigation(self):
         self.homeInterface = Home('HomeInterface', self)
         self.launcherInterface = Launcher('LauncherInterface', self)
+        self.downloadInterface = Download('DownloadInterface', self)
         self.environmentInterface = Environment('EnvironmentInterface', self)
         self.proxyInterface = Proxy('ProxyInterface', self)
         self.settingInterface = Setting('SettingInterface', self)
+        self.moduleInterface = Module('ModuleInterface', self)
+        self.toolsInterface = Tools('ToolsInterface', self)
 
         interfaces = [
-            (self.homeInterface, FluentIcon.HOME, self.tr('主页'), FluentIcon.HOME_FILL),
-            (self.launcherInterface, FluentIcon.PLAY, self.tr('启动器'), FluentIcon.PLAY),
-            (self.environmentInterface, FluentIcon.DICTIONARY, self.tr('环境'), FluentIcon.DICTIONARY),
-            (self.proxyInterface, FluentIcon.CERTIFICATE, self.tr('代理'), FluentIcon.CERTIFICATE),
-            (self.settingInterface, FluentIcon.SETTING, self.tr('设置'), FluentIcon.SETTING, NavigationItemPosition.BOTTOM)
+            (self.homeInterface, FluentIcon.HOME,
+             self.tr('主页'), FluentIcon.HOME_FILL),
+            (self.launcherInterface, FluentIcon.PLAY,
+             self.tr('启动器'), FluentIcon.PLAY),
+            (self.downloadInterface, FluentIcon.DOWNLOAD,
+             self.tr('下载'), FluentIcon.DOWNLOAD),
+            (self.environmentInterface, FluentIcon.DICTIONARY,
+             self.tr('环境'), FluentIcon.DICTIONARY),
+            (self.moduleInterface, FluentIcon.APPLICATION,
+             self.tr('模块'), FluentIcon.APPLICATION),
+            (self.proxyInterface, FluentIcon.CERTIFICATE,
+             self.tr('代理'), FluentIcon.CERTIFICATE),
+            (self.toolsInterface, FluentIcon.DEVELOPER_TOOLS,
+             self.tr('工具'), FluentIcon.DEVELOPER_TOOLS),
+            (self.settingInterface, FluentIcon.SETTING, self.tr('设置'),
+             FluentIcon.SETTING, NavigationItemPosition.BOTTOM)
         ]
 
         for interface, icon, text, fillIcon, *position in interfaces:
@@ -70,6 +92,24 @@ class Main(MSFluentWindow):
             icon=FluentIcon.CONSTRACT,
             text=self.tr('主题'),
             onClick=self.handleThemeChanged,
+            selectable=False,
+            position=NavigationItemPosition.BOTTOM
+        )
+
+        self.navigationInterface.addItem(
+            routeKey='reload',
+            icon=FluentIcon.SYNC,
+            text=self.tr('热重载'),
+            onClick=self.handleReload,
+            selectable=False,
+            position=NavigationItemPosition.BOTTOM
+        )
+
+        self.navigationInterface.addItem(
+            routeKey='shutdown',
+            icon=FluentIcon.POWER_BUTTON,
+            text=self.tr('关机'),
+            onClick=self.handleShutdown,
             selectable=False,
             position=NavigationItemPosition.BOTTOM
         )
@@ -99,8 +139,10 @@ class Main(MSFluentWindow):
     def handleFontCheck(self):
         isSetupFont = False
         registry_keys = [
-            (winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"),
-            (winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows NT\CurrentVersion\Fonts")
+            (winreg.HKEY_LOCAL_MACHINE,
+             r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"),
+            (winreg.HKEY_CURRENT_USER,
+             r"Software\Microsoft\Windows NT\CurrentVersion\Fonts")
         ]
         try:
             for hkey, sub_key in registry_keys:
@@ -132,7 +174,8 @@ class Main(MSFluentWindow):
                 self.handleMediaPlay('success')
             self.login_card.close()
         else:
-            Info(self, 'E', 3000, self.tr('密码错误!'), self.tr('次数: ') + str(self.count_pwd))
+            Info(self, 'E', 3000, self.tr('密码错误!'),
+                 self.tr('次数: ') + str(self.count_pwd))
             self.count_pwd += 1
             if cfg.useAudio.value:
                 self.handleMediaPlay('error')
@@ -142,6 +185,14 @@ class Main(MSFluentWindow):
         setTheme(theme)
         cfg.themeMode.value = theme
         cfg.save()
+
+    def handleReload(self):
+        """处理热重载功能"""
+        self.reload_signal.emit()
+
+    def handleShutdown(self):
+        """处理关机功能"""
+        self.shutdown_signal.emit()
 
     def handleUpdate(self, status, info):
         if status == 2:
@@ -185,6 +236,7 @@ class Main(MSFluentWindow):
                 parent=self
             )
             file_error_button = PrimaryPushButton(self.tr('前往下载'))
-            file_error_button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
+            file_error_button.clicked.connect(
+                lambda: self.stackedWidget.setCurrentIndex(1))
             file_error.addWidget(file_error_button)
             file_error.show()

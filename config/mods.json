@@ -1,0 +1,19 @@
+{
+    "mods": [
+        {
+            "name": "Example Mod 1",
+            "description": "This is the description for Example Mod 1.",
+            "author": "Author 1",
+            "version": "1.0.0",
+            "download_url": "https://example.com/mod1.jar"
+        },
+        {
+            "name": "Example Mod 2",
+            "description": "This is the description for Example Mod 2.",
+            "author": "Author 2",
+            "version": "1.1.0",
+            "download_url": "https://example.com/mod2.jar"
+        }
+    ],
+    "total_pages": 1
+}

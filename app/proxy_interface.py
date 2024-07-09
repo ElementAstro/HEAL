@@ -4,8 +4,8 @@ import subprocess
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QStackedWidget, QHBoxLayout
 from PySide6.QtCore import Qt, Signal
 from qfluentwidgets import (Pivot, qrouter, ScrollArea, PrimaryPushSettingCard, PopupTeachingTip, InfoBarPosition,
-                            TitleLabel, SubtitleLabel, BodyLabel, HyperlinkButton, PrimaryPushButton, InfoBar,
-                            MessageBoxBase, FluentIcon, FlyoutViewBase, TeachingTipTailPosition, InfoBarIcon,
+                            PrimaryPushButton, InfoBar,
+                            FluentIcon, FlyoutViewBase, TeachingTipTailPosition, InfoBarIcon,
                             HyperlinkCard)
 from app.model.style_sheet import StyleSheet
 from app.model.setting_card import SettingCard, SettingCardGroup
@@ -69,7 +69,8 @@ class CustomFlyoutViewFiddler(FlyoutViewBase):
             if script_file:
                 subprocess.run(
                     f'del /f "%userprofile%\\Documents\\Fiddler2\\Scripts\\CustomRules.js" && '
-                    f'copy /y "src\\patch\\fiddler\\{script_file}" "%userprofile%\\Documents\\Fiddler2\\Scripts\\CustomRules.js"',
+                    f'copy /y "src\\patch\\fiddler\\{
+                        script_file}" "%userprofile%\\Documents\\Fiddler2\\Scripts\\CustomRules.js"',
                     shell=True
                 )
 
@@ -138,7 +139,8 @@ class Proxy(ScrollArea):
         self.ProxyToolInterface.addSettingCard(self.noproxyCard)
 
         # 栏绑定界面
-        self.addSubInterface(self.ProxyToolInterface, 'ProxyToolInterface', self.tr('启动'), icon=FluentIcon.PLAY)
+        self.addSubInterface(self.ProxyToolInterface, 'ProxyToolInterface', self.tr(
+            '启动'), icon=FluentIcon.PLAY)
         self.addSubInterface(self.ProxyDownloadInterface, 'ToolkitDownloadInterface', self.tr('下载'),
                              icon=FluentIcon.DOWNLOAD)
 
@@ -150,11 +152,13 @@ class Proxy(ScrollArea):
         self.stackedWidget.currentChanged.connect(self.onCurrentIndexChanged)
         self.stackedWidget.setCurrentWidget(self.ProxyToolInterface)
         self.pivot.setCurrentItem(self.ProxyToolInterface.objectName())
-        qrouter.setDefaultRouteKey(self.stackedWidget, self.ProxyToolInterface.objectName())
+        qrouter.setDefaultRouteKey(
+            self.stackedWidget, self.ProxyToolInterface.objectName())
 
     def __connectSignalToSlot(self):
         sub_download_cmd = SubDownloadCMD(self)
-        self.DownloadFiddlerCard.clicked.connect(lambda: sub_download_cmd.handleDownloadStarted('fiddler'))
+        self.DownloadFiddlerCard.clicked.connect(
+            lambda: sub_download_cmd.handleDownloadStarted('fiddler'))
         self.FiddlerCard.clicked_script.connect(self.handleFiddlerTip)
         self.FiddlerCard.clicked_old.connect(self.handleFiddlerOpen)
         self.FiddlerCard.clicked_backup.connect(self.handleFiddlerBackup)
@@ -192,7 +196,8 @@ class Proxy(ScrollArea):
                 parent=self
             )
             file_error_button = PrimaryPushButton(self.tr('前往下载'))
-            file_error_button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
+            file_error_button.clicked.connect(
+                lambda: self.stackedWidget.setCurrentIndex(1))
             file_error.addWidget(file_error_button)
             file_error.show()
             return False
@@ -209,7 +214,8 @@ class Proxy(ScrollArea):
     def handleFiddlerBackup(self):
         now_time = time.strftime('%Y%m%d%H%M%S', time.localtime())
         subprocess.run(
-            f'copy /y "%userprofile%\\Documents\\Fiddler2\\Scripts\\CustomRules.js" "CustomRules-{now_time}.js"',
+            f'copy /y "%userprofile%\\Documents\\Fiddler2\\Scripts\\CustomRules.js" "CustomRules-{
+                now_time}.js"',
             shell=True
         )
         Info(self, "S", 1000, self.tr("备份成功!"))
@@ -223,7 +229,8 @@ class Proxy(ScrollArea):
                     shell=True, creationflags=subprocess.CREATE_NO_WINDOW
                 )
                 subprocess.run(
-                    f'reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /d "127.0.0.1:{port}" /f',
+                    f'reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /d "127.0.0.1:{
+                        port}" /f',
                     shell=True, creationflags=subprocess.CREATE_NO_WINDOW
                 )
             else:

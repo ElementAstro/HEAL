@@ -2,18 +2,20 @@ import json
 import requests
 from app.model.config import get_json
 
+
 def get_base_url(route_key: str) -> str:
     config_file = './config/config.json'
     server_url = get_json(config_file, 'SERVER_URL')
     route = get_json(config_file, route_key)
     return f'https://{server_url}{route}'
 
+
 def handle_request(url: str, params: dict) -> tuple:
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
         response_json = response.json()
-        
+
         if response_json.get('retcode') == 200:
             return 'success', response_json.get('message', '')
         else:
@@ -31,10 +33,12 @@ def handle_request(url: str, params: dict) -> tuple:
         print(f'未知错误: {err}')
         return 'error', str(err)
 
+
 def handleApply(uid: str) -> tuple:
     base_url = get_base_url('ROUTE_APPLY')
     params = {'uid': uid}
     return handle_request(base_url, params)
+
 
 def handleVerify(uid: str, code: str, key: str) -> tuple:
     base_url = get_base_url('ROUTE_VERIFY')
@@ -44,6 +48,7 @@ def handleVerify(uid: str, code: str, key: str) -> tuple:
         'password': key
     }
     return handle_request(base_url, params)
+
 
 def handleCommandSend(uid: str, key: str, command: str) -> tuple:
     base_url = get_base_url('ROUTE_REMOTE')

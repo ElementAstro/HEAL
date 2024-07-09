@@ -63,11 +63,14 @@ class SubDownloadCMD(QDialog):
         self.runner.terminate()
         output = subprocess.check_output('tasklist', shell=True)
         if 'curl.exe' in str(output):
-            subprocess.run('taskkill /f /im curl.exe', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run('taskkill /f /im curl.exe', shell=True,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         if 'java.exe' in str(output):
-            subprocess.run('taskkill /f /im java.exe', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run('taskkill /f /im java.exe', shell=True,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         if 'git.exe' in str(output):
-            subprocess.run('taskkill /f /im git.exe', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run('taskkill /f /im git.exe', shell=True,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 class CommandRunner(QThread):
@@ -82,7 +85,8 @@ class CommandRunner(QThread):
 
     def run(self):
         if self.types == 'url' and not os.path.exists('temp'):
-            subprocess.run('mkdir temp', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run('mkdir temp', shell=True,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         self.process = subprocess.Popen(self.command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True,
                                         text=True)
@@ -125,16 +129,22 @@ def handleDownloadGenerate(name):
                                       '--branch audio ', '--branch audio ')
     elif name == 'git':
         types = 'url'
-        file_path = os.path.join("temp", cfg.DOWNLOAD_COMMANDS_GIT.split('/')[-1])
-        command = __handleUrlGenerate(types, cfg.DOWNLOAD_COMMANDS_GIT, cfg.DOWNLOAD_COMMANDS_GIT_MIRROR)
+        file_path = os.path.join(
+            "temp", cfg.DOWNLOAD_COMMANDS_GIT.split('/')[-1])
+        command = __handleUrlGenerate(
+            types, cfg.DOWNLOAD_COMMANDS_GIT, cfg.DOWNLOAD_COMMANDS_GIT_MIRROR)
     elif name == 'java':
         types = 'url'
-        file_path = os.path.join("temp", cfg.DOWNLOAD_COMMANDS_JAVA.split('/')[-1])
-        command = __handleUrlGenerate(types, cfg.DOWNLOAD_COMMANDS_JAVA, cfg.DOWNLOAD_COMMANDS_JAVA_MIRROR)
+        file_path = os.path.join(
+            "temp", cfg.DOWNLOAD_COMMANDS_JAVA.split('/')[-1])
+        command = __handleUrlGenerate(
+            types, cfg.DOWNLOAD_COMMANDS_JAVA, cfg.DOWNLOAD_COMMANDS_JAVA_MIRROR)
     elif name == 'mongodb_installer':
         types = 'url'
-        file_path = os.path.join("temp", cfg.DOWNLOAD_COMMANDS_MONGODB_INSTALLER.split('/')[-1])
-        command = __handleUrlGenerate(types, cfg.DOWNLOAD_COMMANDS_MONGODB_INSTALLER, cfg.DOWNLOAD_COMMANDS_MONGODB_INSTALLER_MIRROR)
+        file_path = os.path.join(
+            "temp", cfg.DOWNLOAD_COMMANDS_MONGODB_INSTALLER.split('/')[-1])
+        command = __handleUrlGenerate(
+            types, cfg.DOWNLOAD_COMMANDS_MONGODB_INSTALLER, cfg.DOWNLOAD_COMMANDS_MONGODB_INSTALLER_MIRROR)
     elif name == 'mongodb_portable':
         types = 'git'
         file_path = 'tool\\mongodb'
@@ -151,7 +161,8 @@ def handleDownloadGenerate(name):
         file_path = 'server\\LunarCore\\resources'
         command_1 = __handleUrlGenerate(types, cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES_1,
                                         cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES_MIRROR, '', '--branch lunarcoreres ')
-        command_2 = __handleUrlGenerate(types, cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES_2, '', '', '', True)
+        command_2 = __handleUrlGenerate(
+            types, cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES_2, '', '', '', True)
         command = command_1 + command_2
     elif name == 'fiddler':
         types = 'git'

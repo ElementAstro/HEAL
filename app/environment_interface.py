@@ -30,7 +30,8 @@ class PrimaryPushSettingCard_Download(SettingCard):
         self.options = options or []
         for option in self.options:
             button = PrimaryPushButton(option['name'], self)
-            button.clicked.connect(lambda _, key=option['key']: self.download_signal.emit(key))
+            button.clicked.connect(
+                lambda _, key=option['key']: self.download_signal.emit(key))
             self.hBoxLayout.addWidget(button, 0, Qt.AlignRight)
             self.hBoxLayout.addSpacing(10)
         self.hBoxLayout.addSpacing(16)
@@ -81,7 +82,8 @@ class Environment(ScrollArea):
         self.EnvironmentInterface.addSettingCard(self.MongoDBCard)
 
         # 栏绑定界面
-        self.addSubInterface(self.EnvironmentInterface, 'EnvironmentInterface', self.tr('环境'), icon=FluentIcon.PLAY)
+        self.addSubInterface(self.EnvironmentInterface, 'EnvironmentInterface', self.tr(
+            '环境'), icon=FluentIcon.PLAY)
         self.addSubInterface(self.EnvironmentDownloadInterface, 'EnvironmentDownloadInterface', self.tr('下载'),
                              icon=FluentIcon.DOWNLOAD)
 
@@ -93,15 +95,18 @@ class Environment(ScrollArea):
         self.stackedWidget.currentChanged.connect(self.onCurrentIndexChanged)
         self.stackedWidget.setCurrentWidget(self.EnvironmentInterface)
         self.pivot.setCurrentItem(self.EnvironmentInterface.objectName())
-        qrouter.setDefaultRouteKey(self.stackedWidget, self.EnvironmentInterface.objectName())
+        qrouter.setDefaultRouteKey(
+            self.stackedWidget, self.EnvironmentInterface.objectName())
 
     def __connectSignalToSlot(self):
         self.MongoDBCard.clicked.connect(self.handleMongoDBOpen)
         SubDownloadCMDSelf = SubDownloadCMD(self)
         for i in range(self.EnvironmentDownloadInterface.cardLayout.count()):
-            card = self.EnvironmentDownloadInterface.cardLayout.itemAt(i).widget()
+            card = self.EnvironmentDownloadInterface.cardLayout.itemAt(
+                i).widget()
             if isinstance(card, PrimaryPushSettingCard_Download):
-                card.download_signal.connect(SubDownloadCMDSelf.handleDownloadStarted)
+                card.download_signal.connect(
+                    SubDownloadCMDSelf.handleDownloadStarted)
             elif isinstance(card, HyperlinkCard_Environment) and 'git' in card.links:
                 card.clicked.connect(self.handleRestartInfo)
 
@@ -112,9 +117,11 @@ class Environment(ScrollArea):
                 download_config = json.load(f)
             for item in download_config:
                 if item['type'] == 'link':
-                    card = HyperlinkCard_Environment(item['title'], item.get('content'), links=item.get('links'))
+                    card = HyperlinkCard_Environment(
+                        item['title'], item.get('content'), links=item.get('links'))
                 elif item['type'] == 'download':
-                    card = PrimaryPushSettingCard_Download(item['title'], item.get('content'), options=item.get('options'))
+                    card = PrimaryPushSettingCard_Download(
+                        item['title'], item.get('content'), options=item.get('options'))
                 self.EnvironmentDownloadInterface.addSettingCard(card)
 
     def addSubInterface(self, widget: QLabel, objectName, text, icon=None):
@@ -134,7 +141,8 @@ class Environment(ScrollArea):
 
     def handleMongoDBOpen(self):
         if os.path.exists('tool/mongodb/mongod.exe'):
-            subprocess.run('start cmd /c "cd tool/mongodb && mongod --dbpath data --port 27017"', shell=True)
+            subprocess.run(
+                'start cmd /c "cd tool/mongodb && mongod --dbpath data --port 27017"', shell=True)
             Info(self, "S", 1000, self.tr("数据库已开始运行!"))
         else:
             file_error = InfoBar(
@@ -148,10 +156,11 @@ class Environment(ScrollArea):
                 parent=self
             )
             file_error_button = PrimaryPushButton(self.tr('前往下载'))
-            file_error_button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
+            file_error_button.clicked.connect(
+                lambda: self.stackedWidget.setCurrentIndex(1))
             file_error.addWidget(file_error_button)
             file_error.show()
-    
+
     def handleRestartInfo(self):
         restart_info = InfoBar(
             icon=InfoBarIcon.WARNING,

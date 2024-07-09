@@ -77,7 +77,8 @@ class Launcher(ScrollArea):
         # 栏绑定界面
         self.addSubInterface(self.LauncherDownloadInterface, 'LauncherDownloadInterface', self.tr('下载'),
                              icon=FluentIcon.DOWNLOAD)
-        self.addSubInterface(self.ConfigInterface, 'configInterface', self.tr('配置'), icon=FluentIcon.EDIT)
+        self.addSubInterface(self.ConfigInterface, 'configInterface', self.tr(
+            '配置'), icon=FluentIcon.EDIT)
 
         # 初始化配置界面
         self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignLeft)
@@ -87,12 +88,15 @@ class Launcher(ScrollArea):
         self.stackedWidget.currentChanged.connect(self.onCurrentIndexChanged)
         self.stackedWidget.setCurrentWidget(self.LauncherDownloadInterface)
         self.pivot.setCurrentItem(self.LauncherDownloadInterface.objectName())
-        qrouter.setDefaultRouteKey(self.stackedWidget, self.LauncherDownloadInterface.objectName())
+        qrouter.setDefaultRouteKey(
+            self.stackedWidget, self.LauncherDownloadInterface.objectName())
 
     def __connectSignalToSlot(self):
         SubDownloadCMDSelf = SubDownloadCMD(self)
-        self.AudioDownloadCard.clicked.connect(lambda: SubDownloadCMDSelf.handleDownloadStarted('audio'))
-        self.settingConfigCard.clicked.connect(lambda: open_file(self, 'config/config.json'))
+        self.AudioDownloadCard.clicked.connect(
+            lambda: SubDownloadCMDSelf.handleDownloadStarted('audio'))
+        self.settingConfigCard.clicked.connect(
+            lambda: open_file(self, 'config/config.json'))
 
     def addSubInterface(self, widget: QLabel, objectName, text, icon=None):
         widget.setObjectName(objectName)
