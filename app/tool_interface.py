@@ -5,6 +5,7 @@ from app.model.style_sheet import StyleSheet
 from app.model.setting_card import CustomFrameGroup
 
 from app.components.tools.telescope import TelescopeCatalog
+from app.components.tools.system_command import CommandCenter
 
 class Tools(ScrollArea):
     Nav = Pivot
@@ -24,6 +25,10 @@ class Tools(ScrollArea):
         self.TelescopeCatalogFrame = TelescopeCatalog()
         self.TelescopeCatalogInterface = CustomFrameGroup(self.scrollWidget)
         self.TelescopeCatalogInterface.addCustomFrame(self.TelescopeCatalogFrame)
+
+        self.CommandCenterFrame = CommandCenter()
+        self.CommandCenterInterface = CustomFrameGroup(self.scrollWidget)
+        self.CommandCenterInterface.addCustomFrame(self.CommandCenterFrame)
 
         self.__initWidget()
 
@@ -50,6 +55,9 @@ class Tools(ScrollArea):
         # 栏绑定界面
         self.addSubInterface(self.TelescopeCatalogInterface, 'TelescopeCatalogInterface', self.tr(
             '望远镜分类'), icon=FluentIcon.IOT)
+        
+        self.addSubInterface(self.CommandCenterInterface, 'CommandCenterInterface', self.tr(
+            '命令行'), icon=FluentIcon.LABEL)
 
         # 初始化配置界面
         self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignLeft)

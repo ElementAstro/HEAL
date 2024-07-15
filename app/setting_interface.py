@@ -6,10 +6,11 @@ from PySide6.QtCore import Qt, QUrl, QSize, QProcess, Signal
 from qfluentwidgets import (Pivot, qrouter, ScrollArea, CustomColorSettingCard, PushButton,
                             PrimaryPushSettingCard, setCustomStyleSheet, SwitchSettingCard,
                             ComboBoxSettingCard, LineEdit, PrimaryPushButton, FluentIcon, setThemeColor)
-from app.model.setting_card import SettingCard, SettingCardGroup
+from app.model.setting_card import SettingCard, SettingCardGroup, CustomDialog
 from app.model.style_sheet import StyleSheet
 from app.model.check_update import checkUpdate
 from app.model.config import cfg, get_json, Info
+from app.components.tools.editor import JsonEditor
 
 
 class LineEditSettingCardPort(SettingCard):
@@ -78,6 +79,12 @@ class Setting(ScrollArea):
             self.tr('重启程序'),
             self.tr('无奖竞猜，存在即合理')
         )
+        self.configEditorCard = PrimaryPushSettingCard(
+            self.tr('打开配置'),
+            FluentIcon.PENCIL_INK,
+            self.tr('打开配置'),
+            self.tr('自实现Json编辑器')
+        )
         self.FunctionInterface = SettingCardGroup(self.scrollWidget)
         self.autoCopyCard = SwitchSettingCard(
             FluentIcon.COPY,
@@ -137,6 +144,7 @@ class Setting(ScrollArea):
         self.PersonalInterface.addSettingCard(self.languageCard)
         self.PersonalInterface.addSettingCard(self.updateOnStartUpCard)
         self.PersonalInterface.addSettingCard(self.restartCard)
+        self.PersonalInterface.addSettingCard(self.configEditorCard)
         self.FunctionInterface.addSettingCard(self.autoCopyCard)
         self.FunctionInterface.addSettingCard(self.useLoginCard)
         self.FunctionInterface.addSettingCard(self.useAudioCard)
@@ -154,6 +162,8 @@ class Setting(ScrollArea):
         self.AboutInterface = About('AboutInterface', self)
         self.addSubInterface(self.AboutInterface, 'AboutInterface', self.tr(
             '关于'), icon=FluentIcon.INFO)
+        
+        self.config_editor = JsonEditor()
 
         # 初始化配置界面
         self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignLeft)
@@ -181,6 +191,7 @@ class Setting(ScrollArea):
         self.updateOnStartUpCard.clicked.connect(
             lambda: checkUpdate(self.parent))
         self.restartCard.clicked.connect(self.restart_application)
+        self.configEditorCard.clicked.connect(self.open_config_editor)
 
         self.autoCopyCard.checkedChanged.connect(
             lambda: self.handleChoiceChanged(cfg.autoCopy.value, self.tr('自动复制已开启!'), self.tr('自动复制已关闭!')))
@@ -214,6 +225,10 @@ class Setting(ScrollArea):
         current_process = QProcess()
         current_process.startDetached(sys.executable, sys.argv)
         sys.exit()
+
+    def open_config_editor(self):
+        self.config_editor_dialog = CustomDialog(self.config_editor)
+        self.config_editor_dialog.show()
 
     def handleChoiceChanged(self, status, title_true, title_false):
         if status:

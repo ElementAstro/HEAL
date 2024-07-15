@@ -7,8 +7,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QIcon
 from PySide6.QtWidgets import (
     QApplication, QFrame, QVBoxLayout, QListWidgetItem,
-    QStackedWidget, QHBoxLayout, QLabel,
-    QInputDialog, QGridLayout, QTreeWidget, QTreeWidgetItem, QWidget
+    QStackedWidget, QHBoxLayout, QLabel, QDialog,
+    QInputDialog, QGridLayout, QTreeWidget, QTreeWidgetItem, QWidget, QMessageBox
 )
 from qfluentwidgets import (LineEdit, PushButton, MessageBox, FluentIcon, SubtitleLabel, TitleLabel, ImageLabel,
                             Action, CommandBarView, ListWidget, TransparentPushButton)
@@ -50,7 +50,7 @@ class ModDetailPage(QFrame):
         main_layout.setSpacing(20)
 
         # Title
-        title_label = QLabel(f"Details of {self.mod_name}")
+        title_label = TitleLabel(f"Details of {self.mod_name}")
         title_label.setFont(QFont("Arial", 24, QFont.Bold))
         title_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title_label)
@@ -67,21 +67,6 @@ class ModDetailPage(QFrame):
 
         for button in (self.prev_button, self.next_button):
             button.setFont(QFont("Arial", 12))
-            button.setStyleSheet("""
-                PushButton {
-                    background-color: #4CAF50;
-                    color: white;
-                    padding: 5px 10px;
-                    border: none;
-                    border-radius: 3px;
-                }
-                PushButton:hover {
-                    background-color: #45a049;
-                }
-                PushButton:disabled {
-                    background-color: #cccccc;
-                }
-            """)
 
         self.prev_button.clicked.connect(self.prev_page)
         self.next_button.clicked.connect(self.next_page)
@@ -94,25 +79,10 @@ class ModDetailPage(QFrame):
         # Back button
         back_button = PushButton("Back to Mod List")
         back_button.setFont(QFont("Arial", 14))
-        back_button.setStyleSheet("""
-            PushButton {
-                background-color: #008CBA;
-                color: white;
-                padding: 10px;
-                border: none;
-                border-radius: 5px;
-            }
-            PushButton:hover {
-                background-color: #007B9A;
-            }
-        """)
         back_button.clicked.connect(self.go_back)
         main_layout.addWidget(back_button)
 
         self.setLayout(main_layout)
-
-        # Set background color
-        self.setStyleSheet("background-color: #f0f0f0;")
 
         self.update_page()
 
@@ -147,6 +117,38 @@ class ModDetailPage(QFrame):
     def go_back(self):
         self.parent.stacked_widget.setCurrentIndex(0)
 
+class AddModDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle('Add Mod')
+        
+        self.mod_name_label = SubtitleLabel('Enter mod name:')
+        self.mod_name_edit = LineEdit()
+        self.add_button = PushButton('Add')
+        self.add_button.clicked.connect(self.add_mod)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.mod_name_label)
+        layout.addWidget(self.mod_name_edit)
+        layout.addWidget(self.add_button)
+
+        self.setLayout(layout)
+
+    def add_mod(self):
+        mod_name = self.mod_name_edit.text().strip()
+        if mod_name:
+            if mod_name in self.parent().mods:
+                MessageBox.warning(self, 'Warning', 'Mod already exists.')
+            else:
+                mod_info = {"name": mod_name, "author": "Unknown",
+                            "version": "N/A", "Enabled": False}
+                mod_path = os.path.join(os.getcwd(), 'modules', mod_name)
+                os.makedirs(mod_path, exist_ok=True)
+                with open(os.path.join(mod_path, 'package.json'), 'w', encoding='utf-8') as f:
+                    json.dump(mod_info, f, ensure_ascii=False, indent=4)
+                self.parent().load_mods()
+                self.close()
+
 
 class ModManager(QFrame):
     def __init__(self):
@@ -155,6 +157,7 @@ class ModManager(QFrame):
 
     def initUI(self):
         self.setWindowTitle('Mod Manager')
+        self.setGeometry(100, 100, 800, 600)
         # Removed setGeometry since it's not necessary for embedding
 
         main_layout = QVBoxLayout()
@@ -217,7 +220,7 @@ class ModManager(QFrame):
 
         self.mods = {}
         self.load_mods()
-
+      
     def load_mods(self):
         self.mods.clear()
         modules_path = os.path.join(os.getcwd(), 'modules')
@@ -305,33 +308,23 @@ class ModManager(QFrame):
             self.stacked_widget.setCurrentWidget(detail_page)
 
     def add_mod(self):
-        mod_name, ok = QInputDialog.getText(self, 'Add Mod', 'Enter mod name:')
-        if ok and mod_name:
-            if mod_name in self.mods:
-                MessageBox.warning(self, 'Warning', 'Mod already exists.')
-            else:
-                mod_info = {"name": mod_name, "author": "Unknown",
-                            "version": "N/A", "Enabled": False}
-                mod_path = os.path.join(os.getcwd(), 'modules', mod_name)
-                os.makedirs(mod_path, exist_ok=True)
-                with open(os.path.join(mod_path, 'package.json'), 'w', encoding='utf-8') as f:
-                    json.dump(mod_info, f, ensure_ascii=False, indent=4)
-                self.load_mods()
+        dialog = AddModDialog(self)
+        dialog.exec()
 
     def confirm_delete_mod(self):
         selected_items = self.list_widget.selectedItems()
         if selected_items:
             mod_names = [self.list_widget.itemWidget(item).findChild(
                 QLabel).text() for item in selected_items]
-            reply = MessageBox.question(self, 'Delete Mod',
+            reply = QMessageBox.warning(self, 'Delete Mod',
                                         f"Are you sure you want to delete the selected mod(s)?\n{
                                             ', '.join(mod_names)}",
-                                        MessageBox.Yes | MessageBox.No, MessageBox.No)
-            if reply == MessageBox.Yes:
+                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if reply == QMessageBox.Yes:
                 for mod_name in mod_names:
                     self.delete_mod(mod_name)
         else:
-            MessageBox.warning(self, 'Warning', 'No mod selected.')
+            QMessageBox.warning(self, 'Warning', 'No mod selected.')
 
     def delete_mod(self, mod_name: str):
         if mod_name in self.mods:

@@ -5,6 +5,7 @@ from app.model.style_sheet import StyleSheet
 from app.model.setting_card import CustomFrameGroup
 
 from app.components.module.mod_manager import ModManager
+from app.components.tools.scaffold import ScaffoldApp
 
 class Module(ScrollArea):
     Nav = Pivot
@@ -24,6 +25,10 @@ class Module(ScrollArea):
         self.ModuleManagerFrame = ModManager()
         self.ModuleManagerInterface = CustomFrameGroup(self.scrollWidget)
         self.ModuleManagerInterface.addCustomFrame(self.ModuleManagerFrame)
+
+        self.ScaffoldAppFrame = ScaffoldApp()
+        self.ScaffoldAppInterface = CustomFrameGroup(self.scrollWidget)
+        self.ScaffoldAppInterface.addCustomFrame(self.ScaffoldAppFrame)
 
         self.__initWidget()
 
@@ -50,6 +55,8 @@ class Module(ScrollArea):
         # 栏绑定界面
         self.addSubInterface(self.ModuleManagerInterface, 'ModuleManagerInterface', self.tr(
             '模组管理'), icon=FluentIcon.IOT)
+        self.addSubInterface(self.ScaffoldAppInterface, 'ScaffoldAppInterface', self.tr(
+            '模组生成器'), icon=FluentIcon.IOT)
 
         # 初始化配置界面
         self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignLeft)

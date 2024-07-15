@@ -37,7 +37,7 @@ class TelescopeCatalog(QWidget):
         self.layout.addWidget(self.telescopes_list)
 
         # Add telescope button
-        self.add_button = PushButton("Add Telescope", self)
+        self.add_button = PushButton(FluentIcon.ADD, "Add Telescope", self)
         self.add_button.setIcon(FluentIcon.ADD)
         self.add_button.clicked.connect(self.add_telescope)
         self.layout.addWidget(self.add_button)

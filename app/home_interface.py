@@ -1,13 +1,14 @@
 import os
 import random
 import subprocess
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QButtonGroup, QStyleOptionViewItem, QLabel, QToolBar, QTextEdit, QPushButton, QDialog, QLineEdit, QFormLayout
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QButtonGroup, QStyleOptionViewItem, QLabel, QToolBar,  QDialog, QFormLayout
 from PySide6.QtCore import Qt, QSize, QModelIndex, QRect, QTimer
-from PySide6.QtGui import QPainter, QFont, QColor, QAction
-from qfluentwidgets import (TogglePushButton, PrimaryPushButton, setCustomStyleSheet, InfoBarPosition,
-                            InfoBarIcon, InfoBar, FlowLayout, HorizontalFlipView, FlipImageDelegate, FluentIcon)
+from PySide6.QtGui import QPainter, QFont, QAction, QClipboard
+from qfluentwidgets import (TogglePushButton, PrimaryPushButton, setCustomStyleSheet, InfoBarPosition, PushButton,TextEdit,LineEdit,
+                            InfoBarIcon, InfoBar, FlowLayout, HorizontalFlipView, FlipImageDelegate, FluentIcon, RoundMenu, Action,
+                            AvatarWidget)
 from app.model.config import cfg, Info
-
+from src.icon.astro import AstroIcon
 
 class CustomFlipItemDelegate(FlipImageDelegate):
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
@@ -24,6 +25,90 @@ class CustomFlipItemDelegate(FlipImageDelegate):
         painter.drawText(rect.adjusted(0, 90, 0, 0),
                          Qt.AlignCenter, cfg.APP_VERSION)
         painter.restore()
+
+
+class ProfileCard(QWidget):
+    """ Profile card """
+
+    def __init__(self, avatarPath: str, name: str, email: str, parent=None):
+        super().__init__(parent=parent)
+        
+        # Avatar widget
+        self.avatar = AvatarWidget(avatarPath, self)
+        self.avatar.setFixedSize(48, 48)
+        self.avatar.setRadius(24)
+
+        # Name label
+        self.nameLabel = QLabel(name, self)
+        self.nameLabel.setFont(QFont("Arial", 12, QFont.Bold))
+        self.nameLabel.setStyleSheet('QLabel { color: white; }')
+
+        # Email label
+        self.emailLabel = QLabel(email, self)
+        self.emailLabel.setStyleSheet('QLabel { color: #CCCCCC; }')
+
+        # Layout
+        layout = QVBoxLayout(self)
+        layout.addWidget(self.avatar, alignment=Qt.AlignTop)
+        layout.addWidget(self.nameLabel, alignment=Qt.AlignTop)
+        layout.addWidget(self.emailLabel, alignment=Qt.AlignTop)
+        layout.setContentsMargins(10, 10, 10, 10)
+        self.setLayout(layout)
+
+        # Set size and styles
+        self.setFixedSize(150, 150)
+        self.setStyleSheet('background-color: #333333; border: 1px solid #666666;')
+
+        # Adjust avatar position
+        self.avatar.move(10, 10)
+
+        # Add right-click context menu
+        self.setContextMenuPolicy(Qt.ActionsContextMenu)
+        copyAction = QAction("Copy Email", self)
+        copyAction.triggered.connect(self.copyEmail)
+        self.addAction(copyAction)
+
+    def copyEmail(self):
+        # Copy email to clipboard
+        clipboard = QApplication.clipboard()
+        clipboard.setText(self.emailLabel.text())
+
+class ServerButton(TogglePushButton):
+
+    def ensure_variable(self, var_name, default_value=None):
+        if not hasattr(self, var_name):
+            setattr(self, var_name, default_value)
+
+    def add_widget(self, widget):
+        self.ensure_variable('context_menu_widgets', [])
+        self.context_menu_widgets.append(widget)
+
+    def remove_widget(self, widget):
+        self.ensure_variable('context_menu_widgets', [])
+        if widget in self.context_menu_widgets:
+            self.context_menu_widgets.remove(widget)
+
+    def contextMenuEvent(self, event) -> None:
+        self.ensure_variable('context_menu_widgets', [])
+        menu = RoundMenu(parent=self)
+        for widget in self.context_menu_widgets:
+            menu.addWidget(widget, selectable=False)
+
+        self.add_custom_actions(menu)
+        menu.exec(event.globalPos())
+
+    def add_custom_actions(self, menu):
+        """ Override this method to add custom actions to the menu """
+        menu.addSeparator()
+        menu.addActions([
+            Action(FluentIcon.PEOPLE, ''),
+            Action(FluentIcon.SHOPPING_CART, '支付方式'),
+            Action(FluentIcon.CODE, '兑换代码和礼品卡'),
+        ])
+        menu.addSeparator()
+        settings_action = Action(FluentIcon.SETTING, '设置')
+        menu.addAction(settings_action)
+
 
 
 class Home(QWidget):
@@ -49,15 +134,25 @@ class Home(QWidget):
         for name, details in cfg.SERVER.items():
             icon = FluentIcon.TAG
             if 'ICON' in details and details['ICON']:
-                icon = getattr(FluentIcon, details['ICON'], FluentIcon.TAG)
-
-            button_server = TogglePushButton(icon, '   ' + name, self)
+                if 'ICON_TYPE' in details and details['ICON_TYPE'] == 'PATH':
+                    icon = details['ICON']
+                elif 'ICON_TYPE' in details and details['ICON_TYPE'] == 'FLUENT':
+                    icon = getattr(FluentIcon, details['ICON'], FluentIcon.TAG)
+                elif 'ICON_TYPE' in details and details['ICON_TYPE'] == 'ASTRO':
+                    icon = getattr(AstroIcon, details['ICON'], FluentIcon.TAG)
+                else:
+                    continue
+            button_server = ServerButton(icon, '   ' + name, self)
             button_server.setObjectName(name)
             button_server.setFixedSize(270, 70)
-            button_server.setIconSize(QSize(18, 18))
+            button_server.setIconSize(QSize(24, 24))
             button_server.setFont(QFont(f'{cfg.APP_FONT}', 12))
             setCustomStyleSheet(
                 button_server, 'PushButton{border-radius: 12px}', 'PushButton{border-radius: 12px}')
+            
+            #profile_card = ProfileCard(
+           #     details['ICON'], name, details['COMMAND'], self)
+            #button_server.add_widget(profile_card)
 
             self.button_group.addButton(button_server)
 
@@ -80,7 +175,7 @@ class Home(QWidget):
         image_layout.addWidget(self.flipView)
         image_layout.setAlignment(Qt.AlignHCenter)
 
-        button_layout = FlowLayout()
+        button_layout = FlowLayout(needAni=True)
         button_layout.setVerticalSpacing(30)
         button_layout.setHorizontalSpacing(30)
         for button in self.button_group.buttons():
@@ -205,7 +300,7 @@ class Home(QWidget):
         log_dialog = QDialog(self)
         log_dialog.setWindowTitle(self.tr(f"{server_name} 日志"))
         log_layout = QVBoxLayout(log_dialog)
-        log_text = QTextEdit(log_dialog)
+        log_text = TextEdit(log_dialog)
         log_text.setReadOnly(True)
         log_text.setText(self.readLog(server_name))
         log_layout.addWidget(log_text)
@@ -248,11 +343,11 @@ class Home(QWidget):
                 self.config_fields = {}
                 for line in lines:
                     key, value = line.strip().split('=')
-                    line_edit = QLineEdit(value)
+                    line_edit = LineEdit(value)
                     self.config_fields[key] = line_edit
                     form_layout.addRow(QLabel(key), line_edit)
 
-        save_button = QPushButton(self.tr("保存"))
+        save_button = PushButton(self.tr("保存"))
         save_button.clicked.connect(
             lambda: self.saveConfig(server_name, config_path))
 
@@ -377,7 +472,7 @@ class Home(QWidget):
         log_dialog = QDialog(self)
         log_dialog.setWindowTitle(self.tr(f"{server_name} 日志"))
         log_layout = QVBoxLayout(log_dialog)
-        log_text = QTextEdit(log_dialog)
+        log_text = TextEdit(log_dialog)
         log_text.setReadOnly(True)
         log_text.setText(self.readLog(server_name))
         log_layout.addWidget(log_text)
@@ -420,11 +515,11 @@ class Home(QWidget):
                 self.config_fields = {}
                 for line in lines:
                     key, value = line.strip().split('=')
-                    line_edit = QLineEdit(value)
+                    line_edit = LineEdit(value)
                     self.config_fields[key] = line_edit
                     form_layout.addRow(QLabel(key), line_edit)
 
-        save_button = QPushButton(self.tr("保存"))
+        save_button = PushButton(self.tr("保存"))
         save_button.clicked.connect(
             lambda: self.saveConfig(server_name, config_path))
 
@@ -557,7 +652,7 @@ class Home(QWidget):
         log_dialog = QDialog(self)
         log_dialog.setWindowTitle(self.tr(f"{server_name} 日志"))
         log_layout = QVBoxLayout(log_dialog)
-        log_text = QTextEdit(log_dialog)
+        log_text = TextEdit(log_dialog)
         log_text.setReadOnly(True)
         log_text.setText(self.readLog(server_name))
         log_layout.addWidget(log_text)
@@ -600,11 +695,11 @@ class Home(QWidget):
                 self.config_fields = {}
                 for line in lines:
                     key, value = line.strip().split('=')
-                    line_edit = QLineEdit(value)
+                    line_edit = LineEdit(value)
                     self.config_fields[key] = line_edit
                     form_layout.addRow(QLabel(key), line_edit)
 
-        save_button = QPushButton(self.tr("保存"))
+        save_button = PushButton(self.tr("保存"))
         save_button.clicked.connect(
             lambda: self.saveConfig(server_name, config_path))
 

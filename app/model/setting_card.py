@@ -1,9 +1,9 @@
 from typing import Union, List
 from PySide6.QtGui import QIcon, QPainter, QColor
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QFrame, QHBoxLayout, QVBoxLayout, QLabel, QWidget
+from PySide6.QtWidgets import QFrame, QHBoxLayout, QVBoxLayout, QLabel, QWidget, QDialog
 from qfluentwidgets import (FluentIconBase, IconWidget,
-                            FluentStyleSheet, isDarkTheme, drawIcon, ExpandLayout)
+                            FluentStyleSheet, isDarkTheme, drawIcon, ExpandLayout, PushButton)
 
 
 class SettingCardGroup(QWidget):
@@ -242,3 +242,20 @@ class SettingIconWidget(IconWidget):
         painter.setRenderHints(QPainter.Antialiasing |
                                QPainter.SmoothPixmapTransform)
         drawIcon(self._icon, painter, self.rect())
+
+class CustomDialog(QDialog):
+    def __init__(self, widget, title="Dialog", parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(title)
+        self.setLayout(QVBoxLayout())
+        self.layout().addWidget(widget)
+
+        # Optional: Add standard buttons (OK/Cancel)
+        button_layout = QHBoxLayout()
+        ok_button = PushButton("OK")
+        ok_button.clicked.connect(self.accept)
+        cancel_button = PushButton("Cancel")
+        cancel_button.clicked.connect(self.reject)
+        button_layout.addWidget(ok_button)
+        button_layout.addWidget(cancel_button)
+        self.layout().addLayout(button_layout)

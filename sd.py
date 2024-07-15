@@ -2,10 +2,11 @@ import json
 import os
 import subprocess
 from loguru import logger
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget)
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel,
+                               QStackedWidget, QScrollArea, QComboBox, QMessageBox, QFrame)
 from PySide6.QtCore import Qt
 from qfluentwidgets import FluentIcon as FIF
-from qfluentwidgets import (Pivot, qrouter, SettingCardGroup, PrimaryPushSettingCard, LineEdit, PushButton, ComboBox, ScrollArea,
+from qfluentwidgets import (Pivot, qrouter, SettingCardGroup, PrimaryPushSettingCard,
                             HyperlinkCard, InfoBar, InfoBarPosition)
 from app.model.config import cfg
 from app.model.style_sheet import StyleSheet
@@ -16,7 +17,7 @@ from app.model.message_download import (MessageDownload, MessageNINA, MessagePHD
 from src.icon.astro import AstroIcon
 
 
-class Download(ScrollArea):
+class Download(QScrollArea):
     Nav = Pivot
 
     def __init__(self, text: str, parent=None):
@@ -27,11 +28,11 @@ class Download(ScrollArea):
         self.setObjectName(text.replace(' ', '-'))
         self.scrollWidget = QWidget()
         self.vBoxLayout = QVBoxLayout(self.scrollWidget)
-        self.searchBox = LineEdit(self.scrollWidget)
-        self.searchButton = PushButton("搜索", self.scrollWidget)
-        self.refreshButton = PushButton("刷新", self.scrollWidget)
-        self.toggleSearchButton = PushButton("显示/隐藏搜索框", self.scrollWidget)
-        self.comboBox = ComboBox(self.scrollWidget)
+        self.searchBox = QLineEdit(self.scrollWidget)
+        self.searchButton = QPushButton("搜索", self.scrollWidget)
+        self.refreshButton = QPushButton("刷新", self.scrollWidget)
+        self.toggleSearchButton = QPushButton("显示/隐藏搜索框", self.scrollWidget)
+        self.comboBox = QComboBox(self.scrollWidget)
 
         self.searchBox.setPlaceholderText("输入搜索内容...")
         self.searchBox.textChanged.connect(self.search_items)
@@ -77,7 +78,7 @@ class Download(ScrollArea):
         search_text = self.searchBox.text().lower()
         for index in range(self.comboBox.count()):
             item_text = self.comboBox.itemText(index).lower()
-            self.comboBox.setItemData(index, not search_text or search_text in item_text)
+            self.comboBox.setItemData(index, not search_text or search_text in item_text, Qt.UserRole - 1)
 
     def navigate_to_section(self):
         section_index = self.comboBox.currentIndex() - 1

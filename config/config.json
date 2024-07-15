@@ -9,15 +9,18 @@
   "PROXY_PORT": "7890",
   "SERVER": {
     "NINA": {
-      "ICON": "",
+      "ICON": "NINA",
+      "ICON_TYPE": "ASTRO",
       "COMMAND": "cd ./server/LunarCore/ && start java.exe -jar LunarCore.jar"
     },
     "PHD2": {
-      "ICON": "",
+      "ICON": "PHD",
+      "ICON_TYPE": "ASTRO",
       "COMMAND": "cd ./server/Grasscutter/ && start java.exe -jar grasscutter.jar"
     },
     "Astap": {
-      "ICON": "",
+      "ICON": "ASTAP",
+      "ICON_TYPE": "ASTRO",
       "COMMAND": "cd ./server/HuTao-GS/ && start START-DEV.bat"
     }
   }

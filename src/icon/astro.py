@@ -11,6 +11,7 @@ class AstroIcon(FluentIconBase, Enum):
     INDIGO = "INDIGO"
 
     APT = "APT"
+    ASTAP = "ASTAP"
     NINA = "N.I.N.A"
     SharpCap = "SharpCap"
     FireCpature = "FireCapture"
