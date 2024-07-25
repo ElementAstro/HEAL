@@ -27,7 +27,7 @@ from app.tool_interface import Tools
 from app.model.config import cfg, Info
 from app.model.check_update import checkUpdate
 from app.model.login_card import MessageLogin
-
+from app.model.system_tray import SystemTray
 
 class Main(MSFluentWindow):
     # 自定义信号
@@ -240,3 +240,11 @@ class Main(MSFluentWindow):
                 lambda: self.stackedWidget.setCurrentIndex(1))
             file_error.addWidget(file_error_button)
             file_error.show()
+
+    def toggle_window(self):
+        if self.isVisible():
+            self.hide()  # 隐藏窗口
+            self.tray_icon.toggle_action.setText("Show Window")
+        else:
+            self.show()  # 显示窗口
+            self.tray_icon.toggle_action.setText("Hide Window")

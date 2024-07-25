@@ -2,11 +2,13 @@ import json
 import os
 import subprocess
 from loguru import logger
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget)
+from PySide6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget, QMessageBox)
 from PySide6.QtCore import Qt
 from qfluentwidgets import FluentIcon as FIF
-from qfluentwidgets import (Pivot, qrouter, SettingCardGroup, PrimaryPushSettingCard, LineEdit, PushButton, ComboBox, ScrollArea,
+from qfluentwidgets import (Pivot, qrouter, PrimaryPushSettingCard, LineEdit, PushButton, ComboBox, ScrollArea,
                             HyperlinkCard, InfoBar, InfoBarPosition)
+from app.model.setting_card import SettingCardGroup, SettingIconWidget, CustomDialog, CustomFrame, CustomFrameGroup
 from app.model.config import cfg
 from app.model.style_sheet import StyleSheet
 from app.model.message_download import (MessageDownload, MessageNINA, MessagePHD2, MessageSharpCap,
@@ -50,7 +52,6 @@ class Download(ScrollArea):
         self.load_interface_from_json()
 
         # Initialize additional interface components
-        self.initialize_components()
         self.__initWidget()
 
     def load_interface_from_json(self):
@@ -59,6 +60,7 @@ class Download(ScrollArea):
                 self.interface = json.load(f)
                 logger.debug(f'Loading JSON file: {f.name}: {self.interface}')
                 self.populate_combo_box()
+                self.load_interface_cards()
             except (IOError, json.JSONDecodeError) as e:
                 logger.error(f'Error loading JSON file: {e}')
                 raise
@@ -71,13 +73,21 @@ class Download(ScrollArea):
             self.comboBox.addItem(section_title)
 
     def toggle_search_box(self):
-        self.searchBox.setVisible(not self.searchBox.isVisible())
+        self.searchBox.setVisible(self.searchBox.isVisible())
 
     def search_items(self):
         search_text = self.searchBox.text().lower()
-        for index in range(self.comboBox.count()):
+        matched_index = -1
+        for index in range(1, self.comboBox.count()):
             item_text = self.comboBox.itemText(index).lower()
-            self.comboBox.setItemData(index, not search_text or search_text in item_text)
+            if search_text in item_text:
+                matched_index = index
+                break
+        
+        if matched_index >= 0:
+            self.comboBox.setCurrentIndex(matched_index)
+        else:
+            QMessageBox.warning(self, "未找到", "未找到匹配的项目")
 
     def navigate_to_section(self):
         section_index = self.comboBox.currentIndex() - 1
@@ -113,7 +123,8 @@ class Download(ScrollArea):
         if icon_name.startswith('FIF.'):
             return getattr(FIF, icon_name[4:], FIF.DOWNLOAD)
         elif icon_name.startswith('Astro.'):
-            return getattr(AstroIcon, icon_name[5:], AstroIcon.DOWNLOAD)
+            print(icon_name)
+            return getattr(AstroIcon, icon_name[6:], AstroIcon.PHD)
         logger.error(f'Unknown icon: {icon_name}')
         return FIF.DOWNLOAD
 
@@ -124,140 +135,12 @@ class Download(ScrollArea):
         elif item_type == 'primary_push_setting':
             return PrimaryPushSettingCard(**card_args)
 
-    def initialize_components(self):
-        self.LauncherInterface = SettingCardGroup("launcher", self.scrollWidget)
-        self.LauncherRepoCard = HyperlinkCard(
-            'https://github.com/ElementAstro/HEAL',
-            'Hello-ElementAstro-Launcher',
-            FIF.LINK,
-            '项目仓库',
-            '打开HEAL项目仓库'
-        )
-        self.LauncherResourceCard = PrimaryPushSettingCard(
-            '启动器资源',
-            FIF.MENU,
-            '资源下载',
-            '下载启动器相关资源'
-        )
-        self.EnvironmentInterface = SettingCardGroup("env", self.scrollWidget)
-        self.PythonDownloadCard = PrimaryPushSettingCard(
-            '详细信息',
-            FIF.DOWNLOAD,
-            '项目下载',
-            '下载Python安装包'
-        )
-        self.CompilerDownloadCard = PrimaryPushSettingCard(
-            '详细信息',
-            FIF.DOWNLOAD,
-            '项目下载',
-            '下载编译环境'
-        )
-        self.DriverInterface = SettingCardGroup("driver", self.scrollWidget)
-        self.ASCOMRepoCard = HyperlinkCard(
-            'https://www.ascom-standards.org/Downloads/Index.htm',
-            '官网',
-            AstroIcon.ASCOM,
-            'ASCOM',
-            'ASCOM is a consortium of astronomy software developers, vendors, and users.'
-        )
-        self.INDIRepoCard = HyperlinkCard(
-            'https://www.indilib.org/get-indi.html',
-            '官网',
-            AstroIcon.INDI,
-            'INDI',
-            'INDI Library is an open source software to control astronomical equipment. It is based on the Instrument Neutral Distributed Interface (INDI) protocol and acts as a bridge between software clients and hardware devices.'
-        )
-        self.INDIGORepoCard = HyperlinkCard(
-            'https://indigo-astronomy.org/',
-            '官网',
-            AstroIcon.INDIGO,
-            'INDIGO',
-            'INDIGO is a universal control software for professional and hobbyist astronomy. It is designed to be used with a wide range of devices, including cameras, telescopes, mounts, and other control devices.'
-        )
-        self.ThirdpartyInterface = SettingCardGroup("thirdparty", self.scrollWidget)
-        self.NINARepoCard = HyperlinkCard(
-            'https://nighttime-imaging.eu/download/',
-            '官网',
-            AstroIcon.NINA,
-            'NINA',
-            'NIGHTTIME IMAGING "N" ASTRONOMY - An astrophotography imaging suite'
-        )
-        self.PHD2RepoCard = HyperlinkCard(
-            'https://openphdguiding.org/downloads/',
-            '官网',
-            AstroIcon.PHD,
-            'PHD2',
-            'PHD2 is telescope guiding software that simplifies the process of tracking a guide star, letting you concentrate on other aspects of deep-sky imaging or spectroscopy.'
-        )
-        self.SharpCapRepoCard = HyperlinkCard(
-            'https://github.com/ElementAstro/SharpCap',
-            '官网',
-            AstroIcon.SharpCap,
-            'SharpCap',
-            'SharpCap is an easy-to-use and powerful astronomy camera capture tool. It supports a wide range of dedicated astronomy cameras as well as webcams and USB frame grabbers.'
-        )
-        self.APTRepoCard = HyperlinkCard(
-            'https://astrophotography.app/downloads.php',
-            '官网',
-            AstroIcon.APT,
-            'APT',
-            'Can control DSLR & CMOS camera,includes image acquisition tools,Now ToupTek Astro Camera is fully compatible with this software'
-        )
-        self.MaximDLRepoCard = HyperlinkCard(
-            'https://www.cyanogen.com/product/maxim-dl/',
-            '官网',
-            AstroIcon.MaximDL,
-            'MaximDL',
-            'MaxIm DL is the complete integrated solution for all of your astronomical imaging needs.'
-        )
-        self.THESkyRepoCard = HyperlinkCard(
-            'https://www.bisque.com/product-category/software',
-            '官网',
-            AstroIcon.TheSky,
-            'THESky',
-            'An essential tool for astronomical discovery and observation.'
-        )
-        self.VoyagerRepoCard = HyperlinkCard(
-            'https://software.starkeeper.it/',
-            '官网',
-                        AstroIcon.Voyager,
-            'Voyager',
-            'A systems integration software, interfacing third-part software products.'
-        )
-        self.SGPRepoCard = HyperlinkCard(
-            'https://www.sequencegeneratorpro.com/sgpro',
-            '官网',
-            AstroIcon.SGP,
-            'SGP',
-            'The best in class automation software for astrophotography.'
-        )
-        self.FireCaptureRepoCard = HyperlinkCard(
-            'https://www.firecapture.de/',
-            '官网',
-            AstroIcon.FireCpature,
-            'FireCapture',
-            'Can control Telescope, EFW, has Autoguiding and Autorun features, Now ToupTek Astro Camera is fully compatible with this software'
-        )
-        self.DownloadFiddlerCard = PrimaryPushSettingCard(
-            '详细信息',
-            FIF.DOWNLOAD,
-            'Fiddler',
-            '下载代理工具Fiddler'
-        )
-        self.DownloadMitmdumpCard = PrimaryPushSettingCard(
-            '详细信息',
-            FIF.DOWNLOAD,
-            'Mitmdump',
-            '下载代理工具Mitmdump'
-        )
-        self.ResourceInterface = SettingCardGroup("resource", self.scrollWidget)
-        self.ResourceRepoCard = HyperlinkCard(
-            'https://github.com/ElementAstro/LunarCore',
-            'LunarCore',
-            FIF.LINK,
-            '项目仓库',
-            '打开LunarCore仓库'
-        )
+    def load_interface_cards(self):
+        self.stackedWidget = QStackedWidget(self.scrollWidget)
+        for section in self.interface.get('sections', []):
+            section_widget = SettingCardGroup(self.scrollWidget)
+            self.add_items_to_section(section_widget, section.get('items', []))
+            self.addSubInterface(section_widget, section['id'], section['title'], self.resolve_icon(section['icon']))
 
     def __initWidget(self):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -269,60 +152,21 @@ class Download(ScrollArea):
         self.scrollWidget.setObjectName('scrollWidget')
         StyleSheet.SETTING_INTERFACE.apply(self)
 
-        self.__initLayout()
-        self.__connectSignalToSlot()
-
-    def __initLayout(self):
         topLayout = QHBoxLayout()
         topLayout.addWidget(self.searchBox)
         topLayout.addWidget(self.searchButton)
         topLayout.addWidget(self.refreshButton)
         topLayout.addWidget(self.toggleSearchButton)
-        
+
         self.vBoxLayout.addLayout(topLayout)
         self.vBoxLayout.addWidget(self.comboBox)
-        
-        # Bind items to sections
-        self.LauncherInterface.addSettingCard(self.LauncherRepoCard)
-        self.LauncherInterface.addSettingCard(self.LauncherResourceCard)
-        self.EnvironmentInterface.addSettingCard(self.PythonDownloadCard)
-        self.EnvironmentInterface.addSettingCard(self.CompilerDownloadCard)
-        self.DriverInterface.addSettingCard(self.ASCOMRepoCard)
-        self.DriverInterface.addSettingCard(self.INDIRepoCard)
-        self.DriverInterface.addSettingCard(self.INDIGORepoCard)
-        self.ThirdpartyInterface.addSettingCard(self.NINARepoCard)
-        self.ThirdpartyInterface.addSettingCard(self.PHD2RepoCard)
-        self.ThirdpartyInterface.addSettingCard(self.SharpCapRepoCard)
-        self.ThirdpartyInterface.addSettingCard(self.APTRepoCard)
-        self.ThirdpartyInterface.addSettingCard(self.THESkyRepoCard)
-        self.ThirdpartyInterface.addSettingCard(self.MaximDLRepoCard)
-        self.ThirdpartyInterface.addSettingCard(self.VoyagerRepoCard)
-        self.ThirdpartyInterface.addSettingCard(self.SGPRepoCard)
-        self.ThirdpartyInterface.addSettingCard(self.FireCaptureRepoCard)
-        self.ResourceInterface.addSettingCard(self.ResourceRepoCard)
-
-        # Bind sections to pivot
-        self.addSubInterface(self.LauncherInterface, 'LauncherInterface', '启动器', icon=FIF.HOME)
-        self.addSubInterface(self.EnvironmentInterface, 'EnvironmentInterface', '环境', icon=FIF.IOT)
-        self.addSubInterface(self.DriverInterface, 'DriverInterface', '设备驱动', icon=FIF.IOT)
-        self.addSubInterface(self.ThirdpartyInterface, 'ThirdpartyInterface', '第三方软件', icon=FIF.APPLICATION)
-        self.addSubInterface(self.ResourceInterface, 'ResourceInterface', '资源', icon=FIF.TILES)
-
         self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignLeft)
         self.vBoxLayout.addWidget(self.stackedWidget)
         self.vBoxLayout.setSpacing(28)
         self.vBoxLayout.setContentsMargins(0, 10, 10, 0)
         self.stackedWidget.currentChanged.connect(self.onCurrentIndexChanged)
-        self.stackedWidget.setCurrentWidget(self.LauncherInterface)
-        self.pivot.setCurrentItem(self.LauncherInterface.objectName())
-        qrouter.setDefaultRouteKey(self.stackedWidget, self.LauncherInterface.objectName())
-
-    def __connectSignalToSlot(self):
-        self.LauncherResourceCard.clicked.connect(lambda: self.download_check('launcherres'))
-        self.PythonDownloadCard.clicked.connect(lambda: self.download_check('python'))
-        self.CompilerDownloadCard.clicked.connect(lambda: self.download_check('compiler'))
-        self.DownloadFiddlerCard.clicked.connect(lambda: self.download_check('fiddler'))
-        self.DownloadMitmdumpCard.clicked.connect(lambda: self.download_check('mitmdump'))
+        self.pivot.setCurrentItem(self.stackedWidget.widget(0).objectName())
+        qrouter.setDefaultRouteKey(self.stackedWidget, self.stackedWidget.widget(0).objectName())
 
     def addSubInterface(self, widget: QWidget, objectName, text, icon=None):
         widget.setObjectName(objectName)
@@ -376,12 +220,13 @@ class Download(ScrollArea):
             'phd2': (MessagePHD2, 'git', cfg.DOWNLOAD_COMMANDS_PHD2, cfg.DOWNLOAD_COMMANDS_PHD2_MIRROR, '--branch phd2 '),
             'sharpcap': (MessageSharpCap, 'git', cfg.DOWNLOAD_COMMANDS_SHARPCAP, cfg.DOWNLOAD_COMMANDS_SHARPCAP_MIRROR, '--branch sharpcap '),
             'lunarcore': (MessageLunarCore, 'git', cfg.DOWNLOAD_COMMANDS_LUNARCORE, cfg.DOWNLOAD_COMMANDS_LUNARCORE_MIRROR, '--branch lunarcore ', 'lunarcore'),
-            'lunarcoreres': (MessageLunarCoreRes, 'git', cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES_1, cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES_MIRROR, '--branch lunarcoreres ', 'lunarcore'),
+            'lunarcoreres': (MessageLunarCoreRes, 'git', cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES, cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES_MIRROR, '--branch lunarcoreres ', 'lunarcore'),
             'fiddler': (MessageFiddler, 'git', cfg.DOWNLOAD_COMMANDS_FIDDLER, cfg.DOWNLOAD_COMMANDS_FIDDLER_MIRROR, '--branch fiddler '),
             'mitmdump': (MessageMitmdump, 'git', cfg.DOWNLOAD_COMMANDS_MITMDUMP, cfg.DOWNLOAD_COMMANDS_MITMDUMP_MIRROR, '--branch mitmdump ')
         }
 
-        message_class, types, repo_url, mirror_url, mirror_branch, build_jar = download_mapping.get(name, (None, None, None, None, None, None))
+        message_class, types, repo_url, mirror_url, mirror_branch, build_jar = download_mapping.get(
+            name, (None, None, None, None, None, None))
 
         if not message_class:
             logger.error(f'Unknown download type: {name}')
@@ -389,7 +234,8 @@ class Download(ScrollArea):
 
         w = message_class(self)
         file_path = os.path.join("temp", repo_url.split('/')[-1])
-        command = self.generate_download_url(types, repo_url, mirror_url, mirror_branch, is_add=False)
+        command = self.generate_download_url(
+            types, repo_url, mirror_url, mirror_branch, is_add=False)
 
         if w.exec():
             if not os.path.exists(file_path):
@@ -427,13 +273,3 @@ class Download(ScrollArea):
                     parent=self
                 )
                 subprocess.Popen('start ' + file_path, shell=True)
-
-if __name__ == "__main__":
-    from PySide6.QtWidgets import QApplication
-    import sys
-
-    app = QApplication(sys.argv)
-    download_window = Download("下载界面")
-    download_window.resize(800, 600)
-    download_window.show()
-    sys.exit(app.exec())
