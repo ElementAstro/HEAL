@@ -1,20 +1,23 @@
-import os
 import sys
 import json
 import glob
 import random
-import winreg
 import subprocess
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QApplication
+from pathlib import Path
+from typing import Any
+
+import winreg
+from PySide6.QtCore import Signal, Qt, QSize, QUrl
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import Qt, QSize, QUrl
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
+from PySide6.QtWidgets import QApplication
+
 from qfluentwidgets import (
     MSFluentWindow, NavigationItemPosition, setTheme, Theme, InfoBar,
     PrimaryPushButton, InfoBarPosition, SplashScreen, HyperlinkButton,
     InfoBarIcon, FluentIcon
 )
+
 from app.home_interface import Home
 from app.launcher_interface import Launcher
 from app.download_interface import Download
@@ -29,12 +32,12 @@ from app.model.check_update import checkUpdate
 from app.model.login_card import MessageLogin
 from app.model.system_tray import SystemTray
 
+
 class Main(MSFluentWindow):
-    # 自定义信号
     reload_signal = Signal()
     shutdown_signal = Signal()
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         setTheme(cfg.themeMode.value)
 
@@ -54,7 +57,7 @@ class Main(MSFluentWindow):
             if cfg.useAudio.value:
                 self.handleMediaPlay('success')
 
-    def initNavigation(self):
+    def initNavigation(self) -> None:
         self.homeInterface = Home('HomeInterface', self)
         self.launcherInterface = Launcher('LauncherInterface', self)
         self.downloadInterface = Download('DownloadInterface', self)
@@ -83,9 +86,10 @@ class Main(MSFluentWindow):
              FluentIcon.SETTING, NavigationItemPosition.BOTTOM)
         ]
 
-        for interface, icon, text, fillIcon, *position in interfaces:
-            position = position[0] if position else NavigationItemPosition.TOP
-            self.addSubInterface(interface, icon, text, fillIcon, position)
+        for interface in interfaces:
+            widget, icon, text, fillIcon, *position = interface
+            pos = position[0] if position else NavigationItemPosition.TOP
+            self.addSubInterface(widget, icon, text, fillIcon, pos)
 
         self.navigationInterface.addItem(
             routeKey='theme',
@@ -114,7 +118,7 @@ class Main(MSFluentWindow):
             position=NavigationItemPosition.BOTTOM
         )
 
-    def initMainWindow(self):
+    def initMainWindow(self) -> None:
         self.titleBar.maxBtn.setHidden(True)
         self.titleBar.maxBtn.setDisabled(True)
         self.titleBar.setDoubleClickEnabled(False)
@@ -129,14 +133,14 @@ class Main(MSFluentWindow):
         self.splashScreen.setIconSize(QSize(200, 200))
         self.splashScreen.raise_()
 
-        desktop = QApplication.screens()[0].availableGeometry()
+        desktop = QApplication.primaryScreen().availableGeometry()
         w, h = desktop.width(), desktop.height()
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
 
         self.show()
         QApplication.processEvents()
 
-    def handleFontCheck(self):
+    def handleFontCheck(self) -> None:
         isSetupFont = False
         registry_keys = [
             (winreg.HKEY_LOCAL_MACHINE,
@@ -158,47 +162,46 @@ class Main(MSFluentWindow):
                             except OSError:
                                 break
         except Exception as e:
-            Info(self, 'E', 3000, self.tr('检查字体失败: '), str(e))
+            Info(self, 'E', 3000, self.tr('检查字体失败: ') + str(e))
 
         if not isSetupFont:
             subprocess.run('cd src/patch/font && start zh-cn.ttf', shell=True)
             sys.exit()
 
-    def handleLogin(self, pwd):
-        with open('config/config.json', 'r', encoding='utf-8') as file:
+    def handleLogin(self, pwd: str) -> None:
+        config_path = Path('config/config.json')
+        with config_path.open('r', encoding='utf-8') as file:
             config = json.load(file)
-        local_pwd = config['PASSWORD']
+        local_pwd = config.get('PASSWORD', '')
         if local_pwd == pwd:
             Info(self, 'S', 1000, self.tr('登录成功!'))
             if cfg.useAudio.value:
                 self.handleMediaPlay('success')
             self.login_card.close()
         else:
-            Info(self, 'E', 3000, self.tr('密码错误!'),
-                 self.tr('次数: ') + str(self.count_pwd))
+            Info(self, 'E', 3000, f"{self.tr('密码错误!')} {
+                 self.tr('次数: ')}{self.count_pwd}")
             self.count_pwd += 1
             if cfg.useAudio.value:
                 self.handleMediaPlay('error')
 
-    def handleThemeChanged(self):
+    def handleThemeChanged(self) -> None:
         theme = Theme.LIGHT if cfg.themeMode.value == Theme.DARK else Theme.DARK
         setTheme(theme)
         cfg.themeMode.value = theme
         cfg.save()
 
-    def handleReload(self):
-        """处理热重载功能"""
+    def handleReload(self) -> None:
         self.reload_signal.emit()
 
-    def handleShutdown(self):
-        """处理关机功能"""
+    def handleShutdown(self) -> None:
         self.shutdown_signal.emit()
 
-    def handleUpdate(self, status, info):
+    def handleUpdate(self, status: int, info: str) -> None:
         if status == 2:
             update_info = InfoBar(
                 icon=InfoBarIcon.WARNING,
-                title=self.tr('检测到新版本: ') + info,
+                title=f"{self.tr('检测到新版本: ')}{info}",
                 content='',
                 orient=Qt.Horizontal,
                 isClosable=True,
@@ -210,41 +213,49 @@ class Main(MSFluentWindow):
             update_info.addWidget(update_button)
             update_info.show()
         elif status == 1:
-            Info(self, 'S', 1000, self.tr('当前是最新版本: ') + info)
+            Info(self, 'S', 1000, f"{self.tr('当前是最新版本: ')}{info}")
         elif status == 0:
-            Info(self, 'E', 3000, self.tr('检测更新失败: ') + info)
+            Info(self, 'E', 3000, f"{self.tr('检测更新失败: ')}{info}")
 
-    def handleMediaPlay(self, status):
-        if os.path.exists('src/audio'):
-            self.player = QMediaPlayer()
-            self.audioOutput = QAudioOutput()
-            self.player.setAudioOutput(self.audioOutput)
-            self.audioOutput.setVolume(1)
-            audio_list = glob.glob(f'src\\audio\\{status}\\*.wav')
-            audio_play = QUrl.fromLocalFile(random.choice(audio_list))
-            self.player.setSource(audio_play)
-            self.player.play()
+    def handleMediaPlay(self, status: str) -> None:
+        audio_path = Path('src/audio') / status
+        if audio_path.exists():
+            audio_files = list(audio_path.glob('*.wav'))
+            if audio_files:
+                self.player = QMediaPlayer()
+                self.audioOutput = QAudioOutput()
+                self.player.setAudioOutput(self.audioOutput)
+                self.audioOutput.setVolume(1)
+                audio_play = QUrl.fromLocalFile(
+                    str(random.choice(audio_files)))
+                self.player.setSource(audio_play)
+                self.player.play()
+            else:
+                self.showAudioError()
         else:
-            file_error = InfoBar(
-                icon=InfoBarIcon.ERROR,
-                title=self.tr('未找到语音!'),
-                content='',
-                orient=Qt.Horizontal,
-                isClosable=True,
-                position=InfoBarPosition.TOP,
-                duration=3000,
-                parent=self
-            )
-            file_error_button = PrimaryPushButton(self.tr('前往下载'))
-            file_error_button.clicked.connect(
-                lambda: self.stackedWidget.setCurrentIndex(1))
-            file_error.addWidget(file_error_button)
-            file_error.show()
+            self.showAudioError()
 
-    def toggle_window(self):
+    def showAudioError(self) -> None:
+        file_error = InfoBar(
+            icon=InfoBarIcon.ERROR,
+            title=self.tr('未找到语音!'),
+            content='',
+            orient=Qt.Horizontal,
+            isClosable=True,
+            position=InfoBarPosition.TOP,
+            duration=3000,
+            parent=self
+        )
+        file_error_button = PrimaryPushButton(self.tr('前往下载'))
+        file_error_button.clicked.connect(
+            lambda: self.stackedWidget.setCurrentIndex(1))
+        file_error.addWidget(file_error_button)
+        file_error.show()
+
+    def toggle_window(self) -> None:
         if self.isVisible():
-            self.hide()  # 隐藏窗口
-            self.tray_icon.toggle_action.setText("Show Window")
+            self.hide()
+            self.tray_icon.toggle_action.setText("显示窗口")
         else:
-            self.show()  # 显示窗口
-            self.tray_icon.toggle_action.setText("Hide Window")
+            self.show()
+            self.tray_icon.toggle_action.setText("隐藏窗口")

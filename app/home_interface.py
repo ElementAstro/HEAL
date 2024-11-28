@@ -26,53 +26,6 @@ class CustomFlipItemDelegate(FlipImageDelegate):
                          Qt.AlignCenter, cfg.APP_VERSION)
         painter.restore()
 
-
-class ProfileCard(QWidget):
-    """ Profile card """
-
-    def __init__(self, avatarPath: str, name: str, email: str, parent=None):
-        super().__init__(parent=parent)
-        
-        # Avatar widget
-        self.avatar = AvatarWidget(avatarPath, self)
-        self.avatar.setFixedSize(48, 48)
-        self.avatar.setRadius(24)
-
-        # Name label
-        self.nameLabel = QLabel(name, self)
-        self.nameLabel.setFont(QFont("Arial", 12, QFont.Bold))
-        self.nameLabel.setStyleSheet('QLabel { color: white; }')
-
-        # Email label
-        self.emailLabel = QLabel(email, self)
-        self.emailLabel.setStyleSheet('QLabel { color: #CCCCCC; }')
-
-        # Layout
-        layout = QVBoxLayout(self)
-        layout.addWidget(self.avatar, alignment=Qt.AlignTop)
-        layout.addWidget(self.nameLabel, alignment=Qt.AlignTop)
-        layout.addWidget(self.emailLabel, alignment=Qt.AlignTop)
-        layout.setContentsMargins(10, 10, 10, 10)
-        self.setLayout(layout)
-
-        # Set size and styles
-        self.setFixedSize(150, 150)
-        self.setStyleSheet('background-color: #333333; border: 1px solid #666666;')
-
-        # Adjust avatar position
-        self.avatar.move(10, 10)
-
-        # Add right-click context menu
-        self.setContextMenuPolicy(Qt.ActionsContextMenu)
-        copyAction = QAction("Copy Email", self)
-        copyAction.triggered.connect(self.copyEmail)
-        self.addAction(copyAction)
-
-    def copyEmail(self):
-        # Copy email to clipboard
-        clipboard = QApplication.clipboard()
-        clipboard.setText(self.emailLabel.text())
-
 class ServerButton(TogglePushButton):
 
     def ensure_variable(self, var_name, default_value=None):
@@ -98,16 +51,31 @@ class ServerButton(TogglePushButton):
         menu.exec(event.globalPos())
 
     def add_custom_actions(self, menu):
-        """ Override this method to add custom actions to the menu """
-        menu.addSeparator()
-        menu.addActions([
-            Action(FluentIcon.PEOPLE, ''),
-            Action(FluentIcon.SHOPPING_CART, '支付方式'),
-            Action(FluentIcon.CODE, '兑换代码和礼品卡'),
-        ])
+        """ Override this method to add custom server actions to the menu """
         menu.addSeparator()
         settings_action = Action(FluentIcon.SETTING, '设置')
+        restart_action = QAction("重启服务器", self)
+        restart_action.triggered.connect(self.restart_server)
+        stop_action = QAction("停止服务器", self)
+        stop_action.triggered.connect(self.stop_server)
+        start_action = QAction("启动服务器", self)
+        start_action.triggered.connect(self.start_server)
         menu.addAction(settings_action)
+        menu.addAction(restart_action)
+        menu.addAction(stop_action)
+        menu.addAction(start_action)
+
+    def restart_server(self):
+        # 服务器重启逻辑
+        print("服务器正在重启...")
+
+    def stop_server(self):
+        # 服务器停止逻辑
+        print("服务器已停止。")
+
+    def start_server(self):
+        # 服务器启动逻辑
+        print("服务器已启动。")
 
 
 

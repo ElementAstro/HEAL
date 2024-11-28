@@ -1,11 +1,16 @@
 import sys
 import json
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QStackedWidget
-from PySide6.QtGui import QPixmap, QPainter, QPainterPath, QDesktopServices, QFont, QIntValidator
+from PySide6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QStackedWidget,
+    QPushButton, QApplication
+)
+from PySide6.QtGui import QPixmap, QPainter, QPainterPath, QDesktopServices, QFont, QIntValidator, QClipboard
 from PySide6.QtCore import Qt, QUrl, QSize, QProcess, Signal
-from qfluentwidgets import (Pivot, qrouter, ScrollArea, CustomColorSettingCard, PushButton,
-                            PrimaryPushSettingCard, setCustomStyleSheet, SwitchSettingCard,
-                            ComboBoxSettingCard, LineEdit, PrimaryPushButton, FluentIcon, setThemeColor)
+from qfluentwidgets import (
+    Pivot, qrouter, ScrollArea, CustomColorSettingCard, PushButton,
+    PrimaryPushSettingCard, setCustomStyleSheet, SwitchSettingCard,
+    ComboBoxSettingCard, LineEdit, PrimaryPushButton, FluentIcon, setThemeColor
+)
 from app.model.setting_card import SettingCard, SettingCardGroup, CustomDialog
 from app.model.style_sheet import StyleSheet
 from app.model.check_update import checkUpdate
@@ -162,7 +167,7 @@ class Setting(ScrollArea):
         self.AboutInterface = About('AboutInterface', self)
         self.addSubInterface(self.AboutInterface, 'AboutInterface', self.tr(
             '关于'), icon=FluentIcon.INFO)
-        
+
         self.config_editor = JsonEditor()
 
         # 初始化配置界面
@@ -257,6 +262,11 @@ class Setting(ScrollArea):
             with open(config_path, 'w', encoding='utf-8') as file:
                 json.dump(data, file, indent=2, ensure_ascii=False)
 
+            # 复制到剪贴板
+            clipboard: QClipboard = QApplication.clipboard()
+            clipboard.setText(new_port)
+            Info(self, 'S', 1000, self.tr('代理端口已复制到剪贴板!'))
+
         self.__initInfo()
 
 
@@ -305,6 +315,12 @@ class About(QWidget):
             setCustomStyleSheet(
                 link_button, 'PushButton{border-radius: 12px}', 'PushButton{border-radius: 12px}')
 
+        # 增加复制按钮
+        self.copyButton = QPushButton(self.tr('复制版本信息'), self)
+        self.copyButton.setFixedSize(200, 50)
+        self.copyButton.setFont(QFont(cfg.APP_FONT, 12))
+        self.copyButton.clicked.connect(self.copy_version_info)
+
         self.__initLayout()
         self.__connectSignalToSlot()
 
@@ -323,6 +339,7 @@ class About(QWidget):
         self.main_layout.addLayout(self.image_layout)
         self.main_layout.addSpacing(20)
         self.main_layout.addLayout(self.info_button_layout)
+        self.main_layout.addWidget(self.copyButton, alignment=Qt.AlignCenter)
         self.setLayout(self.main_layout)
 
     def __connectSignalToSlot(self):
@@ -334,3 +351,9 @@ class About(QWidget):
             lambda: QDesktopServices.openUrl(QUrl(cfg.URL_RELEASES)))
         self.link_issues.clicked.connect(
             lambda: QDesktopServices.openUrl(QUrl(cfg.URL_ISSUES)))
+
+    def copy_version_info(self):
+        clipboard: QClipboard = QApplication.clipboard()
+        version_info = f"{cfg.APP_NAME} - {cfg.APP_VERSION}"
+        clipboard.setText(version_info)
+        Info(self, 'S', 1000, self.tr('版本信息已复制到剪贴板!'))

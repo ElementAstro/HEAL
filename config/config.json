@@ -9,7 +9,7 @@
   "PROXY_PORT": "7890",
   "SERVER": {
     "NINA": {
-      "ICON": "NINA",
+      "ICON": "N.I.N.A",
       "ICON_TYPE": "ASTRO",
       "COMMAND": "cd ./server/LunarCore/ && start java.exe -jar LunarCore.jar"
     },

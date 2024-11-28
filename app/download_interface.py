@@ -1,109 +1,128 @@
 import json
-import os
 import subprocess
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 from loguru import logger
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget, QMessageBox)
+    QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget, QMessageBox, QPushButton
+)
 from PySide6.QtCore import Qt
-from qfluentwidgets import FluentIcon as FIF
-from qfluentwidgets import (Pivot, qrouter, PrimaryPushSettingCard, LineEdit, PushButton, ComboBox, ScrollArea,
-                            HyperlinkCard, InfoBar, InfoBarPosition)
-from app.model.setting_card import SettingCardGroup, SettingIconWidget, CustomDialog, CustomFrame, CustomFrameGroup
+from PySide6.QtGui import QClipboard
+from qfluentwidgets import (
+    FluentIcon as FIF, Pivot, qrouter, PrimaryPushSettingCard, LineEdit, PushButton,
+    ComboBox, ScrollArea, HyperlinkCard, InfoBar, InfoBarPosition
+)
+from app.model.setting_card import SettingCardGroup
 from app.model.config import cfg
 from app.model.style_sheet import StyleSheet
-from app.model.message_download import (MessageDownload, MessageNINA, MessagePHD2, MessageSharpCap,
-                                        MessageLunarCore, MessageLunarCoreRes, MessageLauncher,
-                                        MessagePython, MessageGit, MessageJava, MessageMongoDB,
-                                        MessageFiddler, MessageMitmdump)
+from app.model.message_download import (
+    MessageDownload, MessageNINA, MessagePHD2, MessageSharpCap,
+    MessageLunarCore, MessageLunarCoreRes, MessageLauncher,
+    MessagePython, MessageGit, MessageJava, MessageMongoDB,
+    MessageFiddler, MessageMitmdump
+)
 from src.icon.astro import AstroIcon
 
 
 class Download(ScrollArea):
     Nav = Pivot
 
-    def __init__(self, text: str, parent=None):
+    def __init__(self, text: str, parent: Optional[QWidget] = None):
         super().__init__(parent=parent)
-        logger.debug(f'Loading Download Interface: {text}')
+        logger.debug(f'加载下载界面: {text}')
 
         self.parent = parent
         self.setObjectName(text.replace(' ', '-'))
-        self.scrollWidget = QWidget()
-        self.vBoxLayout = QVBoxLayout(self.scrollWidget)
-        self.searchBox = LineEdit(self.scrollWidget)
-        self.searchButton = PushButton("搜索", self.scrollWidget)
-        self.refreshButton = PushButton("刷新", self.scrollWidget)
-        self.toggleSearchButton = PushButton("显示/隐藏搜索框", self.scrollWidget)
-        self.comboBox = ComboBox(self.scrollWidget)
+        self.scroll_widget = QWidget()
+        self.vbox_layout = QVBoxLayout(self.scroll_widget)
 
-        self.searchBox.setPlaceholderText("输入搜索内容...")
-        self.searchBox.textChanged.connect(self.search_items)
-        self.searchButton.clicked.connect(self.search_items)
-        self.refreshButton.clicked.connect(self.load_interface_from_json)
-        self.toggleSearchButton.clicked.connect(self.toggle_search_box)
-        self.comboBox.currentIndexChanged.connect(self.navigate_to_section)
+        # 搜索控件
+        self.search_box = LineEdit(self.scroll_widget)
+        self.search_box.setPlaceholderText("输入搜索内容...")
+        self.search_box.textChanged.connect(self.search_items)
 
+        # 按钮控件
+        self.search_button = PushButton("搜索", self.scroll_widget)
+        self.search_button.clicked.connect(self.search_items)
+        self.refresh_button = PushButton("刷新", self.scroll_widget)
+        self.refresh_button.clicked.connect(self.load_interface_from_json)
+        self.toggle_search_button = PushButton("显示/隐藏搜索框", self.scroll_widget)
+        self.toggle_search_button.clicked.connect(self.toggle_search_box)
+
+        # 组合框
+        self.combo_box = ComboBox(self.scroll_widget)
+        self.combo_box.currentIndexChanged.connect(self.navigate_to_section)
+
+        # 导航与堆叠窗口
         self.pivot = self.Nav(self)
-        self.stackedWidget = QStackedWidget(self)
+        self.stacked_widget = QStackedWidget(self)
 
-        self.searchBox.setVisible(False)
+        self.search_box.setVisible(False)
 
-        # Load download interface configuration
-        self.interface = None
+        # 加载配置
+        self.interface: Optional[Dict[str, Any]] = None
         self.load_interface_from_json()
 
-        # Initialize additional interface components
-        self.__initWidget()
+        # 初始化额外组件
+        self.init_widgets()
 
     def load_interface_from_json(self):
-        with open('./config/interface/download.json', 'r', encoding="utf-8") as f:
-            try:
+        config_path = Path('./config/interface/download.json')
+        try:
+            with config_path.open('r', encoding="utf-8") as f:
                 self.interface = json.load(f)
-                logger.debug(f'Loading JSON file: {f.name}: {self.interface}')
+                logger.debug(f'加载 JSON 文件: {f.name}: {self.interface}')
                 self.populate_combo_box()
                 self.load_interface_cards()
-            except (IOError, json.JSONDecodeError) as e:
-                logger.error(f'Error loading JSON file: {e}')
-                raise
+        except FileNotFoundError:
+            logger.error(f'配置文件未找到: {config_path}')
+            QMessageBox.critical(self, "错误", f"配置文件未找到: {config_path}")
+        except json.JSONDecodeError as e:
+            logger.error(f'JSON 解码错误: {e}')
+            QMessageBox.critical(self, "错误", f"JSON 解码错误: {e}")
 
     def populate_combo_box(self):
-        self.comboBox.clear()
-        self.comboBox.addItem("请选择一个部分")
+        self.combo_box.clear()
+        self.combo_box.addItem("请选择一个部分")
         for section in self.interface.get('sections', []):
             section_title = section.get('title', '无标题')
-            self.comboBox.addItem(section_title)
+            self.combo_box.addItem(section_title)
 
     def toggle_search_box(self):
-        self.searchBox.setVisible(self.searchBox.isVisible())
+        current_visibility = self.search_box.isVisible()
+        self.search_box.setVisible(not current_visibility)
 
     def search_items(self):
-        search_text = self.searchBox.text().lower()
+        search_text = self.search_box.text().lower()
         matched_index = -1
-        for index in range(1, self.comboBox.count()):
-            item_text = self.comboBox.itemText(index).lower()
+        for index in range(1, self.combo_box.count()):
+            item_text = self.combo_box.itemText(index).lower()
             if search_text in item_text:
                 matched_index = index
                 break
-        
+
         if matched_index >= 0:
-            self.comboBox.setCurrentIndex(matched_index)
+            self.combo_box.setCurrentIndex(matched_index)
+            self.copy_to_clipboard(self.interface['sections'][matched_index - 1].get('title', ''))
         else:
             QMessageBox.warning(self, "未找到", "未找到匹配的项目")
 
     def navigate_to_section(self):
-        section_index = self.comboBox.currentIndex() - 1
+        section_index = self.combo_box.currentIndex() - 1
         if section_index < 0:
             return
 
         section = self.interface['sections'][section_index]
         section_title = section.get('title')
-        self.pivot.setCurrentItem(section_title.replace(' ', '-'))
-        self.stackedWidget.setCurrentIndex(section_index)
+        pivot_item_name = section_title.replace(' ', '-')
+        self.pivot.setCurrentItem(pivot_item_name)
+        self.stacked_widget.setCurrentIndex(section_index)
 
-    def add_items_to_section(self, section_interface, items):
+    def add_items_to_section(self, section_interface: SettingCardGroup, items: List[Dict[str, Any]]):
         for item in items:
             item_type = item.get('type')
             if not item_type:
-                logger.warning('Item type missing')
+                logger.warning('项目类型缺失')
                 continue
 
             required_fields = {
@@ -112,92 +131,102 @@ class Download(ScrollArea):
             }.get(item_type)
 
             if not required_fields or not all(field in item for field in required_fields):
-                logger.error(f'Missing required fields for {item_type.capitalize()}')
+                logger.error(f'{item_type.capitalize()} 缺少必需字段')
                 continue
 
             item['icon'] = self.resolve_icon(item['icon'])
             card = self.create_card(item_type, item, required_fields)
             section_interface.addSettingCard(card)
 
-    def resolve_icon(self, icon_name):
+    def resolve_icon(self, icon_name: str) -> Any:
         if icon_name.startswith('FIF.'):
             return getattr(FIF, icon_name[4:], FIF.DOWNLOAD)
         elif icon_name.startswith('Astro.'):
-            print(icon_name)
             return getattr(AstroIcon, icon_name[6:], AstroIcon.PHD)
-        logger.error(f'Unknown icon: {icon_name}')
+        logger.error(f'未知图标: {icon_name}')
         return FIF.DOWNLOAD
 
-    def create_card(self, item_type, item, required_fields):
+    def create_card(self, item_type: str, item: Dict[str, Any], required_fields: List[str]) -> QWidget:
         card_args = {field: item[field] for field in required_fields}
         if item_type == 'hyperlink':
             return HyperlinkCard(**card_args)
         elif item_type == 'primary_push_setting':
             return PrimaryPushSettingCard(**card_args)
+        raise ValueError(f'未知的项目类型: {item_type}')
 
     def load_interface_cards(self):
-        self.stackedWidget = QStackedWidget(self.scrollWidget)
+        self.stacked_widget = QStackedWidget(self.scroll_widget)
         for section in self.interface.get('sections', []):
-            section_widget = SettingCardGroup(self.scrollWidget)
+            section_widget = SettingCardGroup(self.scroll_widget)
             self.add_items_to_section(section_widget, section.get('items', []))
-            self.addSubInterface(section_widget, section['id'], section['title'], self.resolve_icon(section['icon']))
+            self.add_sub_interface(
+                section_widget,
+                section.get('id', 'section'),
+                section.get('title', '无标题'),
+                self.resolve_icon(section.get('icon', 'FIF.DOWNLOAD'))
+            )
 
-    def __initWidget(self):
+    def init_widgets(self):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setViewportMargins(20, 0, 20, 20)
-        self.setWidget(self.scrollWidget)
+        self.setWidget(self.scroll_widget)
         self.setWidgetResizable(True)
 
-        # Apply stylesheet
-        self.scrollWidget.setObjectName('scrollWidget')
+        # 应用样式表
+        self.scroll_widget.setObjectName('scrollWidget')
         StyleSheet.SETTING_INTERFACE.apply(self)
 
-        topLayout = QHBoxLayout()
-        topLayout.addWidget(self.searchBox)
-        topLayout.addWidget(self.searchButton)
-        topLayout.addWidget(self.refreshButton)
-        topLayout.addWidget(self.toggleSearchButton)
+        # 布局
+        top_layout = QHBoxLayout()
+        top_layout.addWidget(self.search_box)
+        top_layout.addWidget(self.search_button)
+        top_layout.addWidget(self.refresh_button)
+        top_layout.addWidget(self.toggle_search_button)
 
-        self.vBoxLayout.addLayout(topLayout)
-        self.vBoxLayout.addWidget(self.comboBox)
-        self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignLeft)
-        self.vBoxLayout.addWidget(self.stackedWidget)
-        self.vBoxLayout.setSpacing(28)
-        self.vBoxLayout.setContentsMargins(0, 10, 10, 0)
-        self.stackedWidget.currentChanged.connect(self.onCurrentIndexChanged)
-        self.pivot.setCurrentItem(self.stackedWidget.widget(0).objectName())
-        qrouter.setDefaultRouteKey(self.stackedWidget, self.stackedWidget.widget(0).objectName())
+        self.vbox_layout.addLayout(top_layout)
+        self.vbox_layout.addWidget(self.combo_box)
+        self.vbox_layout.addWidget(self.pivot, 0, Qt.AlignLeft)
+        self.vbox_layout.addWidget(self.stacked_widget)
+        self.vbox_layout.setSpacing(28)
+        self.vbox_layout.setContentsMargins(0, 10, 10, 0)
+        self.stacked_widget.currentChanged.connect(self.on_current_index_changed)
+        if self.stacked_widget.count() > 0:
+            initial_widget = self.stacked_widget.widget(0)
+            self.pivot.setCurrentItem(initial_widget.objectName())
+            qrouter.setDefaultRouteKey(self.stacked_widget, initial_widget.objectName())
 
-    def addSubInterface(self, widget: QWidget, objectName, text, icon=None):
-        widget.setObjectName(objectName)
-        self.stackedWidget.addWidget(widget)
+    def add_sub_interface(self, widget: QWidget, object_name: str, text: str, icon: Any = FIF.DOWNLOAD):
+        widget.setObjectName(object_name)
+        self.stacked_widget.addWidget(widget)
         self.pivot.addItem(
             icon=icon,
-            routeKey=objectName,
+            routeKey=object_name,
             text=text,
-            onClick=lambda: self.stackedWidget.setCurrentWidget(widget)
+            onClick=lambda: self.stacked_widget.setCurrentWidget(widget)
         )
 
-    def onCurrentIndexChanged(self, index):
-        widget = self.stackedWidget.widget(index)
+    def on_current_index_changed(self, index: int):
+        widget = self.stacked_widget.widget(index)
         self.pivot.setCurrentItem(widget.objectName())
-        qrouter.push(self.stackedWidget, widget.objectName())
+        qrouter.push(self.stacked_widget, widget.objectName())
 
-    def generate_download_url(self, types, repo_url, mirror_url, mirror_branch=None, is_add=False):
-        file = os.path.join("temp", repo_url.split('/')[-1])
+    def generate_download_url(
+        self, types: str, repo_url: str, mirror_url: str, mirror_branch: Optional[str] = None, is_add: bool = False
+    ) -> str:
+        file = Path("temp") / Path(repo_url).name
         url_cfg = f'curl -o {file} -L '
 
         if types == 'url':
             if cfg.chinaStatus.value:
                 return url_cfg + mirror_url
             elif cfg.proxyStatus.value:
-                url_cfg = f'curl -x http://127.0.0.1:7890 -o {file} -L '
+                url_cfg = 'curl -x http://127.0.0.1:7890 -o {file} -L '
             return url_cfg + repo_url
 
         git_cfg = 'git clone --progress '
         if not is_add:
             if cfg.chinaStatus.value:
-                return git_cfg + mirror_branch + mirror_url
+                return f"{git_cfg}{mirror_branch or ''}{mirror_url}"
             elif cfg.proxyStatus.value:
                 git_cfg = 'git -c http.proxy=http://127.0.0.1:7890 -c https.proxy=http://127.0.0.1:7890 clone --progress '
             return git_cfg + repo_url
@@ -208,40 +237,37 @@ class Download(ScrollArea):
             git_cfg = 'git -c http.proxy=http://127.0.0.1:7890 -c https.proxy=http://127.0.0.1:7890 clone --progress '
         return ' && ' + git_cfg + repo_url
 
-    def download_check(self, name):
-        build_jar = ''
-        download_mapping = {
-            'launcher': (MessageLauncher, 'url', cfg.DOWNLOAD_COMMANDS_LAUNCHER, cfg.DOWNLOAD_COMMANDS_LAUNCHER_MIRROR),
-            'python': (MessagePython, 'url', cfg.DOWNLOAD_COMMANDS_PYTHON, cfg.DOWNLOAD_COMMANDS_PYTHON_MIRROR),
-            'git': (MessageGit, 'url', cfg.DOWNLOAD_COMMANDS_GIT, cfg.DOWNLOAD_COMMANDS_GIT_MIRROR),
-            'java': (MessageJava, 'url', cfg.DOWNLOAD_COMMANDS_JAVA, cfg.DOWNLOAD_COMMANDS_JAVA_MIRROR),
-            'mongodb': (MessageMongoDB, 'url', cfg.DOWNLOAD_COMMANDS_MONGODB, cfg.DOWNLOAD_COMMANDS_MONGODB_MIRROR),
-            'nina': (MessageNINA, 'git', cfg.DOWNLOAD_COMMANDS_NINA, cfg.DOWNLOAD_COMMANDS_NINA_MIRROR, '--branch nina '),
-            'phd2': (MessagePHD2, 'git', cfg.DOWNLOAD_COMMANDS_PHD2, cfg.DOWNLOAD_COMMANDS_PHD2_MIRROR, '--branch phd2 '),
-            'sharpcap': (MessageSharpCap, 'git', cfg.DOWNLOAD_COMMANDS_SHARPCAP, cfg.DOWNLOAD_COMMANDS_SHARPCAP_MIRROR, '--branch sharpcap '),
-            'lunarcore': (MessageLunarCore, 'git', cfg.DOWNLOAD_COMMANDS_LUNARCORE, cfg.DOWNLOAD_COMMANDS_LUNARCORE_MIRROR, '--branch lunarcore ', 'lunarcore'),
-            'lunarcoreres': (MessageLunarCoreRes, 'git', cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES, cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES_MIRROR, '--branch lunarcoreres ', 'lunarcore'),
-            'fiddler': (MessageFiddler, 'git', cfg.DOWNLOAD_COMMANDS_FIDDLER, cfg.DOWNLOAD_COMMANDS_FIDDLER_MIRROR, '--branch fiddler '),
-            'mitmdump': (MessageMitmdump, 'git', cfg.DOWNLOAD_COMMANDS_MITMDUMP, cfg.DOWNLOAD_COMMANDS_MITMDUMP_MIRROR, '--branch mitmdump ')
+    def download_check(self, name: str):
+        download_mapping: Dict[str, Tuple[Any, str, str, Optional[str], Optional[str]]] = {
+            'launcher': (MessageLauncher, 'url', cfg.DOWNLOAD_COMMANDS_LAUNCHER, cfg.DOWNLOAD_COMMANDS_LAUNCHER_MIRROR, None),
+            'python': (MessagePython, 'url', cfg.DOWNLOAD_COMMANDS_PYTHON, cfg.DOWNLOAD_COMMANDS_PYTHON_MIRROR, None),
+            'git': (MessageGit, 'url', cfg.DOWNLOAD_COMMANDS_GIT, cfg.DOWNLOAD_COMMANDS_GIT_MIRROR, None),
+            'java': (MessageJava, 'url', cfg.DOWNLOAD_COMMANDS_JAVA, cfg.DOWNLOAD_COMMANDS_JAVA_MIRROR, None),
+            'mongodb': (MessageMongoDB, 'url', cfg.DOWNLOAD_COMMANDS_MONGODB, cfg.DOWNLOAD_COMMANDS_MONGODB_MIRROR, None),
+            'nina': (MessageNINA, 'git', cfg.DOWNLOAD_COMMANDS_NINA, cfg.DOWNLOAD_COMMANDS_NINA_MIRROR, '--branch nina'),
+            'phd2': (MessagePHD2, 'git', cfg.DOWNLOAD_COMMANDS_PHD2, cfg.DOWNLOAD_COMMANDS_PHD2_MIRROR, '--branch phd2'),
+            'sharpcap': (MessageSharpCap, 'git', cfg.DOWNLOAD_COMMANDS_SHARPCAP, cfg.DOWNLOAD_COMMANDS_SHARPCAP_MIRROR, '--branch sharpcap'),
+            'lunarcore': (MessageLunarCore, 'git', cfg.DOWNLOAD_COMMANDS_LUNARCORE, cfg.DOWNLOAD_COMMANDS_LUNARCORE_MIRROR, '--branch lunarcore'),
+            'lunarcoreres': (MessageLunarCoreRes, 'git', cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES, cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES_MIRROR, '--branch lunarcoreres'),
+            'fiddler': (MessageFiddler, 'git', cfg.DOWNLOAD_COMMANDS_FIDDLER, cfg.DOWNLOAD_COMMANDS_FIDDLER_MIRROR, '--branch fiddler'),
+            'mitmdump': (MessageMitmdump, 'git', cfg.DOWNLOAD_COMMANDS_MITMDUMP, cfg.DOWNLOAD_COMMANDS_MITMDUMP_MIRROR, '--branch mitmdump')
         }
 
-        message_class, types, repo_url, mirror_url, mirror_branch, build_jar = download_mapping.get(
-            name, (None, None, None, None, None, None))
-
-        if not message_class:
-            logger.error(f'Unknown download type: {name}')
+        mapping = download_mapping.get(name)
+        if not mapping:
+            logger.error(f'未知的下载类型: {name}')
             return
 
+        message_class, types, repo_url, mirror_url, mirror_branch = mapping
         w = message_class(self)
-        file_path = os.path.join("temp", repo_url.split('/')[-1])
-        command = self.generate_download_url(
-            types, repo_url, mirror_url, mirror_branch, is_add=False)
+        file_path = Path("temp") / Path(repo_url).name
+        command = self.generate_download_url(types, repo_url, mirror_url, mirror_branch, is_add=False)
 
         if w.exec():
-            if not os.path.exists(file_path):
+            if not file_path.exists():
                 x = MessageDownload(self)
                 x.show()
-                x.start_download(types, command, file_path, build_jar)
+                x.start_download(types, command, str(file_path), '')
                 if x.exec():
                     InfoBar.success(
                         title='下载成功！',
@@ -264,7 +290,7 @@ class Download(ScrollArea):
                     )
             else:
                 InfoBar.error(
-                    title=f'该目录已存在文件,无法下载！',
+                    title='该目录已存在文件，无法下载！',
                     content="",
                     orient=Qt.Horizontal,
                     isClosable=True,
@@ -272,4 +298,17 @@ class Download(ScrollArea):
                     duration=3000,
                     parent=self
                 )
-                subprocess.Popen('start ' + file_path, shell=True)
+                subprocess.Popen(['start', str(file_path)], shell=True)
+
+    def copy_to_clipboard(self, text: str):
+        clipboard: QClipboard = QApplication.clipboard()
+        clipboard.setText(text)
+        InfoBar.success(
+            title='已复制',
+            content=text,
+            orient=Qt.Horizontal,
+            isClosable=True,
+            position=InfoBarPosition.TOP,
+            duration=1000,
+            parent=self
+        )
