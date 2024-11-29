@@ -4,6 +4,7 @@ from qfluentwidgets import (Pivot, qrouter, ScrollArea, FluentIcon)
 from app.model.style_sheet import StyleSheet
 from app.model.setting_card import CustomFrameGroup
 
+from app.components.tools.nginx import NginxConfigurator
 from app.components.tools.telescope import TelescopeCatalog
 from app.components.tools.system_command import CommandCenter
 
@@ -22,6 +23,10 @@ class Tools(ScrollArea):
         self.stackedWidget = QStackedWidget(self)
 
         # 添加项
+        self.NginxConfiguratorFrame = NginxConfigurator()
+        self.NginxConfiguratorInterface = CustomFrameGroup(self.scrollWidget)
+        self.NginxConfiguratorInterface.addCustomFrame(self.NginxConfiguratorFrame)
+
         self.TelescopeCatalogFrame = TelescopeCatalog()
         self.TelescopeCatalogInterface = CustomFrameGroup(self.scrollWidget)
         self.TelescopeCatalogInterface.addCustomFrame(self.TelescopeCatalogFrame)
@@ -53,6 +58,9 @@ class Tools(ScrollArea):
         # self.TelescopeCatalogInterface.addSettingCard(self.noproxyCard)
 
         # 栏绑定界面
+        self.addSubInterface(self.NginxConfiguratorInterface, 'NginxConfiguratorInterface', self.tr(
+            'Nginx配置'), icon=FluentIcon.CLOUD)
+        
         self.addSubInterface(self.TelescopeCatalogInterface, 'TelescopeCatalogInterface', self.tr(
             '望远镜分类'), icon=FluentIcon.IOT)
         

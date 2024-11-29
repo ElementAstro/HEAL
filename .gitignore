@@ -16,3 +16,4 @@ temp/
 auto.json
 test/
 modules/
+*.log

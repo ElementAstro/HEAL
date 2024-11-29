@@ -1,8 +1,8 @@
-from typing import Union, List
+from typing import Union, List, Optional
 from PySide6.QtGui import QIcon, QPainter, QColor
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QVBoxLayout, QLabel, QWidget, QDialog
-from qfluentwidgets import (FluentIconBase, IconWidget,
+from qfluentwidgets import (FluentIconBase, IconWidget, LineEdit,
                             FluentStyleSheet, isDarkTheme, drawIcon, ExpandLayout, PushButton)
 
 
@@ -259,3 +259,29 @@ class CustomDialog(QDialog):
         button_layout.addWidget(ok_button)
         button_layout.addWidget(cancel_button)
         self.layout().addLayout(button_layout)
+
+class CustomInputDialog(QDialog):
+    def __init__(self, title: str, label: str, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(title)
+        self.setFixedSize(400, 150)
+        self.layout = QVBoxLayout()
+        self.label = QLabel(label)
+        self.input = LineEdit()
+        self.buttons_layout = QHBoxLayout()
+        self.ok_button = PushButton("确认")
+        self.cancel_button = PushButton("取消")
+        self.buttons_layout.addWidget(self.ok_button)
+        self.buttons_layout.addWidget(self.cancel_button)
+        self.layout.addWidget(self.label)
+        self.layout.addWidget(self.input)
+        self.layout.addLayout(self.buttons_layout)
+        self.setLayout(self.layout)
+
+        self.ok_button.clicked.connect(self.accept)
+        self.cancel_button.clicked.connect(self.reject)
+
+    def get_text(self) -> Optional[str]:
+        if self.exec() == QDialog.Accepted:
+            return self.input.text()
+        return None

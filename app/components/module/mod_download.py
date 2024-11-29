@@ -1,29 +1,25 @@
 import os
 import sys
 import json
-import logging
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from typing import List, Optional
 
 import requests
 from PySide6.QtCore import Qt, QThread, Signal, Slot
-from PySide6.QtGui import QPixmap, QFont, QAction
+from PySide6.QtGui import QPixmap, QFont
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QMessageBox,
-    QListWidget, QListWidgetItem, QProgressBar, QStackedWidget, QWidget,
-    QPushButton, QLineEdit, QComboBox, QSplitter, QFileDialog
+    QApplication, QVBoxLayout, QHBoxLayout, QLabel, QMessageBox,
+    QListWidgetItem, QStackedWidget, QWidget,
+    QSplitter, QFileDialog, QFrame, QDialog
 )
 from qfluentwidgets import (
     FluentIcon, PushButton, ListWidget, MessageBox, ProgressBar, ToolButton,
-    ComboBox, LineEdit
+    ComboBox, LineEdit, CheckBox, SpinBox
 )
+from loguru import logger
 
-# 配置日志
-logging.basicConfig(
-    filename='mod_manager.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+# 配置loguru
+logger.add("mod_manager.log", rotation="500 MB")
 
 @dataclass
 class Mod:
@@ -40,14 +36,16 @@ class ModDownloadThread(QThread):
     progress_updated = Signal(int)
     download_finished = Signal(bool, str)
 
-    def __init__(self, url: str, save_path: str):
+    def __init__(self, url: str, save_path: str, proxy: Optional[str] = None):
         super().__init__()
         self.url = url
         self.save_path = save_path
+        self.proxy = proxy
 
     def run(self):
         try:
-            with requests.get(self.url, stream=True) as r:
+            proxies = {"http": self.proxy, "https": self.proxy} if self.proxy else None
+            with requests.get(self.url, stream=True, proxies=proxies) as r:
                 r.raise_for_status()
                 total_length = r.headers.get('content-length')
                 with open(self.save_path, 'wb') as f:
@@ -64,86 +62,128 @@ class ModDownloadThread(QThread):
                                 done = int(100 * dl / total_length)
                                 self.progress_updated.emit(done)
             self.download_finished.emit(True, self.save_path)
-            logging.info(f"下载完成: {self.save_path}")
+            logger.info(f"下载完成: {self.save_path}")
         except Exception as e:
-            logging.error(f"下载失败: {e}")
+            logger.error(f"下载失败: {e}")
             self.download_finished.emit(False, str(e))
 
-class SettingsWindow(QWidget):
+class SettingsWindow(QDialog):
     """设置窗口"""
 
-    def __init__(self, download_dir: str, parent=None):
+    def __init__(self, settings: dict, parent=None):
         super().__init__(parent)
         self.setWindowTitle("设置")
-        self.resize(400, 200)
-        self.download_dir = download_dir
+        self.setFixedSize(500, 300)
+        self.settings = settings
         self.init_ui()
 
     def init_ui(self):
         layout = QVBoxLayout()
 
+        # 下载目录
         dir_layout = QHBoxLayout()
         self.dir_label = QLabel("下载目录:")
-        self.dir_display = QLineEdit(self.download_dir)
+        self.dir_display = LineEdit()
         self.dir_display.setReadOnly(True)
-        self.browse_button = QPushButton("浏览")
+        self.dir_display.setText(self.settings.get('download_dir', os.path.expanduser('~/Downloads')))
+        self.browse_button = PushButton("浏览")
         self.browse_button.clicked.connect(self.browse_directory)
         dir_layout.addWidget(self.dir_label)
         dir_layout.addWidget(self.dir_display)
         dir_layout.addWidget(self.browse_button)
-
         layout.addLayout(dir_layout)
 
-        self.save_button = QPushButton("保存")
+        # 并发下载数
+        concurrency_layout = QHBoxLayout()
+        self.concurrency_label = QLabel("并发下载数:")
+        self.concurrency_spin = SpinBox()
+        self.concurrency_spin.setRange(1, 10)
+        self.concurrency_spin.setValue(self.settings.get('concurrent_downloads', 3))
+        concurrency_layout.addWidget(self.concurrency_label)
+        concurrency_layout.addWidget(self.concurrency_spin)
+        layout.addLayout(concurrency_layout)
+
+        # 代理设置
+        proxy_layout = QHBoxLayout()
+        self.proxy_label = QLabel("代理 (可选):")
+        self.proxy_input = LineEdit()
+        self.proxy_input.setText(self.settings.get('proxy', ''))
+        proxy_layout.addWidget(self.proxy_label)
+        proxy_layout.addWidget(self.proxy_input)
+        layout.addLayout(proxy_layout)
+
+        # 文件验证
+        self.verify_checkbox = CheckBox("启用文件验证 (MD5)")
+        self.verify_checkbox.setChecked(self.settings.get('enable_verification', False))
+        layout.addWidget(self.verify_checkbox)
+
+        # 启用自动更新
+        self.auto_update_checkbox = CheckBox("启用自动更新")
+        self.auto_update_checkbox.setChecked(self.settings.get('auto_update', True))
+        layout.addWidget(self.auto_update_checkbox)
+
+        # 保存按钮
+        self.save_button = PushButton("保存")
         self.save_button.clicked.connect(self.save_settings)
         layout.addWidget(self.save_button, alignment=Qt.AlignRight)
 
         self.setLayout(layout)
 
     def browse_directory(self):
-        directory = QFileDialog.getExistingDirectory(self, "选择下载目录", self.download_dir)
+        directory = QFileDialog.getExistingDirectory(
+            self, "选择下载目录", self.dir_display.text())
         if directory:
             self.dir_display.setText(directory)
 
     def save_settings(self):
-        self.download_dir = self.dir_display.text()
-        with open('settings.json', 'w') as f:
-            json.dump({'download_dir': self.download_dir}, f)
-        MessageBox.information(self, "保存成功", "设置已保存。")
-        self.close()
+        self.settings['download_dir'] = self.dir_display.text()
+        self.settings['concurrent_downloads'] = self.concurrency_spin.value()
+        self.settings['proxy'] = self.proxy_input.text()
+        self.settings['enable_verification'] = self.verify_checkbox.isChecked()
+        self.settings['auto_update'] = self.auto_update_checkbox.isChecked()
+        try:
+            with open('settings.json', 'w') as f:
+                json.dump(self.settings, f, indent=4)
+            MessageBox.information(self, "保存成功", "设置已保存。")
+            logger.info(f"设置已保存: {self.settings}")
+            self.accept()
+        except Exception as e:
+            logger.error(f"保存设置失败: {e}")
+            MessageBox.warning(self, "保存失败", "设置保存失败。")
 
-class ModDownloadWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
+class ModDownload(QFrame):
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
         # 加载设置
         self.settings = self.load_settings()
 
-        # 窗口设置
-        self.setWindowTitle("模组下载器")
-        self.resize(1000, 700)
-        self.setMinimumSize(800, 500)
-
         # 主容器
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
+        self.main_layout = QVBoxLayout(self)
+        self.main_layout.setContentsMargins(10, 10, 10, 10)
+        self.main_layout.setSpacing(10)
 
-        # 菜单栏
-        menubar = self.menuBar()
-        settings_action = QAction("设置", self)
-        settings_action.triggered.connect(self.open_settings)
-        menubar.addAction(settings_action)
-
-        # 搜索框
+        # 搜索栏、分类选择和设置按钮
+        search_settings_layout = QHBoxLayout()
         self.search_bar = LineEdit()
         self.search_bar.setPlaceholderText("搜索模组...")
         self.search_bar.setClearButtonEnabled(True)
         self.search_bar.textChanged.connect(self.filter_mod_list)
 
-        # 分类选择
         self.category_selector = ComboBox()
         self.category_selector.addItems(["全部", "生存", "科技", "魔法"])
         self.category_selector.currentTextChanged.connect(self.filter_mod_list)
+
+        self.settings_button = PushButton()
+        self.settings_button.setText("设置")
+        self.settings_button.setIcon(FluentIcon.SETTING)
+        self.settings_button.clicked.connect(self.open_settings)
+
+        search_settings_layout.addWidget(self.search_bar)
+        search_settings_layout.addWidget(self.category_selector)
+        search_settings_layout.addWidget(self.settings_button)
+
+        self.main_layout.addLayout(search_settings_layout)
 
         # 左侧模组列表
         self.mod_list = ListWidget()
@@ -151,9 +191,10 @@ class ModDownloadWindow(QMainWindow):
         self.mod_list.itemClicked.connect(self.display_mod_details)
 
         # 下载历史记录
+        self.history_label = QLabel("下载历史")
+        self.history_label.setFont(QFont("Arial", 12, QFont.Bold))
         self.history_list = ListWidget()
         self.history_list.setFixedHeight(150)
-        # self.history_list.setTitle("下载历史")
 
         # 右侧模组详情和下载
         self.details_widget = QStackedWidget()
@@ -163,15 +204,12 @@ class ModDownloadWindow(QMainWindow):
         self.details_widget.addWidget(self.default_details)
 
         # 主布局
-        main_layout = QVBoxLayout()
-        controls_layout = QHBoxLayout()
-        controls_layout.addWidget(self.search_bar)
-        controls_layout.addWidget(self.category_selector)
-
         mod_list_layout = QVBoxLayout()
-        mod_list_layout.addWidget(QLabel("模组列表"))
+        mod_list_label = QLabel("模组列表")
+        mod_list_label.setFont(QFont("Arial", 12, QFont.Bold))
+        mod_list_layout.addWidget(mod_list_label)
         mod_list_layout.addWidget(self.mod_list)
-        mod_list_layout.addWidget(QLabel("下载历史"))
+        mod_list_layout.addWidget(self.history_label)
         mod_list_layout.addWidget(self.history_list)
 
         splitter = QSplitter(Qt.Horizontal)
@@ -179,11 +217,9 @@ class ModDownloadWindow(QMainWindow):
         left_panel.setLayout(mod_list_layout)
         splitter.addWidget(left_panel)
         splitter.addWidget(self.details_widget)
-        splitter.setStretchFactor(1, 2)
+        splitter.setStretchFactor(1, 3)
 
-        main_layout.addLayout(controls_layout)
-        main_layout.addWidget(splitter)
-        self.central_widget.setLayout(main_layout)
+        self.main_layout.addWidget(splitter)
 
         # 模拟模组数据
         self.mods: List[Mod] = self.load_mods()
@@ -192,14 +228,25 @@ class ModDownloadWindow(QMainWindow):
     def load_settings(self) -> dict:
         """加载设置"""
         if os.path.exists('settings.json'):
-            with open('settings.json', 'r') as f:
-                return json.load(f)
-        return {'download_dir': os.path.expanduser('~/Downloads')}
+            try:
+                with open('settings.json', 'r') as f:
+                    return json.load(f)
+            except json.JSONDecodeError:
+                logger.error("settings.json 格式错误，使用默认设置。")
+        return {
+            'download_dir': os.path.expanduser('~/Downloads'),
+            'concurrent_downloads': 3,
+            'proxy': '',
+            'enable_verification': False,
+            'auto_update': True
+        }
 
     def open_settings(self):
         """打开设置窗口"""
-        self.settings_window = SettingsWindow(self.settings.get('download_dir', os.path.expanduser('~/Downloads')), self)
-        self.settings_window.show()
+        self.settings_window = SettingsWindow(self.settings, self)
+        if self.settings_window.exec():
+            self.settings = self.load_settings()
+            logger.info("设置窗口已关闭，更新设置。")
 
     def load_mods(self) -> List[Mod]:
         """加载模组数据，并更新安装状态"""
@@ -234,17 +281,24 @@ class ModDownloadWindow(QMainWindow):
         ]
         # 加载已安装状态
         if os.path.exists('installed_mods.json'):
-            with open('installed_mods.json', 'r') as f:
-                installed = json.load(f)
-            for mod in mods:
-                mod.installed = mod.name in installed
+            try:
+                with open('installed_mods.json', 'r') as f:
+                    installed = json.load(f)
+                for mod in mods:
+                    mod.installed = mod.name in installed
+            except json.JSONDecodeError:
+                logger.error("installed_mods.json 格式错误，忽略已安装状态。")
         return mods
 
     def save_installed_mods(self):
         """保存已安装的模组"""
         installed = [mod.name for mod in self.mods if mod.installed]
-        with open('installed_mods.json', 'w') as f:
-            json.dump(installed, f)
+        try:
+            with open('installed_mods.json', 'w') as f:
+                json.dump(installed, f, indent=4)
+            logger.info("已安装模组列表已保存。")
+        except Exception as e:
+            logger.error(f"保存已安装模组失败: {e}")
 
     def load_mod_list(self):
         """加载模组列表"""
@@ -254,6 +308,7 @@ class ModDownloadWindow(QMainWindow):
             item = QListWidgetItem(item_text)
             item.setData(Qt.UserRole, mod)
             self.mod_list.addItem(item)
+        logger.info("模组列表已加载。")
 
     def display_mod_details(self, item: QListWidgetItem):
         """显示模组详情"""
@@ -268,7 +323,8 @@ class ModDownloadWindow(QMainWindow):
         icon_label = QLabel()
         icon_path = selected_mod.icon
         if os.path.exists(icon_path):
-            pixmap = QPixmap(icon_path).scaled(150, 150, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            pixmap = QPixmap(icon_path).scaled(
+                150, 150, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         else:
             pixmap = QPixmap(150, 150)
             pixmap.fill(Qt.gray)
@@ -342,13 +398,23 @@ class ModDownloadWindow(QMainWindow):
 
     def download_mod(self, mod: Mod, button: PushButton):
         """下载模组"""
-        save_path = os.path.join(self.settings.get('download_dir', os.path.expanduser('~/Downloads')), f"{mod.name}.zip")
+        save_path = os.path.join(
+            self.settings.get('download_dir', os.path.expanduser('~/Downloads')),
+            f"{mod.name}.zip"
+        )
         self.current_progress_bar.setVisible(True)
-        self.download_thread = ModDownloadThread(mod.download_url, save_path)
+        self.current_progress_bar.setValue(0)
+        self.current_download_button.setEnabled(False)
+
+        self.download_thread = ModDownloadThread(
+            mod.download_url,
+            save_path,
+            proxy=self.settings.get('proxy') if self.settings.get('proxy') else None
+        )
         self.download_thread.progress_updated.connect(self.update_progress)
         self.download_thread.download_finished.connect(lambda success, info: self.finish_download(mod, button, success, info))
         self.download_thread.start()
-        logging.info(f"开始下载: {mod.name} 从 {mod.download_url} 到 {save_path}")
+        logger.info(f"开始下载: {mod.name} 从 {mod.download_url} 到 {save_path}")
 
     def uninstall_mod(self, mod: Mod, button: PushButton):
         """卸载模组"""
@@ -363,7 +429,7 @@ class ModDownloadWindow(QMainWindow):
             self.save_installed_mods()
             self.update_mod_list()
             MessageBox.information(self, "卸载成功", f"模组 {mod.name} 已卸载。")
-            logging.info(f"卸载模组: {mod.name}")
+            logger.info(f"卸载模组: {mod.name}")
 
     @Slot(int)
     def update_progress(self, value: int):
@@ -380,10 +446,10 @@ class ModDownloadWindow(QMainWindow):
             self.history_list.addItem(f"{mod.name} 下载完成")
             self.save_installed_mods()
             MessageBox.information(self, "下载完成", f"模组 {mod.name} 已下载并安装。")
-            logging.info(f"模组下载完成: {mod.name}")
+            logger.info(f"模组下载完成: {mod.name}")
         else:
             MessageBox.warning(self, "下载失败", f"模组 {mod.name} 下载失败: {info}")
-            logging.error(f"模组下载失败: {mod.name} 错误: {info}")
+            logger.error(f"模组下载失败: {mod.name} 错误: {info}")
         self.update_mod_list()
         self.current_progress_bar.setVisible(False)
         button.setEnabled(True)
@@ -406,17 +472,27 @@ class ModDownloadWindow(QMainWindow):
             item = QListWidgetItem(item_text)
             item.setData(Qt.UserRole, mod)
             self.mod_list.addItem(item)
+        logger.info("模组列表已根据搜索和分类筛选。")
 
     def copy_to_clipboard(self, text: str):
         """复制文本到剪贴板"""
         clipboard = QApplication.clipboard()
         clipboard.setText(text)
         MessageBox.information(self, "复制成功", "内容已复制到剪贴板。")
-        logging.info(f"复制到剪贴板: {text}")
+        logger.info(f"复制到剪贴板: {text}")
 
 def main():
     app = QApplication(sys.argv)
-    window = ModDownloadWindow()
+    window = QWidget()
+    window.setWindowTitle("Mod Manager")
+    window.resize(900, 600)
+    layout = QVBoxLayout(window)
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.setSpacing(0)
+
+    mod_download_frame = ModDownload()
+    layout.addWidget(mod_download_frame)
+
     window.show()
     sys.exit(app.exec())
 

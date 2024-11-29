@@ -13,7 +13,7 @@ from qfluentwidgets import (
 )
 from app.model.setting_card import SettingCard, SettingCardGroup, CustomDialog
 from app.model.style_sheet import StyleSheet
-from app.model.check_update import checkUpdate
+from app.model.check_update import check_update
 from app.model.config import cfg, get_json, Info
 from app.components.tools.editor import JsonEditor
 
@@ -194,7 +194,7 @@ class Setting(ScrollArea):
         self.languageCard.comboBox.currentIndexChanged.connect(
             self.restart_application)
         self.updateOnStartUpCard.clicked.connect(
-            lambda: checkUpdate(self.parent))
+            lambda: check_update(self.parent))
         self.restartCard.clicked.connect(self.restart_application)
         self.configEditorCard.clicked.connect(self.open_config_editor)
 

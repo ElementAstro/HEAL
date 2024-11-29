@@ -5,6 +5,7 @@ from app.model.style_sheet import StyleSheet
 from app.model.setting_card import CustomFrameGroup
 
 from app.components.module.mod_manager import ModManager
+from app.components.module.mod_download import ModDownload
 from app.components.tools.scaffold import ScaffoldApp
 
 class Module(ScrollArea):
@@ -25,6 +26,10 @@ class Module(ScrollArea):
         self.ModuleManagerFrame = ModManager()
         self.ModuleManagerInterface = CustomFrameGroup(self.scrollWidget)
         self.ModuleManagerInterface.addCustomFrame(self.ModuleManagerFrame)
+
+        self.ModuleDownloadFrame = ModDownload()
+        self.ModuleDownloadInterface = CustomFrameGroup(self.scrollWidget)
+        self.ModuleDownloadInterface.addCustomFrame(self.ModuleDownloadFrame)
 
         self.ScaffoldAppFrame = ScaffoldApp()
         self.ScaffoldAppInterface = CustomFrameGroup(self.scrollWidget)
@@ -55,6 +60,8 @@ class Module(ScrollArea):
         # 栏绑定界面
         self.addSubInterface(self.ModuleManagerInterface, 'ModuleManagerInterface', self.tr(
             '模组管理'), icon=FluentIcon.IOT)
+        self.addSubInterface(self.ModuleDownloadInterface, 'ModuleDownloadInterface', self.tr(
+            '模组下载'), icon=FluentIcon.DOWNLOAD)
         self.addSubInterface(self.ScaffoldAppInterface, 'ScaffoldAppInterface', self.tr(
             '模组生成器'), icon=FluentIcon.IOT)
 

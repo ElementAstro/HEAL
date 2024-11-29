@@ -28,7 +28,7 @@ from app.module_interface import Module
 from app.tool_interface import Tools
 
 from app.model.config import cfg, Info
-from app.model.check_update import checkUpdate
+from app.model.check_update import check_update
 from app.model.login_card import MessageLogin
 from app.model.system_tray import SystemTray
 
@@ -47,7 +47,7 @@ class Main(MSFluentWindow):
 
         self.splashScreen.finish()
 
-        checkUpdate(self)
+        # check_update()
         if cfg.useLogin.value:
             self.count_pwd = 1
             self.login_card = MessageLogin(self)

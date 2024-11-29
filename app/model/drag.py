@@ -1,15 +1,29 @@
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QSizePolicy, QScrollArea
-from PySide6.QtCore import Qt, QPropertyAnimation, QMimeData, QRect, QPoint
-from PySide6.QtGui import QDrag, QPixmap
+from dataclasses import dataclass
+from typing import List, Optional
+
+from PySide6.QtCore import Qt, QPropertyAnimation, QPoint, QRect
+from PySide6.QtGui import QDrag, QMimeData, QPixmap
+from PySide6.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+    QPushButton, QSizePolicy, QScrollArea, QMessageBox
+)
+
+
+@dataclass
+class DraggableButtonConfig:
+    text: str
+    color: str = "lightgray"
 
 
 class DraggableButton(QPushButton):
-    def __init__(self, text, parent=None):
-        super().__init__(text, parent)
+    def __init__(self, config: DraggableButtonConfig, parent: Optional[QWidget] = None):
+        super().__init__(config.text, parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setStyleSheet(
-            "border: 1px solid gray; border-radius: 5px; background-color: lightgray;")
+            f"border: 1px solid gray; border-radius: 5px; background-color: {
+                config.color};"
+        )
         self.setAcceptDrops(False)
 
     def mousePressEvent(self, event):
@@ -19,122 +33,79 @@ class DraggableButton(QPushButton):
             mime_data.setText(self.text())
             drag.setMimeData(mime_data)
 
-            # Create a pixmap for the drag operation
+            # 创建拖拽的图像
             pixmap = QPixmap(self.size())
             self.render(pixmap)
             drag.setPixmap(pixmap)
 
-            # Adjust the hotspot position using global position
+            # 设置热点位置
             drag.setHotSpot(event.position().toPoint() - self.rect().topLeft())
             drag.exec(Qt.MoveAction)
 
 
 class FlowLayout(QVBoxLayout):
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(parent)
         self.setSpacing(10)
         self.setContentsMargins(10, 10, 10, 10)
         self.addStretch()
-        self.buttons = []
+        self.buttons: List[DraggableButton] = []
 
-    def addButton(self, button):
-        current_row = None
-        if self.count() == 1:  # If only the stretch is present
-            current_row = QHBoxLayout()
-            current_row.setSpacing(10)
-            self.insertLayout(self.count() - 1, current_row)
-        else:
-            current_row = self.itemAt(self.count() - 2).layout()
-
-        current_row.addWidget(button)
+    def add_button(self, button: DraggableButton):
+        row_layout = self._get_current_row()
+        row_layout.addWidget(button)
         self.buttons.append(button)
-        self.updateLayout()
+        self.update_layout()
 
-    def removeButton(self, button):
-        for i in range(self.count()):
-            row_layout = self.itemAt(i).layout()
+    def remove_button(self, button: DraggableButton):
+        for row_index in range(self.count()):
+            row_layout = self.itemAt(row_index).layout()
             if row_layout and row_layout.indexOf(button) != -1:
                 row_layout.removeWidget(button)
                 self.buttons.remove(button)
                 button.setParent(None)
-                self.updateLayout()
+                self.update_layout()
                 return
 
-    def insertButton(self, index, button):
+    def insert_button(self, index: int, button: DraggableButton):
         if index >= len(self.buttons):
-            self.addButton(button)
+            self.add_button(button)
             return
 
-        current_row = None
-        count = 0
-        for i in range(self.count() - 1):  # Exclude the stretch item
-            row_layout = self.itemAt(i).layout()
-            if row_layout:
-                for j in range(row_layout.count()):
-                    if count == index:
-                        current_row = row_layout
-                        break
-                    count += 1
-                if current_row:
-                    break
-
-        if current_row:
-            current_row.insertWidget(index - count, button)
-        else:
-            new_row = QHBoxLayout()
-            new_row.setSpacing(10)
-            new_row.addWidget(button)
-            self.insertLayout(self.count() - 1, new_row)
-
+        row_index, widget_index = divmod(index, 4)  # 假设每行最多4个按钮
+        row_layout = self._get_or_create_row(row_index)
+        row_layout.insertWidget(widget_index, button)
         self.buttons.insert(index, button)
-        self.updateLayout()
+        self.update_layout()
 
-    def updateLayout(self):
+    def update_layout(self):
         self.update()
         self.parentWidget().update()
 
-    def findInsertionPosition(self, position):
-        for i in range(self.count() - 1):  # Exclude the stretch item
-            row_layout = self.itemAt(i).layout()
-            if row_layout:
-                row_rect = QRect(self.parentWidget().mapToGlobal(row_layout.geometry().topLeft()),
-                                 row_layout.geometry().size())
-                if row_rect.contains(position):
-                    for j in range(row_layout.count()):
-                        widget = row_layout.itemAt(j).widget()
-                        if widget:
-                            widget_rect = QRect(widget.mapToGlobal(
-                                QPoint(0, 0)), widget.size())
-                            if widget_rect.contains(position):
-                                return i * row_layout.count() + j
-                    return i * row_layout.count() + row_layout.count()
+    def find_insertion_position(self, position: QPoint) -> int:
+        for i, button in enumerate(self.buttons):
+            if button.geometry().contains(position):
+                return i
         return len(self.buttons)
 
+    def _get_current_row(self) -> QHBoxLayout:
+        if self.count() <= 1:
+            new_row = QHBoxLayout()
+            new_row.setSpacing(10)
+            self.insertLayout(self.count() - 1, new_row)
+            return new_row
+        return self.itemAt(self.count() - 2).layout()
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        self.setCentralWidget(scroll_area)
-
-        container = DropArea(self)
-        scroll_area.setWidget(container)
-
-        self.flow_layout = FlowLayout()
-        container.setLayout(self.flow_layout)
-
-        for i in range(1, 5):
-            button = DraggableButton(f"Button {i}")
-            self.flow_layout.addButton(button)
-
-        self.setWindowTitle("Draggable Flow Layout Example")
-        self.resize(400, 600)
+    def _get_or_create_row(self, row_index: int) -> QHBoxLayout:
+        while self.count() - 1 <= row_index:
+            new_row = QHBoxLayout()
+            new_row.setSpacing(10)
+            self.insertLayout(self.count() - 1, new_row)
+        return self.itemAt(row_index).layout()
 
 
 class DropArea(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(parent)
         self.setAcceptDrops(True)
 
@@ -145,23 +116,79 @@ class DropArea(QWidget):
     def dropEvent(self, event):
         source_button = event.source()
         target_position = event.position().toPoint()
-        parent_layout = self.layout()
+        parent_layout: FlowLayout = self.layout()
 
         if not parent_layout:
             return
 
-        insertion_index = parent_layout.findInsertionPosition(
-            self.mapToGlobal(target_position))
-        parent_layout.removeButton(source_button)
-        parent_layout.insertButton(insertion_index, source_button)
-        self.animateButton(source_button, source_button.geometry())
+        insertion_index = parent_layout.find_insertion_position(
+            self.mapToGlobal(target_position)
+        )
+        parent_layout.remove_button(source_button)
+        parent_layout.insert_button(insertion_index, source_button)
+        self.animate_button(source_button, source_button.geometry())
 
-    def animateButton(self, button, target_geometry):
+    def animate_button(self, button: DraggableButton, target_geometry: QRect):
         animation = QPropertyAnimation(button, b"geometry")
         animation.setDuration(300)
         animation.setStartValue(button.geometry())
         animation.setEndValue(target_geometry)
         animation.start()
+
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Draggable Flow Layout 示例")
+        self.resize(600, 800)
+
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        self.setCentralWidget(scroll_area)
+
+        container = DropArea(self)
+        scroll_area.setWidget(container)
+
+        flow_layout = FlowLayout()
+        container.setLayout(flow_layout)
+        self.flow_layout = flow_layout
+
+        # 初始化按钮
+        initial_buttons = [
+            DraggableButton(DraggableButtonConfig(
+                text=f"按钮 {i}", color="lightblue"))
+            for i in range(1, 9)
+        ]
+        for button in initial_buttons:
+            self.flow_layout.add_button(button)
+
+        # 添加控制按钮
+        control_widget = QWidget()
+        control_layout = QHBoxLayout(control_widget)
+        add_button = QPushButton("添加按钮")
+        add_button.clicked.connect(self.add_new_button)
+        remove_button = QPushButton("移除按钮")
+        remove_button.clicked.connect(self.remove_last_button)
+        control_layout.addWidget(add_button)
+        control_layout.addWidget(remove_button)
+        self.flow_layout.add_widget(control_widget)
+
+    def add_new_button(self):
+        new_index = len(self.flow_layout.buttons) + 1
+        new_button = DraggableButton(
+            DraggableButtonConfig(text=f"按钮 {new_index}", color="lightgreen")
+        )
+        self.flow_layout.add_button(new_button)
+        QMessageBox.information(self, "添加按钮", f"已添加按钮 {new_index}")
+
+    def remove_last_button(self):
+        if not self.flow_layout.buttons:
+            QMessageBox.warning(self, "移除按钮", "没有按钮可移除")
+            return
+        button = self.flow_layout.buttons[-1]
+        self.flow_layout.remove_button(button)
+        QMessageBox.information(self, "移除按钮", f"已移除 {button.text()}")
 
 
 if __name__ == "__main__":

@@ -14,6 +14,10 @@ from app.model.style_sheet import StyleSheet
 from app.model.setting_card import SettingCard, SettingCardGroup
 from app.model.download_process import SubDownloadCMD
 from app.model.config import cfg, get_json, Info
+from loguru import logger
+
+
+logger.add("app.log", rotation="1 MB")
 
 
 class PrimaryPushSettingCardFiddler(SettingCard):
@@ -45,7 +49,7 @@ class CustomFlyoutViewFiddler(FlyoutViewBase):
         self.gc_button = PrimaryPushButton('Grasscutter')
         self.ht_button = PrimaryPushButton('Hutao-GS')
         self.lc_button = PrimaryPushButton('LunarCore')
-        self.clash_button = PrimaryPushButton('Clash')  # 新增Clash按钮
+        self.clash_button = PrimaryPushButton('Clash')
         for button in [self.gc_button, self.ht_button, self.lc_button, self.clash_button]:
             button.setFixedWidth(120)
 
@@ -55,13 +59,13 @@ class CustomFlyoutViewFiddler(FlyoutViewBase):
         self.hBoxLayout.addWidget(self.gc_button)
         self.hBoxLayout.addWidget(self.ht_button)
         self.hBoxLayout.addWidget(self.lc_button)
-        self.hBoxLayout.addWidget(self.clash_button)  # 添加Clash按钮
+        self.hBoxLayout.addWidget(self.clash_button)
 
         self.gc_button.clicked.connect(lambda: self.handleFiddlerButton('gc'))
         self.ht_button.clicked.connect(lambda: self.handleFiddlerButton('ht'))
         self.lc_button.clicked.connect(lambda: self.handleFiddlerButton('lc'))
         self.clash_button.clicked.connect(
-            lambda: self.handleFiddlerButton('clash'))  # 处理Clash按钮点击
+            lambda: self.handleFiddlerButton('clash'))
 
     def handleFiddlerButton(self, mode: str):
         status = Proxy.handleFiddlerOpen(self.parent)
@@ -70,7 +74,7 @@ class CustomFlyoutViewFiddler(FlyoutViewBase):
                 'gc': 'CustomRules-GC.js',
                 'ht': 'CustomRules-HT.js',
                 'lc': 'CustomRules-LC.js',
-                'clash': 'CustomRules-Clash.js'  # 添加Clash对应的脚本
+                'clash': 'CustomRules-Clash.js'
             }
             script_file = script_map.get(mode)
             if script_file:
@@ -81,8 +85,10 @@ class CustomFlyoutViewFiddler(FlyoutViewBase):
                             script_file}" "%userprofile%\\Documents\\Fiddler2\\Scripts\\CustomRules.js"',
                         shell=True, check=True
                     )
+                    logger.info(f"脚本 {script_file} 已成功应用。")
                 except subprocess.CalledProcessError as e:
                     Info(self, 'E', 3000, self.tr("脚本更新失败！"), str(e))
+                    logger.error(f"脚本更新失败: {e}")
 
 
 class Proxy(ScrollArea):
@@ -167,6 +173,7 @@ class Proxy(ScrollArea):
         self.FiddlerCard.clicked_old.connect(self.handleFiddlerOpen)
         self.FiddlerCard.clicked_backup.connect(self.handleFiddlerBackup)
         self.noproxyCard.clicked.connect(self.handleProxyDisabled)
+        logger.info("信号已连接到槽。")
 
     def addSubInterface(self, widget: QLabel, objectName: str, text: str, icon=None):
         widget.setObjectName(objectName)
@@ -177,38 +184,44 @@ class Proxy(ScrollArea):
             text=text,
             onClick=lambda: self.stackedWidget.setCurrentWidget(widget)
         )
+        logger.debug(f"子界面 {objectName} 已添加。")
 
     def onCurrentIndexChanged(self, index: int):
         widget = self.stackedWidget.widget(index)
         self.pivot.setCurrentItem(widget.objectName())
         qrouter.push(self.stackedWidget, widget.objectName())
+        logger.debug(f"当前索引已更改为 {index}。")
 
-    def handleFiddlerOpen(self) -> bool:
+    @staticmethod
+    def handleFiddlerOpen() -> bool:
         fiddler_path = 'tool/Fiddler/Fiddler.exe'
         if os.path.exists(fiddler_path):
             try:
                 subprocess.run(['start', fiddler_path], shell=True, check=True)
-                Info(self, "S", 1000, self.tr("文件已打开!"))
+                Info(None, "S", 1000, "文件已打开!")
+                logger.info("Fiddler 已成功打开。")
                 return True
             except subprocess.CalledProcessError as e:
-                Info(self, 'E', 3000, self.tr("打开文件失败！"), str(e))
+                Info(None, 'E', 3000, "打开文件失败！", str(e))
+                logger.error(f"打开 Fiddler 失败: {e}")
                 return False
         else:
             file_error = InfoBar(
                 icon=InfoBarIcon.ERROR,
-                title=self.tr('找不到文件!'),
+                title='找不到文件!',
                 content='',
                 orient=Qt.Horizontal,
                 isClosable=True,
                 position=InfoBarPosition.TOP,
                 duration=3000,
-                parent=self
+                parent=None
             )
-            file_error_button = PrimaryPushButton(self.tr('前往下载'))
+            file_error_button = PrimaryPushButton('前往下载')
             file_error_button.clicked.connect(
-                lambda: self.stackedWidget.setCurrentIndex(1))
+                lambda: None)  # 需要具体实现
             file_error.addWidget(file_error_button)
             file_error.show()
+            logger.warning("Fiddler 文件不存在。")
             return False
 
     def handleFiddlerTip(self):
@@ -219,6 +232,7 @@ class Proxy(ScrollArea):
             duration=-1,
             parent=self
         )
+        logger.info("Fiddler 提示已显示。")
 
     def handleFiddlerBackup(self):
         now_time = time.strftime('%Y%m%d%H%M%S', time.localtime())
@@ -229,9 +243,11 @@ class Proxy(ScrollArea):
                     backup_path}"',
                 shell=True, check=True
             )
-            Info(self, "S", 1000, self.tr("备份成功!"))
+            Info(self, "S", 1000, "备份成功!")
+            logger.info(f"脚本已备份到 {backup_path}。")
         except subprocess.CalledProcessError as e:
-            Info(self, 'E', 3000, self.tr("备份失败！"), str(e))
+            Info(self, 'E', 3000, "备份失败！", str(e))
+            logger.error(f"备份失败: {e}")
 
     def handleProxyDisabled(self):
         try:
@@ -255,6 +271,8 @@ class Proxy(ScrollArea):
                     'reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /d "" /f',
                     shell=True, creationflags=subprocess.CREATE_NO_WINDOW, check=True
                 )
-            Info(self, 'S', 1000, self.tr("全局代理已更改！"))
+            Info(self, 'S', 1000, "全局代理已更改！")
+            logger.info("全局代理设置已更新。")
         except subprocess.CalledProcessError as e:
-            Info(self, 'E', 3000, self.tr("全局代理更改失败！"), str(e))
+            Info(self, 'E', 3000, "全局代理更改失败！", str(e))
+            logger.error(f"更改全局代理失败: {e}")

@@ -1,17 +1,23 @@
 import sys
+from dataclasses import dataclass, field
 from PySide6.QtGui import QColor
 from PySide6.QtCore import Signal, Qt
-from PySide6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QPushButton
-from qfluentwidgets import TitleLabel, PasswordLineEdit, PrimaryPushButton, FluentStyleSheet
+from PySide6.QtWidgets import (
+    QFrame, QVBoxLayout, QHBoxLayout, QPushButton, QCheckBox, QLabel, QMessageBox
+)
+from qfluentwidgets import (
+    TitleLabel, PasswordLineEdit, PrimaryPushButton, FluentStyleSheet
+)
 from qfluentwidgets.components.dialog_box.mask_dialog_base import MaskDialogBase
 
 
+@dataclass
 class MessageBoxBase(MaskDialogBase):
-    accepted = Signal()
-    rejected = Signal()
+    accepted: Signal = field(default_factory=Signal)
+    rejected: Signal = field(default_factory=Signal)
 
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
+    def __post_init__(self):
+        super().__init__()
         self.buttonGroup = QFrame(self.widget)
         self.yesButton = PrimaryPushButton(self.tr('登录'), self.buttonGroup)
         self.cancelButton = QPushButton(self.tr('退出'), self.buttonGroup)
@@ -76,21 +82,38 @@ class MessageBoxBase(MaskDialogBase):
         self.buttonLayout.insertStretch(0, 1)
 
 
+@dataclass
 class MessageLogin(MessageBoxBase):
-    passwordEntered = Signal(str)
+    passwordEntered: Signal = field(default_factory=Signal)
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __post_init__(self):
+        super().__post_init__()
         self.titleLabel = TitleLabel(self.tr('你的老婆是?    '))
         self.passwordLabel = PasswordLineEdit(self)
         self.passwordLabel.setFixedWidth(300)
         self.passwordLabel.setPlaceholderText(self.tr('请输入TA的英文名'))
+
+        # 新增组件
+        self.rememberCheckBox = QCheckBox(self.tr('记住密码'), self)
+        self.forgotPasswordLabel = QLabel(
+            f"<a href='#'>{self.tr('忘记密码?')}</a>", self)
+        self.forgotPasswordLabel.setOpenExternalLinks(False)
+        self.forgotPasswordLabel.linkActivated.connect(self.onForgotPassword)
+
         self.yesButton.clicked.connect(self.emitPassword)
         self.cancelButton.clicked.connect(lambda: sys.exit())
 
         self.viewLayout.addWidget(self.titleLabel)
         self.viewLayout.addWidget(self.passwordLabel)
+        self.viewLayout.addWidget(self.rememberCheckBox)
+        self.viewLayout.addWidget(self.forgotPasswordLabel)
 
     def emitPassword(self) -> None:
         password = self.passwordLabel.text()
+        if self.rememberCheckBox.isChecked():
+            # 实现记住密码的逻辑
+            pass
         self.passwordEntered.emit(password)
+
+    def onForgotPassword(self):
+        QMessageBox.information(self, self.tr('忘记密码'), self.tr('请联系管理员重置密码。'))

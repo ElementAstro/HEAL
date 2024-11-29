@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from loguru import logger
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget, QMessageBox, QPushButton
+    QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget, QMessageBox, QApplication
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QClipboard
@@ -24,6 +24,9 @@ from app.model.message_download import (
 from src.icon.astro import AstroIcon
 
 
+logger.add("download_interface.log", rotation="1 MB")
+
+
 class Download(ScrollArea):
     Nav = Pivot
 
@@ -36,6 +39,13 @@ class Download(ScrollArea):
         self.scroll_widget = QWidget()
         self.vbox_layout = QVBoxLayout(self.scroll_widget)
 
+        self.init_search_bar()
+        self.init_combo_box()
+        self.init_navigation()
+        self.load_interface_from_json()
+        self.init_widgets()
+
+    def init_search_bar(self):
         # 搜索控件
         self.search_box = LineEdit(self.scroll_widget)
         self.search_box.setPlaceholderText("输入搜索内容...")
@@ -49,29 +59,24 @@ class Download(ScrollArea):
         self.toggle_search_button = PushButton("显示/隐藏搜索框", self.scroll_widget)
         self.toggle_search_button.clicked.connect(self.toggle_search_box)
 
+    def init_combo_box(self):
         # 组合框
         self.combo_box = ComboBox(self.scroll_widget)
         self.combo_box.currentIndexChanged.connect(self.navigate_to_section)
 
+    def init_navigation(self):
         # 导航与堆叠窗口
         self.pivot = self.Nav(self)
         self.stacked_widget = QStackedWidget(self)
-
         self.search_box.setVisible(False)
-
-        # 加载配置
-        self.interface: Optional[Dict[str, Any]] = None
-        self.load_interface_from_json()
-
-        # 初始化额外组件
-        self.init_widgets()
 
     def load_interface_from_json(self):
         config_path = Path('./config/interface/download.json')
         try:
             with config_path.open('r', encoding="utf-8") as f:
                 self.interface = json.load(f)
-                logger.debug(f'加载 JSON 文件: {f.name}: {self.interface}')
+                logger.debug(f'加载 JSON 文件: {config_path.name}: {
+                             self.interface}')
                 self.populate_combo_box()
                 self.load_interface_cards()
         except FileNotFoundError:
@@ -91,6 +96,8 @@ class Download(ScrollArea):
     def toggle_search_box(self):
         current_visibility = self.search_box.isVisible()
         self.search_box.setVisible(not current_visibility)
+        logger.debug(f'Search box visibility toggled to {
+                     not current_visibility}')
 
     def search_items(self):
         search_text = self.search_box.text().lower()
@@ -103,9 +110,13 @@ class Download(ScrollArea):
 
         if matched_index >= 0:
             self.combo_box.setCurrentIndex(matched_index)
-            self.copy_to_clipboard(self.interface['sections'][matched_index - 1].get('title', ''))
+            section_title = self.interface['sections'][matched_index - 1].get(
+                'title', '')
+            self.copy_to_clipboard(section_title)
+            logger.info(f'找到匹配项: {section_title}')
         else:
             QMessageBox.warning(self, "未找到", "未找到匹配的项目")
+            logger.info('未找到匹配的搜索项')
 
     def navigate_to_section(self):
         section_index = self.combo_box.currentIndex() - 1
@@ -113,10 +124,11 @@ class Download(ScrollArea):
             return
 
         section = self.interface['sections'][section_index]
-        section_title = section.get('title')
+        section_title = section.get('title', '')
         pivot_item_name = section_title.replace(' ', '-')
         self.pivot.setCurrentItem(pivot_item_name)
         self.stacked_widget.setCurrentIndex(section_index)
+        logger.debug(f'导航到部分: {section_title}')
 
     def add_items_to_section(self, section_interface: SettingCardGroup, items: List[Dict[str, Any]]):
         for item in items:
@@ -135,8 +147,12 @@ class Download(ScrollArea):
                 continue
 
             item['icon'] = self.resolve_icon(item['icon'])
-            card = self.create_card(item_type, item, required_fields)
-            section_interface.addSettingCard(card)
+            try:
+                card = self.create_card(item_type, item, required_fields)
+                section_interface.addSettingCard(card)
+                logger.debug(f'添加卡片: {item.get("title", "无标题")}')
+            except ValueError as e:
+                logger.error(f'创建卡片失败: {e}')
 
     def resolve_icon(self, icon_name: str) -> Any:
         if icon_name.startswith('FIF.'):
@@ -189,11 +205,14 @@ class Download(ScrollArea):
         self.vbox_layout.addWidget(self.stacked_widget)
         self.vbox_layout.setSpacing(28)
         self.vbox_layout.setContentsMargins(0, 10, 10, 0)
-        self.stacked_widget.currentChanged.connect(self.on_current_index_changed)
+        self.stacked_widget.currentChanged.connect(
+            self.on_current_index_changed)
         if self.stacked_widget.count() > 0:
             initial_widget = self.stacked_widget.widget(0)
             self.pivot.setCurrentItem(initial_widget.objectName())
-            qrouter.setDefaultRouteKey(self.stacked_widget, initial_widget.objectName())
+            qrouter.setDefaultRouteKey(
+                self.stacked_widget, initial_widget.objectName())
+            logger.debug(f'初始界面设置为: {initial_widget.objectName()}')
 
     def add_sub_interface(self, widget: QWidget, object_name: str, text: str, icon: Any = FIF.DOWNLOAD):
         widget.setObjectName(object_name)
@@ -204,11 +223,13 @@ class Download(ScrollArea):
             text=text,
             onClick=lambda: self.stacked_widget.setCurrentWidget(widget)
         )
+        logger.debug(f"子界面添加: {object_name}")
 
     def on_current_index_changed(self, index: int):
         widget = self.stacked_widget.widget(index)
         self.pivot.setCurrentItem(widget.objectName())
         qrouter.push(self.stacked_widget, widget.objectName())
+        logger.debug(f'当前索引已更改为 {index} - {widget.objectName()}')
 
     def generate_download_url(
         self, types: str, repo_url: str, mirror_url: str, mirror_branch: Optional[str] = None, is_add: bool = False
@@ -218,24 +239,25 @@ class Download(ScrollArea):
 
         if types == 'url':
             if cfg.chinaStatus.value:
-                return url_cfg + mirror_url
+                return f"{url_cfg}{mirror_url}"
             elif cfg.proxyStatus.value:
-                url_cfg = 'curl -x http://127.0.0.1:7890 -o {file} -L '
-            return url_cfg + repo_url
+                url_cfg = f'curl -x http://127.0.0.1:7890 -o {file} -L '
+            return f"{url_cfg}{repo_url}"
 
         git_cfg = 'git clone --progress '
         if not is_add:
             if cfg.chinaStatus.value:
-                return f"{git_cfg}{mirror_branch or ''}{mirror_url}"
+                branch = f' --branch {mirror_branch}' if mirror_branch else ''
+                return f"{git_cfg}{branch} {mirror_url}"
             elif cfg.proxyStatus.value:
                 git_cfg = 'git -c http.proxy=http://127.0.0.1:7890 -c https.proxy=http://127.0.0.1:7890 clone --progress '
-            return git_cfg + repo_url
+            return f"{git_cfg}{repo_url}"
 
         if cfg.chinaStatus.value:
             return ''
         elif cfg.proxyStatus.value:
             git_cfg = 'git -c http.proxy=http://127.0.0.1:7890 -c https.proxy=http://127.0.0.1:7890 clone --progress '
-        return ' && ' + git_cfg + repo_url
+        return f' && {git_cfg}{repo_url}'
 
     def download_check(self, name: str):
         download_mapping: Dict[str, Tuple[Any, str, str, Optional[str], Optional[str]]] = {
@@ -261,7 +283,8 @@ class Download(ScrollArea):
         message_class, types, repo_url, mirror_url, mirror_branch = mapping
         w = message_class(self)
         file_path = Path("temp") / Path(repo_url).name
-        command = self.generate_download_url(types, repo_url, mirror_url, mirror_branch, is_add=False)
+        command = self.generate_download_url(
+            types, repo_url, mirror_url, mirror_branch, is_add=False)
 
         if w.exec():
             if not file_path.exists():
@@ -278,6 +301,7 @@ class Download(ScrollArea):
                         duration=1000,
                         parent=self
                     )
+                    logger.info(f'下载成功: {file_path}')
                 else:
                     InfoBar.error(
                         title='下载失败！',
@@ -288,6 +312,7 @@ class Download(ScrollArea):
                         duration=3000,
                         parent=self
                     )
+                    logger.error(f'下载失败: {name}')
             else:
                 InfoBar.error(
                     title='该目录已存在文件，无法下载！',
@@ -299,6 +324,7 @@ class Download(ScrollArea):
                     parent=self
                 )
                 subprocess.Popen(['start', str(file_path)], shell=True)
+                logger.warning(f'文件已存在，打开文件: {file_path}')
 
     def copy_to_clipboard(self, text: str):
         clipboard: QClipboard = QApplication.clipboard()
@@ -312,3 +338,4 @@ class Download(ScrollArea):
             duration=1000,
             parent=self
         )
+        logger.info(f'复制到剪贴板: {text}')
