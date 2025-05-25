@@ -1,8 +1,7 @@
 import os
-import time
 import subprocess
 from PySide6.QtGui import QPalette, QColor
-from PySide6.QtWidgets import QWidget, QDialog, QVBoxLayout
+from PySide6.QtWidgets import QDialog, QVBoxLayout
 from PySide6.QtCore import QThread, Signal, Qt
 from qfluentwidgets import PlainTextEdit
 from app.model.config import cfg, Info
@@ -11,12 +10,15 @@ from app.model.config import cfg, Info
 class SubDownloadCMD(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.parent = parent
-        self.palette = self.palette()
-        self.palette.setColor(QPalette.ColorRole.Window, QColor(0, 0, 0))
-        self.setPalette(self.palette)
+        self._parent_widget = parent  # 避免与parent()方法冲突
+
+        # 创建新的调色板而不是覆盖palette()方法
+        custom_palette = self.palette()
+        custom_palette.setColor(QPalette.ColorRole.Window, QColor(0, 0, 0))
+        self.setPalette(custom_palette)
+
         self.setFixedSize(960, 512)
-        self.setCursor(Qt.CrossCursor)
+        self.setCursor(Qt.CursorShape.CrossCursor)
         self.setWindowTitle(cfg.APP_NAME)
 
         self.commandOutput = PlainTextEdit()
@@ -38,10 +40,10 @@ class SubDownloadCMD(QDialog):
             self.success = False
             self.commandOutput.clear()
             self.runner.start()
-            if self.exec_() == 0:
+            if self.exec() == 0:
                 self.runner.download_finished.emit(-1, file_path)
         else:
-            Info(self.parent, 'E', 3000, self.tr('该目录已存在文件！'))
+            Info(self._parent_widget, 'E', 3000, self.tr('该目录已存在文件！'))
             subprocess.Popen('start ' + file_path, shell=True)
 
     def handleTextUpdate(self, text):
@@ -49,18 +51,21 @@ class SubDownloadCMD(QDialog):
 
     def handleDownloadFinished(self, returncode, file_path):
         if returncode == 0:
-            Info(self.parent, 'S', 2000, self.tr('下载成功！'))
+            Info(self._parent_widget, 'S', 2000, self.tr('下载成功！'))
             self.success = True
             self.commandOutput.clear()
             self.close()
             subprocess.Popen('start ' + file_path, shell=True)
         if not self.success:
             if returncode == -1:
-                Info(self.parent, 'E', 3000, self.tr('下载取消！'))
+                Info(self._parent_widget, 'E', 3000, self.tr('下载取消！'))
             else:
-                Info(self.parent, 'E', 3000, self.tr('下载失败！'))
-        self.runner.process.kill()
-        self.runner.terminate()
+                Info(self._parent_widget, 'E', 3000, self.tr('下载失败！'))
+
+        if hasattr(self, 'runner') and self.runner.process:
+            self.runner.process.kill()
+            self.runner.terminate()
+
         output = subprocess.check_output('tasklist', shell=True)
         if 'curl.exe' in str(output):
             subprocess.run('taskkill /f /im curl.exe', shell=True,
@@ -82,16 +87,25 @@ class CommandRunner(QThread):
         self.types = types
         self.command = command
         self.check = check
+        self.process = None
 
     def run(self):
         if self.types == 'url' and not os.path.exists('temp'):
             subprocess.run('mkdir temp', shell=True,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-        self.process = subprocess.Popen(self.command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True,
-                                        text=True)
-        for line in self.process.stdout:
-            self.command_updated.emit(line.rstrip('\n'))
+        self.process = subprocess.Popen(
+            self.command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            shell=True,
+            text=True
+        )
+
+        if self.process.stdout:
+            for line in self.process.stdout:
+                self.command_updated.emit(line.rstrip('\n'))
+
         self.process.communicate()
         self.download_finished.emit(self.process.returncode, self.check)
 
@@ -109,19 +123,24 @@ def __handleUrlGenerate(types, repo_url, mirror_url, repo_branch=None, mirror_br
         git_cfg = 'git config --global core.longpaths true && git clone --progress '
         if not is_add:
             if cfg.chinaStatus.value:
-                return git_cfg + mirror_branch + mirror_url
+                return git_cfg + (mirror_branch or '') + (mirror_url or '')
             elif cfg.proxyStatus.value:
                 git_cfg = 'git config --global core.longpaths true && git -c http.proxy=http://127.0.0.1:7890 -c https.proxy=http://127.0.0.1:7890 clone --progress '
-            return git_cfg + repo_branch + repo_url
+            return git_cfg + (repo_branch or '') + (repo_url or '')
         else:
             if cfg.chinaStatus.value:
                 return ''
             elif cfg.proxyStatus.value:
                 git_cfg = 'git config --global core.longpaths true && git -c http.proxy=http://127.0.0.1:7890 -c https.proxy=http://127.0.0.1:7890 clone --progress '
-            return ' && ' + git_cfg + repo_branch + repo_url
+            return ' && ' + git_cfg + (repo_branch or '') + (repo_url or '')
+    return ''
 
 
 def handleDownloadGenerate(name):
+    types = ''
+    command = ''
+    file_path = ''
+
     if name == 'audio':
         types = 'git'
         file_path = 'src\\audio'
@@ -150,7 +169,6 @@ def handleDownloadGenerate(name):
         file_path = 'tool\\mongodb'
         command = __handleUrlGenerate(types, cfg.DOWNLOAD_COMMANDS_MONGODB_PORTABLE, cfg.DOWNLOAD_COMMANDS_MONGODB_PORTABLE_MIRROR,
                                       '--branch mongodb ', '--branch mongodb ')
-        print(command)
     elif name == 'lunarcore':
         types = 'git'
         file_path = 'server\\LunarCore'
@@ -163,10 +181,11 @@ def handleDownloadGenerate(name):
                                         cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES_MIRROR, '', '--branch lunarcoreres ')
         command_2 = __handleUrlGenerate(
             types, cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES_2, '', '', '', True)
-        command = command_1 + command_2
+        command = (command_1 or '') + (command_2 or '')
     elif name == 'fiddler':
         types = 'git'
         file_path = 'tool\\Fiddler'
         command = __handleUrlGenerate(types, cfg.DOWNLOAD_COMMANDS_FIDDLER, cfg.DOWNLOAD_COMMANDS_FIDDLER_MIRROR,
                                       '--branch fiddler ', '--branch fiddler ')
+
     return types, command, file_path

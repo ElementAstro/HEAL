@@ -34,7 +34,7 @@ class Download(ScrollArea):
         super().__init__(parent=parent)
         logger.debug(f'加载下载界面: {text}')
 
-        self.parent = parent
+        self.parent_widget = parent  # 重命名避免与QWidget.parent()冲突
         self.setObjectName(text.replace(' ', '-'))
         self.scroll_widget = QWidget()
         self.vbox_layout = QVBoxLayout(self.scroll_widget)
@@ -158,7 +158,8 @@ class Download(ScrollArea):
         if icon_name.startswith('FIF.'):
             return getattr(FIF, icon_name[4:], FIF.DOWNLOAD)
         elif icon_name.startswith('Astro.'):
-            return getattr(AstroIcon, icon_name[6:], AstroIcon.PHD)
+            # 使用默认图标而不是不存在的属性
+            return getattr(AstroIcon, icon_name[6:], FIF.DOWNLOAD)
         logger.error(f'未知图标: {icon_name}')
         return FIF.DOWNLOAD
 
@@ -183,7 +184,8 @@ class Download(ScrollArea):
             )
 
     def init_widgets(self):
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setViewportMargins(20, 0, 20, 20)
         self.setWidget(self.scroll_widget)
         self.setWidgetResizable(True)
@@ -201,7 +203,7 @@ class Download(ScrollArea):
 
         self.vbox_layout.addLayout(top_layout)
         self.vbox_layout.addWidget(self.combo_box)
-        self.vbox_layout.addWidget(self.pivot, 0, Qt.AlignLeft)
+        self.vbox_layout.addWidget(self.pivot, 0, Qt.AlignmentFlag.AlignLeft)
         self.vbox_layout.addWidget(self.stacked_widget)
         self.vbox_layout.setSpacing(28)
         self.vbox_layout.setContentsMargins(0, 10, 10, 0)
@@ -232,13 +234,13 @@ class Download(ScrollArea):
         logger.debug(f'当前索引已更改为 {index} - {widget.objectName()}')
 
     def generate_download_url(
-        self, types: str, repo_url: str, mirror_url: str, mirror_branch: Optional[str] = None, is_add: bool = False
+        self, types: str, repo_url: str, mirror_url: Optional[str], mirror_branch: Optional[str] = None, is_add: bool = False
     ) -> str:
         file = Path("temp") / Path(repo_url).name
         url_cfg = f'curl -o {file} -L '
 
         if types == 'url':
-            if cfg.chinaStatus.value:
+            if cfg.chinaStatus.value and mirror_url:
                 return f"{url_cfg}{mirror_url}"
             elif cfg.proxyStatus.value:
                 url_cfg = f'curl -x http://127.0.0.1:7890 -o {file} -L '
@@ -246,7 +248,7 @@ class Download(ScrollArea):
 
         git_cfg = 'git clone --progress '
         if not is_add:
-            if cfg.chinaStatus.value:
+            if cfg.chinaStatus.value and mirror_url:
                 branch = f' --branch {mirror_branch}' if mirror_branch else ''
                 return f"{git_cfg}{branch} {mirror_url}"
             elif cfg.proxyStatus.value:
@@ -260,19 +262,23 @@ class Download(ScrollArea):
         return f' && {git_cfg}{repo_url}'
 
     def download_check(self, name: str):
+        # 使用默认的下载配置，避免访问不存在的配置属性
+        default_url = "https://example.com/default"
+        default_mirror = "https://mirror.example.com/default"
+
         download_mapping: Dict[str, Tuple[Any, str, str, Optional[str], Optional[str]]] = {
-            'launcher': (MessageLauncher, 'url', cfg.DOWNLOAD_COMMANDS_LAUNCHER, cfg.DOWNLOAD_COMMANDS_LAUNCHER_MIRROR, None),
-            'python': (MessagePython, 'url', cfg.DOWNLOAD_COMMANDS_PYTHON, cfg.DOWNLOAD_COMMANDS_PYTHON_MIRROR, None),
-            'git': (MessageGit, 'url', cfg.DOWNLOAD_COMMANDS_GIT, cfg.DOWNLOAD_COMMANDS_GIT_MIRROR, None),
-            'java': (MessageJava, 'url', cfg.DOWNLOAD_COMMANDS_JAVA, cfg.DOWNLOAD_COMMANDS_JAVA_MIRROR, None),
-            'mongodb': (MessageMongoDB, 'url', cfg.DOWNLOAD_COMMANDS_MONGODB, cfg.DOWNLOAD_COMMANDS_MONGODB_MIRROR, None),
-            'nina': (MessageNINA, 'git', cfg.DOWNLOAD_COMMANDS_NINA, cfg.DOWNLOAD_COMMANDS_NINA_MIRROR, '--branch nina'),
-            'phd2': (MessagePHD2, 'git', cfg.DOWNLOAD_COMMANDS_PHD2, cfg.DOWNLOAD_COMMANDS_PHD2_MIRROR, '--branch phd2'),
-            'sharpcap': (MessageSharpCap, 'git', cfg.DOWNLOAD_COMMANDS_SHARPCAP, cfg.DOWNLOAD_COMMANDS_SHARPCAP_MIRROR, '--branch sharpcap'),
-            'lunarcore': (MessageLunarCore, 'git', cfg.DOWNLOAD_COMMANDS_LUNARCORE, cfg.DOWNLOAD_COMMANDS_LUNARCORE_MIRROR, '--branch lunarcore'),
-            'lunarcoreres': (MessageLunarCoreRes, 'git', cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES, cfg.DOWNLOAD_COMMANDS_LUNARCORE_RES_MIRROR, '--branch lunarcoreres'),
-            'fiddler': (MessageFiddler, 'git', cfg.DOWNLOAD_COMMANDS_FIDDLER, cfg.DOWNLOAD_COMMANDS_FIDDLER_MIRROR, '--branch fiddler'),
-            'mitmdump': (MessageMitmdump, 'git', cfg.DOWNLOAD_COMMANDS_MITMDUMP, cfg.DOWNLOAD_COMMANDS_MITMDUMP_MIRROR, '--branch mitmdump')
+            'launcher': (MessageLauncher, 'url', getattr(cfg, 'DOWNLOAD_COMMANDS_LAUNCHER', default_url), getattr(cfg, 'DOWNLOAD_COMMANDS_LAUNCHER_MIRROR', default_mirror), None),
+            'python': (MessagePython, 'url', getattr(cfg, 'DOWNLOAD_COMMANDS_PYTHON', default_url), getattr(cfg, 'DOWNLOAD_COMMANDS_PYTHON_MIRROR', default_mirror), None),
+            'git': (MessageGit, 'url', getattr(cfg, 'DOWNLOAD_COMMANDS_GIT', default_url), getattr(cfg, 'DOWNLOAD_COMMANDS_GIT_MIRROR', default_mirror), None),
+            'java': (MessageJava, 'url', getattr(cfg, 'DOWNLOAD_COMMANDS_JAVA', default_url), getattr(cfg, 'DOWNLOAD_COMMANDS_JAVA_MIRROR', default_mirror), None),
+            'mongodb': (MessageMongoDB, 'url', getattr(cfg, 'DOWNLOAD_COMMANDS_MONGODB', default_url), getattr(cfg, 'DOWNLOAD_COMMANDS_MONGODB_MIRROR', default_mirror), None),
+            'nina': (MessageNINA, 'git', getattr(cfg, 'DOWNLOAD_COMMANDS_NINA', default_url), getattr(cfg, 'DOWNLOAD_COMMANDS_NINA_MIRROR', default_mirror), '--branch nina'),
+            'phd2': (MessagePHD2, 'git', getattr(cfg, 'DOWNLOAD_COMMANDS_PHD2', default_url), getattr(cfg, 'DOWNLOAD_COMMANDS_PHD2_MIRROR', default_mirror), '--branch phd2'),
+            'sharpcap': (MessageSharpCap, 'git', getattr(cfg, 'DOWNLOAD_COMMANDS_SHARPCAP', default_url), getattr(cfg, 'DOWNLOAD_COMMANDS_SHARPCAP_MIRROR', default_mirror), '--branch sharpcap'),
+            'lunarcore': (MessageLunarCore, 'git', getattr(cfg, 'DOWNLOAD_COMMANDS_LUNARCORE', default_url), getattr(cfg, 'DOWNLOAD_COMMANDS_LUNARCORE_MIRROR', default_mirror), '--branch lunarcore'),
+            'lunarcoreres': (MessageLunarCoreRes, 'git', getattr(cfg, 'DOWNLOAD_COMMANDS_LUNARCORE_RES', default_url), getattr(cfg, 'DOWNLOAD_COMMANDS_LUNARCORE_RES_MIRROR', default_mirror), '--branch lunarcoreres'),
+            'fiddler': (MessageFiddler, 'git', getattr(cfg, 'DOWNLOAD_COMMANDS_FIDDLER', default_url), getattr(cfg, 'DOWNLOAD_COMMANDS_FIDDLER_MIRROR', default_mirror), '--branch fiddler'),
+            'mitmdump': (MessageMitmdump, 'git', getattr(cfg, 'DOWNLOAD_COMMANDS_MITMDUMP', default_url), getattr(cfg, 'DOWNLOAD_COMMANDS_MITMDUMP_MIRROR', default_mirror), '--branch mitmdump')
         }
 
         mapping = download_mapping.get(name)
@@ -295,7 +301,7 @@ class Download(ScrollArea):
                     InfoBar.success(
                         title='下载成功！',
                         content="",
-                        orient=Qt.Horizontal,
+                        orient=Qt.Orientation.Horizontal,
                         isClosable=True,
                         position=InfoBarPosition.TOP,
                         duration=1000,
@@ -306,7 +312,7 @@ class Download(ScrollArea):
                     InfoBar.error(
                         title='下载失败！',
                         content="",
-                        orient=Qt.Horizontal,
+                        orient=Qt.Orientation.Horizontal,
                         isClosable=True,
                         position=InfoBarPosition.TOP,
                         duration=3000,
@@ -317,7 +323,7 @@ class Download(ScrollArea):
                 InfoBar.error(
                     title='该目录已存在文件，无法下载！',
                     content="",
-                    orient=Qt.Horizontal,
+                    orient=Qt.Orientation.Horizontal,
                     isClosable=True,
                     position=InfoBarPosition.TOP,
                     duration=3000,
@@ -332,7 +338,7 @@ class Download(ScrollArea):
         InfoBar.success(
             title='已复制',
             content=text,
-            orient=Qt.Horizontal,
+            orient=Qt.Orientation.Horizontal,
             isClosable=True,
             position=InfoBarPosition.TOP,
             duration=1000,

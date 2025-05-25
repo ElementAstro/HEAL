@@ -1,9 +1,9 @@
 import sys
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, cast
 
-from PySide6.QtCore import Qt, QPropertyAnimation, QPoint, QRect
-from PySide6.QtGui import QDrag, QMimeData, QPixmap
+from PySide6.QtCore import Qt, QPropertyAnimation, QPoint, QRect, QMimeData, QByteArray
+from PySide6.QtGui import QDrag, QPixmap
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QSizePolicy, QScrollArea, QMessageBox
@@ -19,15 +19,15 @@ class DraggableButtonConfig:
 class DraggableButton(QPushButton):
     def __init__(self, config: DraggableButtonConfig, parent: Optional[QWidget] = None):
         super().__init__(config.text, parent)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding,
+                           QSizePolicy.Policy.Expanding)
         self.setStyleSheet(
-            f"border: 1px solid gray; border-radius: 5px; background-color: {
-                config.color};"
+            f"border: 1px solid gray; border-radius: 5px; background-color: {config.color};"
         )
         self.setAcceptDrops(False)
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             drag = QDrag(self)
             mime_data = QMimeData()
             mime_data.setText(self.text())
@@ -40,7 +40,7 @@ class DraggableButton(QPushButton):
 
             # 设置热点位置
             drag.setHotSpot(event.position().toPoint() - self.rect().topLeft())
-            drag.exec(Qt.MoveAction)
+            drag.exec(Qt.DropAction.MoveAction)
 
 
 class FlowLayout(QVBoxLayout):
@@ -57,15 +57,21 @@ class FlowLayout(QVBoxLayout):
         self.buttons.append(button)
         self.update_layout()
 
+    def add_widget(self, widget: QWidget):
+        """添加普通widget的方法"""
+        self.insertWidget(self.count() - 1, widget)
+
     def remove_button(self, button: DraggableButton):
         for row_index in range(self.count()):
-            row_layout = self.itemAt(row_index).layout()
-            if row_layout and row_layout.indexOf(button) != -1:
-                row_layout.removeWidget(button)
-                self.buttons.remove(button)
-                button.setParent(None)
-                self.update_layout()
-                return
+            item = self.itemAt(row_index)
+            if item and item.layout():
+                row_layout = cast(QHBoxLayout, item.layout())
+                if row_layout.indexOf(button) != -1:
+                    row_layout.removeWidget(button)
+                    self.buttons.remove(button)
+                    button.setParent(None)
+                    self.update_layout()
+                    return
 
     def insert_button(self, index: int, button: DraggableButton):
         if index >= len(self.buttons):
@@ -80,7 +86,8 @@ class FlowLayout(QVBoxLayout):
 
     def update_layout(self):
         self.update()
-        self.parentWidget().update()
+        if self.parentWidget():
+            self.parentWidget().update()
 
     def find_insertion_position(self, position: QPoint) -> int:
         for i, button in enumerate(self.buttons):
@@ -94,19 +101,40 @@ class FlowLayout(QVBoxLayout):
             new_row.setSpacing(10)
             self.insertLayout(self.count() - 1, new_row)
             return new_row
-        return self.itemAt(self.count() - 2).layout()
+
+        item = self.itemAt(self.count() - 2)
+        if item and item.layout():
+            return cast(QHBoxLayout, item.layout())
+
+        # 如果没有找到，创建新的行
+        new_row = QHBoxLayout()
+        new_row.setSpacing(10)
+        self.insertLayout(self.count() - 1, new_row)
+        return new_row
 
     def _get_or_create_row(self, row_index: int) -> QHBoxLayout:
         while self.count() - 1 <= row_index:
             new_row = QHBoxLayout()
             new_row.setSpacing(10)
             self.insertLayout(self.count() - 1, new_row)
-        return self.itemAt(row_index).layout()
+
+        item = self.itemAt(row_index)
+        if item and item.layout():
+            return cast(QHBoxLayout, item.layout())
+
+        # 如果没有找到，创建新的行
+        new_row = QHBoxLayout()
+        new_row.setSpacing(10)
+        self.insertLayout(self.count() - 1, new_row)
+        return new_row
 
 
 class DropArea(QWidget):
     def __init__(self, parent: Optional[QWidget] = None):
-        super().__init__(parent)
+        if parent is not None:
+            super().__init__(parent)
+        else:
+            super().__init__()
         self.setAcceptDrops(True)
 
     def dragEnterEvent(self, event):
@@ -116,10 +144,12 @@ class DropArea(QWidget):
     def dropEvent(self, event):
         source_button = event.source()
         target_position = event.position().toPoint()
-        parent_layout: FlowLayout = self.layout()
+        layout = self.layout()
 
-        if not parent_layout:
+        if not layout or not isinstance(layout, FlowLayout):
             return
+
+        parent_layout = cast(FlowLayout, layout)
 
         insertion_index = parent_layout.find_insertion_position(
             self.mapToGlobal(target_position)
@@ -129,7 +159,7 @@ class DropArea(QWidget):
         self.animate_button(source_button, source_button.geometry())
 
     def animate_button(self, button: DraggableButton, target_geometry: QRect):
-        animation = QPropertyAnimation(button, b"geometry")
+        animation = QPropertyAnimation(button, QByteArray(b"geometry"))
         animation.setDuration(300)
         animation.setStartValue(button.geometry())
         animation.setEndValue(target_geometry)

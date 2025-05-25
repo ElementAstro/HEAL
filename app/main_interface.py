@@ -1,10 +1,8 @@
 import sys
 import json
-import glob
 import random
 import subprocess
 from pathlib import Path
-from typing import Any
 
 import winreg
 from PySide6.QtCore import Signal, Qt, QSize, QUrl
@@ -28,9 +26,7 @@ from app.module_interface import Module
 from app.tool_interface import Tools
 
 from app.model.config import cfg, Info
-from app.model.check_update import check_update
 from app.model.login_card import MessageLogin
-from app.model.system_tray import SystemTray
 
 
 class Main(MSFluentWindow):
@@ -41,6 +37,9 @@ class Main(MSFluentWindow):
         super().__init__()
         setTheme(cfg.themeMode.value)
 
+        # Initialize tray_icon as None initially
+        self.tray_icon = None
+
         self.initMainWindow()
         self.initNavigation()
         self.handleFontCheck()
@@ -50,7 +49,7 @@ class Main(MSFluentWindow):
         # check_update()
         if cfg.useLogin.value:
             self.count_pwd = 1
-            self.login_card = MessageLogin(self)
+            self.login_card = MessageLogin()  # 移除错误的参数
             self.login_card.show()
             self.login_card.passwordEntered.connect(self.handleLogin)
         else:
@@ -123,7 +122,8 @@ class Main(MSFluentWindow):
         self.titleBar.maxBtn.setDisabled(True)
         self.titleBar.setDoubleClickEnabled(False)
         self.setResizeEnabled(False)
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowMaximizeButtonHint)
+        self.setWindowFlags(self.windowFlags() & ~
+                            Qt.WindowType.WindowMaximizeButtonHint)
 
         self.setWindowTitle(cfg.APP_NAME)
         self.setFixedSize(1280, 768)
@@ -203,7 +203,7 @@ class Main(MSFluentWindow):
                 icon=InfoBarIcon.WARNING,
                 title=f"{self.tr('检测到新版本: ')}{info}",
                 content='',
-                orient=Qt.Horizontal,
+                orient=Qt.Orientation.Horizontal,
                 isClosable=True,
                 position=InfoBarPosition.TOP,
                 duration=-1,
@@ -240,7 +240,7 @@ class Main(MSFluentWindow):
             icon=InfoBarIcon.ERROR,
             title=self.tr('未找到语音!'),
             content='',
-            orient=Qt.Horizontal,
+            orient=Qt.Orientation.Horizontal,
             isClosable=True,
             position=InfoBarPosition.TOP,
             duration=3000,
@@ -255,7 +255,9 @@ class Main(MSFluentWindow):
     def toggle_window(self) -> None:
         if self.isVisible():
             self.hide()
-            self.tray_icon.toggle_action.setText("显示窗口")
+            if self.tray_icon and hasattr(self.tray_icon, 'toggle_action'):
+                self.tray_icon.toggle_action.setText("显示窗口")
         else:
             self.show()
-            self.tray_icon.toggle_action.setText("隐藏窗口")
+            if self.tray_icon and hasattr(self.tray_icon, 'toggle_action'):
+                self.tray_icon.toggle_action.setText("隐藏窗口")

@@ -1,44 +1,47 @@
 import sys
 import json
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Union
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QFileDialog, QVBoxLayout, QWidget, QTreeWidgetItem,
-    QInputDialog, QToolBar, QSplitter, QStatusBar, QPushButton, QLabel
+    QApplication, QFileDialog, QVBoxLayout, QWidget, QTreeWidgetItem,
+    QInputDialog, QToolBar, QSplitter, QStatusBar
 )
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QClipboard, QTextCursor
 from qfluentwidgets import (
     TextEdit, MessageBox, Action, FluentIcon, InfoBar, InfoBarPosition, TreeWidget,
-    PrimaryPushButton, NavigationWidget, LineEdit
+    LineEdit
 )
-from PySide6.QtGui import QClipboard
 
 
 class JsonTextEdit(TextEdit):
-    def __init__(self, parent: QWidget = None) -> None:
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
         self.setTabStopDistance(20)
 
     def keyPressEvent(self, event) -> None:
-        if event.key() == Qt.Key_Return and event.modifiers() == Qt.ShiftModifier:
+        if event.key() == Qt.Key.Key_Return and event.modifiers() == Qt.KeyboardModifier.ShiftModifier:
             cursor = self.textCursor()
             indent = len(cursor.block().text()) - \
                 len(cursor.block().text().lstrip())
             cursor.insertText('\n' + ' ' * indent)
             self.setTextCursor(cursor)
-        elif event.key() == Qt.Key_BraceLeft:
+        elif event.key() == Qt.Key.Key_BraceLeft:
             cursor = self.textCursor()
             cursor.insertText('{}')
-            cursor.movePosition(cursor.Left, cursor.MoveAnchor, 1)
+            cursor.movePosition(QTextCursor.MoveOperation.Left,
+                                QTextCursor.MoveMode.MoveAnchor, 1)
             self.setTextCursor(cursor)
-        elif event.key() == Qt.Key_BracketLeft:
+        elif event.key() == Qt.Key.Key_BracketLeft:
             cursor = self.textCursor()
             cursor.insertText('[]')
-            cursor.movePosition(cursor.Left, cursor.MoveAnchor, 1)
+            cursor.movePosition(QTextCursor.MoveOperation.Left,
+                                QTextCursor.MoveMode.MoveAnchor, 1)
             self.setTextCursor(cursor)
-        elif event.key() == Qt.Key_QuoteDbl:
+        elif event.key() == Qt.Key.Key_QuoteDbl:
             cursor = self.textCursor()
             cursor.insertText('""')
-            cursor.movePosition(cursor.Left, cursor.MoveAnchor, 1)
+            cursor.movePosition(QTextCursor.MoveOperation.Left,
+                                QTextCursor.MoveMode.MoveAnchor, 1)
             self.setTextCursor(cursor)
         else:
             super().keyPressEvent(event)
@@ -140,7 +143,7 @@ class JsonEditor(QWidget):
         toolbar.addWidget(search_bar)
 
         # 分割器布局
-        splitter = QSplitter(Qt.Horizontal)
+        splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.addWidget(self.text_edit)
         splitter.addWidget(self.tree_widget)
         splitter.setStretchFactor(0, 1)
@@ -194,7 +197,8 @@ class JsonEditor(QWidget):
             if text.strip():
                 parsed_data = json.loads(text)
                 self.tree_widget.clear()
-                self.populate_tree(parsed_data, parent=self.tree_widget)
+                self.populate_tree(
+                    parsed_data, parent=self.tree_widget.invisibleRootItem())
                 self.status_bar.showMessage("JSON已解析", 2000)
             else:
                 self.tree_widget.clear()
@@ -219,7 +223,7 @@ class JsonEditor(QWidget):
                     MessageBox.critical(
                         self, "错误", f"无法处理文件 '{file_name}': {e}")
 
-    def populate_tree(self, data: Any, parent: QTreeWidgetItem = None) -> None:
+    def populate_tree(self, data: Any, parent: Optional[QTreeWidgetItem] = None) -> None:
         if isinstance(data, dict):
             for key, value in data.items():
                 item = QTreeWidgetItem(parent, [str(key)])
@@ -245,7 +249,7 @@ class JsonEditor(QWidget):
                     InfoBar.success(
                         title='节点已添加',
                         content=f'已添加键: {key}',
-                        orient=Qt.Horizontal,
+                        orient=Qt.Orientation.Horizontal,
                         isClosable=True,
                         position=InfoBarPosition.TOP_RIGHT,
                         duration=3000,
@@ -356,7 +360,8 @@ class JsonEditor(QWidget):
             export_dialog = QInputDialog(self)
             export_dialog.setWindowTitle("导出JSON")
             export_dialog.setLabelText("这是您的JSON字符串:")
-            export_dialog.setOption(QInputDialog.UsePlainTextEditForTextInput)
+            export_dialog.setOption(
+                QInputDialog.InputDialogOption.UsePlainTextEditForTextInput)
             export_dialog.setTextValue(json_string)
             export_dialog.exec()
             self.status_bar.showMessage("JSON已导出", 2000)

@@ -8,12 +8,13 @@ from app.components.module.mod_manager import ModManager
 from app.components.module.mod_download import ModDownload
 from app.components.tools.scaffold import ScaffoldApp
 
+
 class Module(ScrollArea):
     Nav = Pivot
 
     def __init__(self, text: str, parent=None):
         super().__init__(parent=parent)
-        self.parent = parent
+        self.parent_widget = parent  # 重命名避免与QWidget.parent()冲突
         self.setObjectName(text)
         self.scrollWidget = QWidget()
         self.vBoxLayout = QVBoxLayout(self.scrollWidget)
@@ -38,7 +39,8 @@ class Module(ScrollArea):
         self.__initWidget()
 
     def __initWidget(self):
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # 水平滚动条关闭
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)  # 水平滚动条关闭
         self.setViewportMargins(20, 0, 20, 20)
         self.setWidget(self.scrollWidget)
         self.setWidgetResizable(True)  # 必须设置！！！
@@ -66,7 +68,7 @@ class Module(ScrollArea):
             '模组生成器'), icon=FluentIcon.IOT)
 
         # 初始化配置界面
-        self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignLeft)
+        self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignmentFlag.AlignLeft)
         self.vBoxLayout.addWidget(self.stackedWidget)
         self.vBoxLayout.setSpacing(15)
         self.vBoxLayout.setContentsMargins(0, 10, 10, 0)
@@ -79,7 +81,7 @@ class Module(ScrollArea):
     def __connectSignalToSlot(self):
         """"""
 
-    def addSubInterface(self, widget: QLabel, objectName: str, text: str, icon=None):
+    def addSubInterface(self, widget: QWidget, objectName: str, text: str, icon=None):
         widget.setObjectName(objectName)
         self.stackedWidget.addWidget(widget)
         self.pivot.addItem(

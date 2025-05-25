@@ -29,9 +29,11 @@ class LineEditSettingCardPort(SettingCard):
         self.port_edit.setValidator(QIntValidator(1, 99999, self))
         self.set_port_button = PrimaryPushButton(self.tr('设置'), self)
 
-        self.hBoxLayout.addWidget(self.port_edit, 0, Qt.AlignRight)
+        self.hBoxLayout.addWidget(
+            self.port_edit, 0, Qt.AlignmentFlag.AlignRight)
         self.hBoxLayout.addSpacing(10)
-        self.hBoxLayout.addWidget(self.set_port_button, 0, Qt.AlignRight)
+        self.hBoxLayout.addWidget(
+            self.set_port_button, 0, Qt.AlignmentFlag.AlignRight)
         self.hBoxLayout.addSpacing(16)
         self.set_port_button.clicked.connect(self.set_port.emit)
 
@@ -41,7 +43,7 @@ class Setting(ScrollArea):
 
     def __init__(self, text: str, parent=None):
         super().__init__(parent=parent)
-        self.parent = parent
+        self.parent_widget = parent  # 重命名避免与QWidget.parent()冲突
         self.setObjectName(text)
         self.scrollWidget = QWidget()
         self.vBoxLayout = QVBoxLayout(self.scrollWidget)
@@ -129,7 +131,8 @@ class Setting(ScrollArea):
         self.__initWidget()
 
     def __initWidget(self):
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # 水平滚动条关闭
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)  # 水平滚动条关闭
         self.setViewportMargins(20, 0, 20, 20)
         self.setWidget(self.scrollWidget)
         self.setWidgetResizable(True)  # 必须设置！！！
@@ -171,7 +174,7 @@ class Setting(ScrollArea):
         self.config_editor = JsonEditor()
 
         # 初始化配置界面
-        self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignLeft)
+        self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignmentFlag.AlignLeft)
         self.vBoxLayout.addWidget(self.stackedWidget)
         self.vBoxLayout.setSpacing(15)
         self.vBoxLayout.setContentsMargins(0, 10, 10, 0)
@@ -194,7 +197,7 @@ class Setting(ScrollArea):
         self.languageCard.comboBox.currentIndexChanged.connect(
             self.restart_application)
         self.updateOnStartUpCard.clicked.connect(
-            lambda: check_update(self.parent))
+            lambda: check_update() if self.parent_widget else check_update())
         self.restartCard.clicked.connect(self.restart_application)
         self.configEditorCard.clicked.connect(self.open_config_editor)
 
@@ -211,7 +214,7 @@ class Setting(ScrollArea):
             lambda: self.handleProxyChanged(cfg.chinaStatus.value, self.tr('国内镜像已开启!'), self.tr('国内镜像已关闭!')))
         self.proxyPortCard.set_port.connect(self.handleSetProxyPort)
 
-    def addSubInterface(self, widget: QLabel, objectName: str, text: str, icon=None):
+    def addSubInterface(self, widget: QWidget, objectName: str, text: str, icon=None):
         widget.setObjectName(objectName)
         self.stackedWidget.addWidget(widget)
         self.pivot.addItem(
@@ -276,20 +279,20 @@ class AboutBackground(QWidget):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         pixmap = QPixmap("./src/image/bg_about.png")
         path = QPainterPath()
         path.addRoundedRect(self.rect(), 20, 20)
         painter.setClipPath(path)
         painter.drawPixmap(0, 0, self.width(), self.height(), pixmap)
 
-        painter.setPen(Qt.white)
+        painter.setPen(Qt.GlobalColor.white)
         painter.setFont(QFont(cfg.APP_FONT, 45))
         painter.drawText(self.rect().adjusted(0, -30, 0, 0),
-                         Qt.AlignHCenter | Qt.AlignVCenter, cfg.APP_NAME)
+                         Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter, cfg.APP_NAME)
         painter.setFont(QFont(cfg.APP_FONT, 30))
         painter.drawText(self.rect().adjusted(0, 120, 0, 0),
-                         Qt.AlignHCenter | Qt.AlignVCenter, cfg.APP_VERSION)
+                         Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter, cfg.APP_VERSION)
 
 
 class About(QWidget):
@@ -327,7 +330,7 @@ class About(QWidget):
     def __initLayout(self):
         self.image_layout = QVBoxLayout()
         self.image_layout.addWidget(
-            self.about_image, alignment=Qt.AlignHCenter)
+            self.about_image, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         self.info_button_layout = QHBoxLayout()
         self.info_button_layout.addWidget(self.link_writer)
@@ -339,7 +342,8 @@ class About(QWidget):
         self.main_layout.addLayout(self.image_layout)
         self.main_layout.addSpacing(20)
         self.main_layout.addLayout(self.info_button_layout)
-        self.main_layout.addWidget(self.copyButton, alignment=Qt.AlignCenter)
+        self.main_layout.addWidget(
+            self.copyButton, alignment=Qt.AlignmentFlag.AlignCenter)
         self.setLayout(self.main_layout)
 
     def __connectSignalToSlot(self):

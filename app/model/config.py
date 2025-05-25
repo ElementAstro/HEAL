@@ -1,6 +1,5 @@
 import os
 import json
-import subprocess
 from enum import Enum
 from PySide6.QtCore import Qt, QLocale
 from qfluentwidgets import (qconfig, QConfig, Theme, ConfigItem, BoolValidator, OptionsValidator,
@@ -12,7 +11,7 @@ def Info(self, types, time, title, content=''):
         InfoBar.success(
             title=title,
             content=content,
-            orient=Qt.Horizontal,
+            orient=Qt.Orientation.Horizontal,
             isClosable=True,
             position=InfoBarPosition.TOP,
             duration=time,
@@ -22,7 +21,7 @@ def Info(self, types, time, title, content=''):
         InfoBar.error(
             title=title,
             content=content,
-            orient=Qt.Horizontal,
+            orient=Qt.Orientation.Horizontal,
             isClosable=True,
             position=InfoBarPosition.TOP,
             duration=time,
@@ -32,7 +31,7 @@ def Info(self, types, time, title, content=''):
         InfoBar.warning(
             title=title,
             content=content,
-            orient=Qt.Horizontal,
+            orient=Qt.Orientation.Horizontal,
             isClosable=True,
             position=InfoBarPosition.TOP,
             duration=time,
@@ -70,14 +69,16 @@ def get_version_type(version):
 
 
 class Language(Enum):
-    CHINESE_SIMPLIFIED = QLocale(QLocale.Chinese, QLocale.China)
-    CHINESE_TRADITIONAL = QLocale(QLocale.Chinese, QLocale.Taiwan)
-    ENGLISH = QLocale(QLocale.English)
+    CHINESE_SIMPLIFIED = QLocale(
+        QLocale.Language.Chinese, QLocale.Country.China)
+    CHINESE_TRADITIONAL = QLocale(
+        QLocale.Language.Chinese, QLocale.Country.Taiwan)
+    ENGLISH = QLocale(QLocale.Language.English)
 
 
 class LanguageSerializer(ConfigSerializer):
-    def serialize(self, language):
-        return language.value.name()
+    def serialize(self, value):
+        return value.value.name()
 
     def deserialize(self, value: str):
         return Language(QLocale(value))

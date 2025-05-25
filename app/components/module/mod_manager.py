@@ -2,18 +2,18 @@ import sys
 import os
 import json
 from functools import partial
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass, field
-from PySide6.QtCore import Qt, QSize
+from typing import Dict, Any, Optional
+from dataclasses import dataclass
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QIcon
 from PySide6.QtWidgets import (
     QApplication, QFrame, QVBoxLayout, QListWidgetItem,
     QStackedWidget, QHBoxLayout, QLabel, QDialog,
-    QInputDialog, QGridLayout, QTreeWidget, QTreeWidgetItem, QWidget, QMessageBox, QPushButton
+    QGridLayout, QTreeWidget, QTreeWidgetItem, QWidget, QMessageBox
 )
 from qfluentwidgets import (
     LineEdit, PushButton, FluentIcon, SubtitleLabel, TitleLabel, ImageLabel,
-    Action, CommandBarView, ListWidget, TransparentPushButton, setTheme, Theme, isDarkTheme
+    Action, CommandBarView, ListWidget, setTheme, Theme, isDarkTheme
 )
 
 
@@ -49,10 +49,10 @@ class JsonTreeWidget(QTreeWidget):
 
 
 class ModDetailPage(QFrame):
-    def __init__(self, mod_info: ModInfo, parent: 'ModManager'):
+    def __init__(self, mod_info: ModInfo, parent_manager: 'ModManager'):
         super().__init__()
         self.mod_info = mod_info
-        self.parent = parent
+        self.parent_manager = parent_manager  # 重命名避免与QWidget.parent()冲突
         self.current_page = 0
         self.pages_per_view = 20
         self.initUI()
@@ -64,13 +64,13 @@ class ModDetailPage(QFrame):
 
         # Title
         title_label = TitleLabel(f"详情 - {self.mod_info.name}")
-        title_label.setFont(QFont("Arial", 24, QFont.Bold))
-        title_label.setAlignment(Qt.AlignCenter)
+        title_label.setFont(QFont("Arial", 24, QFont.Weight.Bold))
+        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.addWidget(title_label)
 
         # JSON Tree View
         self.tree_widget = JsonTreeWidget(
-            self.parent.load_mod_details(self.mod_info.path))
+            self.parent_manager.load_mod_details(self.mod_info.path))
         main_layout.addWidget(self.tree_widget)
 
         # 分页导航按钮
@@ -92,7 +92,7 @@ class ModDetailPage(QFrame):
 
         # 操作按钮
         operations_layout = QHBoxLayout()
-        self.copy_button = PushButton(FluentIcon.CONTENT_COPY, "复制详情")
+        self.copy_button = PushButton(FluentIcon.COPY, "复制详情")
         self.copy_button.clicked.connect(self.copy_details)
         operations_layout.addWidget(self.copy_button)
         main_layout.addLayout(operations_layout)
@@ -112,7 +112,8 @@ class ModDetailPage(QFrame):
 
         for i in range(self.tree_widget.topLevelItemCount()):
             item = self.tree_widget.topLevelItem(i)
-            item.setHidden(i < start or i >= end)
+            if item:  # 检查item不为None
+                item.setHidden(i < start or i >= end)
 
         total_pages = (self.tree_widget.topLevelItemCount() -
                        1) // self.pages_per_view + 1
@@ -135,20 +136,20 @@ class ModDetailPage(QFrame):
             self.update_page()
 
     def copy_details(self):
-        details = self.parent.load_mod_details(self.mod_info.path)
+        details = self.parent_manager.load_mod_details(self.mod_info.path)
         details_str = json.dumps(details, indent=4, ensure_ascii=False)
         QApplication.clipboard().setText(details_str)
         QMessageBox.information(self, "已复制", "模组详情已复制到剪贴板。")
 
     def go_back(self):
-        self.parent.stacked_widget.setCurrentIndex(0)
+        self.parent_manager.stacked_widget.setCurrentIndex(0)
 
 
 class AddModDialog(QDialog):
-    def __init__(self, parent: 'ModManager'):
-        super().__init__(parent)
+    def __init__(self, parent_manager: 'ModManager'):
+        super().__init__(parent_manager)
         self.setWindowTitle('添加模组')
-        self.parent = parent
+        self.parent_manager = parent_manager  # 重命名避免冲突
 
         self.mod_name_label = SubtitleLabel('模组名称:')
         self.mod_name_edit = LineEdit()
@@ -191,7 +192,7 @@ class AddModDialog(QDialog):
             QMessageBox.warning(self, '输入错误', '版本不能为空。')
             return
 
-        if mod_name in self.parent.mods:
+        if mod_name in self.parent_manager.mods:
             QMessageBox.warning(self, '警告', '模组已存在。')
             return
 
@@ -202,7 +203,7 @@ class AddModDialog(QDialog):
             enabled=True,
             path=os.path.join(os.getcwd(), 'modules', mod_name),
             thumbnail=None,
-            usable=self.parent.check_mod_usability(
+            usable=self.parent_manager.check_mod_usability(
                 os.path.join(os.getcwd(), 'modules', mod_name))
         )
 
@@ -216,7 +217,7 @@ class AddModDialog(QDialog):
                     "version": mod_info.version,
                     "Enabled": mod_info.enabled
                 }, f, ensure_ascii=False, indent=4)
-            self.parent.load_mods()
+            self.parent_manager.load_mods()
             QMessageBox.information(self, '成功', f"模组 '{mod_name}' 已成功添加。")
             self.close()
         except Exception as e:
@@ -337,7 +338,7 @@ class ModManager(QFrame):
 
     def update_mod_list(self):
         self.list_widget.clear()
-        for mod_name, info in self.filtered_mods.items():
+        for info in self.filtered_mods.values():
             item_widget = QWidget()
             item_layout = QGridLayout()
             item_layout.setContentsMargins(5, 5, 5, 5)
@@ -349,14 +350,14 @@ class ModManager(QFrame):
                 item_layout.addWidget(thumbnail_label, 0, 0, 2, 1)
             else:
                 placeholder = QLabel("No Image")
-                placeholder.setAlignment(Qt.AlignCenter)
+                placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 placeholder.setFixedSize(64, 64)
                 placeholder.setStyleSheet(
                     "background-color: #ccc; border: 1px solid #999;")
                 item_layout.addWidget(placeholder, 0, 0, 2, 1)
 
             name_label = TitleLabel(info.name)
-            name_label.setFont(QFont("Arial", 14, QFont.Bold))
+            name_label.setFont(QFont("Arial", 14, QFont.Weight.Bold))
             item_layout.addWidget(name_label, 0, 1)
 
             version_author_label = SubtitleLabel(
@@ -385,7 +386,7 @@ class ModManager(QFrame):
                 partial(self.open_folder, info.path))
             operations_layout.addWidget(open_folder_button)
 
-            copy_button = PushButton(FluentIcon.CONTENT_COPY, "")
+            copy_button = PushButton(FluentIcon.COPY, "")
             copy_button.setToolTip("复制详情")
             copy_button.clicked.connect(partial(self.copy_mod_details, info))
             operations_layout.addWidget(copy_button)
@@ -408,13 +409,15 @@ class ModManager(QFrame):
 
     def show_mod_details(self, item: QListWidgetItem):
         widget = self.list_widget.itemWidget(item)
-        name_label = widget.findChild(TitleLabel)
-        mod_name = name_label.text()
-        if mod_name in self.mods:
-            mod_info = self.mods[mod_name]
-            detail_page = ModDetailPage(mod_info, self)
-            self.stacked_widget.addWidget(detail_page)
-            self.stacked_widget.setCurrentWidget(detail_page)
+        if widget:
+            name_label = widget.findChild(TitleLabel)
+            if name_label:
+                mod_name = name_label.text()
+                if mod_name in self.mods:
+                    mod_info = self.mods[mod_name]
+                    detail_page = ModDetailPage(mod_info, self)
+                    self.stacked_widget.addWidget(detail_page)
+                    self.stacked_widget.setCurrentWidget(detail_page)
 
     def add_mod(self):
         dialog = AddModDialog(self)
@@ -428,18 +431,23 @@ class ModManager(QFrame):
             reply = QMessageBox.warning(
                 self, '确认删除',
                 f"确定要删除以下模组吗？\n{', '.join(mod_names)}",
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No
             )
-            if reply == QMessageBox.Yes:
+            if reply == QMessageBox.StandardButton.Yes:
                 for mod_name in mod_names:
-                    self.delete_mod(mod_name)
+                    if mod_name:  # 确保mod_name不为None
+                        self.delete_mod(mod_name)
         else:
             QMessageBox.warning(self, '警告', '未选中任何模组。')
 
-    def get_mod_name_from_item(self, item: QListWidgetItem) -> str:
+    def get_mod_name_from_item(self, item: QListWidgetItem) -> Optional[str]:
         widget = self.list_widget.itemWidget(item)
-        name_label = widget.findChild(TitleLabel)
-        return name_label.text()
+        if widget:
+            name_label = widget.findChild(TitleLabel)
+            if name_label:
+                return name_label.text()
+        return None
 
     def delete_mod(self, mod_name: str):
         if mod_name in self.mods:
@@ -464,7 +472,7 @@ class ModManager(QFrame):
             return
         for item in selected_items:
             mod_name = self.get_mod_name_from_item(item)
-            if mod_name in self.mods and not self.mods[mod_name].enabled:
+            if mod_name and mod_name in self.mods and not self.mods[mod_name].enabled:
                 mod_info = self.mods[mod_name]
                 disabled_file = os.path.join(mod_info.path, '.disabled')
                 if os.path.isfile(disabled_file):
@@ -480,7 +488,7 @@ class ModManager(QFrame):
             return
         for item in selected_items:
             mod_name = self.get_mod_name_from_item(item)
-            if mod_name in self.mods and self.mods[mod_name].enabled:
+            if mod_name and mod_name in self.mods and self.mods[mod_name].enabled:
                 mod_info = self.mods[mod_name]
                 disabled_file = os.path.join(mod_info.path, '.disabled')
                 with open(disabled_file, 'w') as f:
@@ -494,9 +502,9 @@ class ModManager(QFrame):
             if sys.platform == 'win32':
                 os.startfile(path)
             elif sys.platform == 'darwin':
-                os.system(f'open "{path}"')
+                subprocess.run(['open', path])
             else:
-                os.system(f'xdg-open "{path}"')
+                subprocess.run(['xdg-open', path])
         except Exception as e:
             QMessageBox.critical(self, '错误', f"打开文件夹时发生错误: {e}")
 
@@ -527,6 +535,7 @@ class ModManager(QFrame):
 
 
 if __name__ == '__main__':
+    import subprocess
     app = QApplication(sys.argv)
     mod_manager = ModManager()
     mod_manager.show()

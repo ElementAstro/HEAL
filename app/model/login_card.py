@@ -13,8 +13,9 @@ from qfluentwidgets.components.dialog_box.mask_dialog_base import MaskDialogBase
 
 @dataclass
 class MessageBoxBase(MaskDialogBase):
-    accepted: Signal = field(default_factory=Signal)
-    rejected: Signal = field(default_factory=Signal)
+    # 重命名Signal以避免与QDialog的方法冲突
+    acceptedSignal: Signal = field(default_factory=Signal)
+    rejectedSignal: Signal = field(default_factory=Signal)
 
     def __post_init__(self):
         super().__init__()
@@ -35,8 +36,10 @@ class MessageBoxBase(MaskDialogBase):
         self.setShadowEffect(60, (0, 10), QColor(0, 0, 0, 50))
         self.setMaskColor(QColor(0, 0, 0, 76))
 
-        self.yesButton.setAttribute(Qt.WA_LayoutUsesWidgetRect)
-        self.cancelButton.setAttribute(Qt.WA_LayoutUsesWidgetRect)
+        # 使用正确的枚举类型
+        self.yesButton.setAttribute(Qt.WidgetAttribute.WA_LayoutUsesWidgetRect)
+        self.cancelButton.setAttribute(
+            Qt.WidgetAttribute.WA_LayoutUsesWidgetRect)
 
         self.yesButton.setFocus()
         self.buttonGroup.setFixedHeight(81)
@@ -46,27 +49,34 @@ class MessageBoxBase(MaskDialogBase):
 
     def __initLayout(self) -> None:
         self._hBoxLayout.removeWidget(self.widget)
-        self._hBoxLayout.addWidget(self.widget, 1, Qt.AlignCenter)
+        # 使用正确的枚举类型
+        self._hBoxLayout.addWidget(
+            self.widget, 1, Qt.AlignmentFlag.AlignCenter)
 
         self.vBoxLayout.setSpacing(0)
         self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
         self.vBoxLayout.addLayout(self.viewLayout, 1)
-        self.vBoxLayout.addWidget(self.buttonGroup, 0, Qt.AlignBottom)
+        # 使用正确的枚举类型
+        self.vBoxLayout.addWidget(
+            self.buttonGroup, 0, Qt.AlignmentFlag.AlignBottom)
 
         self.viewLayout.setSpacing(12)
         self.viewLayout.setContentsMargins(24, 24, 24, 24)
 
         self.buttonLayout.setSpacing(12)
         self.buttonLayout.setContentsMargins(24, 24, 24, 24)
-        self.buttonLayout.addWidget(self.yesButton, 1, Qt.AlignVCenter)
-        self.buttonLayout.addWidget(self.cancelButton, 1, Qt.AlignVCenter)
+        # 使用正确的枚举类型
+        self.buttonLayout.addWidget(
+            self.yesButton, 1, Qt.AlignmentFlag.AlignVCenter)
+        self.buttonLayout.addWidget(
+            self.cancelButton, 1, Qt.AlignmentFlag.AlignVCenter)
 
     def __onCancelButtonClicked(self) -> None:
         self.reject()
-        self.rejected.emit()
+        self.rejectedSignal.emit()
 
     def __onYesButtonClicked(self) -> None:
-        self.accepted.emit()
+        self.acceptedSignal.emit()
 
     def __setQss(self) -> None:
         self.buttonGroup.setObjectName('buttonGroup')

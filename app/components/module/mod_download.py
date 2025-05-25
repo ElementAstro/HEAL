@@ -125,7 +125,7 @@ class SettingsWindow(QDialog):
         # 保存按钮
         self.save_button = PushButton("保存")
         self.save_button.clicked.connect(self.save_settings)
-        layout.addWidget(self.save_button, alignment=Qt.AlignRight)
+        layout.addWidget(self.save_button, alignment=Qt.AlignmentFlag.AlignRight)
 
         self.setLayout(layout)
 
@@ -144,12 +144,12 @@ class SettingsWindow(QDialog):
         try:
             with open('settings.json', 'w') as f:
                 json.dump(self.settings, f, indent=4)
-            MessageBox.information(self, "保存成功", "设置已保存。")
+            QMessageBox.information(self, "保存成功", "设置已保存。")
             logger.info(f"设置已保存: {self.settings}")
             self.accept()
         except Exception as e:
             logger.error(f"保存设置失败: {e}")
-            MessageBox.warning(self, "保存失败", "设置保存失败。")
+            QMessageBox.warning(self, "保存失败", "设置保存失败。")
 
 class ModDownload(QFrame):
     def __init__(self, parent=None):
@@ -192,27 +192,27 @@ class ModDownload(QFrame):
 
         # 下载历史记录
         self.history_label = QLabel("下载历史")
-        self.history_label.setFont(QFont("Arial", 12, QFont.Bold))
+        self.history_label.setFont(QFont("Arial", 12, QFont.Weight.Bold))
         self.history_list = ListWidget()
         self.history_list.setFixedHeight(150)
 
         # 右侧模组详情和下载
         self.details_widget = QStackedWidget()
         self.default_details = QLabel("请选择一个模组查看详情")
-        self.default_details.setAlignment(Qt.AlignCenter)
+        self.default_details.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.default_details.setStyleSheet("color: gray; font-size: 16px;")
         self.details_widget.addWidget(self.default_details)
 
         # 主布局
         mod_list_layout = QVBoxLayout()
         mod_list_label = QLabel("模组列表")
-        mod_list_label.setFont(QFont("Arial", 12, QFont.Bold))
+        mod_list_label.setFont(QFont("Arial", 12, QFont.Weight.Bold))
         mod_list_layout.addWidget(mod_list_label)
         mod_list_layout.addWidget(self.mod_list)
         mod_list_layout.addWidget(self.history_label)
         mod_list_layout.addWidget(self.history_list)
 
-        splitter = QSplitter(Qt.Horizontal)
+        splitter = QSplitter(Qt.Orientation.Horizontal)
         left_panel = QWidget()
         left_panel.setLayout(mod_list_layout)
         splitter.addWidget(left_panel)
@@ -306,13 +306,13 @@ class ModDownload(QFrame):
         for mod in self.mods:
             item_text = f"{mod.name} (已安装)" if mod.installed else mod.name
             item = QListWidgetItem(item_text)
-            item.setData(Qt.UserRole, mod)
+            item.setData(Qt.ItemDataRole.UserRole, mod)
             self.mod_list.addItem(item)
         logger.info("模组列表已加载。")
 
     def display_mod_details(self, item: QListWidgetItem):
         """显示模组详情"""
-        selected_mod: Optional[Mod] = item.data(Qt.UserRole)
+        selected_mod: Optional[Mod] = item.data(Qt.ItemDataRole.UserRole)
         if not selected_mod:
             return
 
@@ -324,26 +324,26 @@ class ModDownload(QFrame):
         icon_path = selected_mod.icon
         if os.path.exists(icon_path):
             pixmap = QPixmap(icon_path).scaled(
-                150, 150, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                150, 150, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         else:
             pixmap = QPixmap(150, 150)
-            pixmap.fill(Qt.gray)
+            pixmap.fill(Qt.GlobalColor.gray)
         icon_label.setPixmap(pixmap)
-        icon_label.setAlignment(Qt.AlignCenter)
+        icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # 模组名称
         name_label = QLabel(selected_mod.name)
-        name_label.setFont(QFont("Arial", 16, QFont.Bold))
-        name_label.setAlignment(Qt.AlignCenter)
+        name_label.setFont(QFont("Arial", 16, QFont.Weight.Bold))
+        name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # 模组描述
         desc_label = QLabel(selected_mod.description)
         desc_label.setWordWrap(True)
-        desc_label.setAlignment(Qt.AlignCenter)
+        desc_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # 文件大小
         size_label = QLabel(f"大小: {selected_mod.size}")
-        size_label.setAlignment(Qt.AlignCenter)
+        size_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # 下载/卸载按钮
         download_button = PushButton(
@@ -418,7 +418,7 @@ class ModDownload(QFrame):
 
     def uninstall_mod(self, mod: Mod, button: PushButton):
         """卸载模组"""
-        reply = MessageBox.question(
+        reply = QMessageBox.question(
             self, "确认卸载", f"确定要卸载模组 {mod.name} 吗？",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
@@ -428,7 +428,7 @@ class ModDownload(QFrame):
             button.setIcon(FluentIcon.DOWNLOAD)
             self.save_installed_mods()
             self.update_mod_list()
-            MessageBox.information(self, "卸载成功", f"模组 {mod.name} 已卸载。")
+            QMessageBox.information(self, "卸载成功", f"模组 {mod.name} 已卸载。")
             logger.info(f"卸载模组: {mod.name}")
 
     @Slot(int)
@@ -445,10 +445,10 @@ class ModDownload(QFrame):
             button.setIcon(FluentIcon.DELETE)
             self.history_list.addItem(f"{mod.name} 下载完成")
             self.save_installed_mods()
-            MessageBox.information(self, "下载完成", f"模组 {mod.name} 已下载并安装。")
+            QMessageBox.information(self, "下载完成", f"模组 {mod.name} 已下载并安装。")
             logger.info(f"模组下载完成: {mod.name}")
         else:
-            MessageBox.warning(self, "下载失败", f"模组 {mod.name} 下载失败: {info}")
+            QMessageBox.warning(self, "下载失败", f"模组 {mod.name} 下载失败: {info}")
             logger.error(f"模组下载失败: {mod.name} 错误: {info}")
         self.update_mod_list()
         self.current_progress_bar.setVisible(False)
@@ -470,7 +470,7 @@ class ModDownload(QFrame):
                 continue
             item_text = f"{mod.name} (已安装)" if mod.installed else mod.name
             item = QListWidgetItem(item_text)
-            item.setData(Qt.UserRole, mod)
+            item.setData(Qt.ItemDataRole.UserRole, mod)
             self.mod_list.addItem(item)
         logger.info("模组列表已根据搜索和分类筛选。")
 
@@ -478,7 +478,7 @@ class ModDownload(QFrame):
         """复制文本到剪贴板"""
         clipboard = QApplication.clipboard()
         clipboard.setText(text)
-        MessageBox.information(self, "复制成功", "内容已复制到剪贴板。")
+        QMessageBox.information(self, "复制成功", "内容已复制到剪贴板。")
         logger.info(f"复制到剪贴板: {text}")
 
 def main():

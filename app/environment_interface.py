@@ -5,10 +5,11 @@ from typing import Optional, Dict, Any
 from pathlib import Path
 
 from PySide6.QtWidgets import (
-    QWidget, QLabel, QStackedWidget, QVBoxLayout, QHBoxLayout, QPushButton, QApplication
+    QWidget, QStackedWidget, QVBoxLayout
 )
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QClipboard
+from PySide6.QtWidgets import QApplication
 
 from qfluentwidgets import (
     Pivot, qrouter, ScrollArea, PrimaryPushSettingCard, InfoBar, FluentIcon,
@@ -27,23 +28,25 @@ logger.add("environment_interface.log", rotation="1 MB")
 
 
 class HyperlinkCardEnvironment(SettingCard):
+    clicked = Signal()
+    
     def __init__(
         self, title: str, content: Optional[str] = None,
         icon: FluentIcon = FluentIcon.LINK, links: Optional[Dict[str, str]] = None
     ):
-        super().__init__(icon, title, content)
+        super().__init__(icon, title, content or "")
         self.links = links or {}
         self.init_ui()
 
     def init_ui(self):
         for name, url in self.links.items():
             link_button = HyperlinkButton(url, name, self)
-            self.hBoxLayout.addWidget(link_button, 0, Qt.AlignRight)
+            self.hBoxLayout.addWidget(link_button, 0, Qt.AlignmentFlag.AlignRight)
         self.hBoxLayout.addSpacing(16)
         copy_button = PrimaryPushButton("复制链接", self)
         copy_button.clicked.connect(lambda: self.copy_to_clipboard(
             next(iter(self.links.values()), "")))
-        self.hBoxLayout.addWidget(copy_button, 0, Qt.AlignRight)
+        self.hBoxLayout.addWidget(copy_button, 0, Qt.AlignmentFlag.AlignRight)
         self.hBoxLayout.addSpacing(10)
 
     def copy_to_clipboard(self, text: str) -> None:
@@ -55,6 +58,7 @@ class HyperlinkCardEnvironment(SettingCard):
 
 class PrimaryPushSettingCardDownload(SettingCard):
     download_signal = Signal(str)
+    handle_download_started = Signal(str)  # 添加缺失的信号
 
     def __init__(
         self, title: str, content: str, icon: FluentIcon = FluentIcon.DOWNLOAD,
@@ -70,7 +74,7 @@ class PrimaryPushSettingCardDownload(SettingCard):
             button.clicked.connect(
                 lambda _, key=option['key']: self.download_signal.emit(key)
             )
-            self.hBoxLayout.addWidget(button, 0, Qt.AlignRight)
+            self.hBoxLayout.addWidget(button, 0, Qt.AlignmentFlag.AlignRight)
             self.hBoxLayout.addSpacing(10)
         self.hBoxLayout.addSpacing(16)
 
@@ -80,7 +84,7 @@ class Environment(ScrollArea):
 
     def __init__(self, text: str, parent: Optional[QWidget] = None):
         super().__init__(parent=parent)
-        self.parent = parent
+        self._parent_widget = parent  # 使用不同的名称避免冲突
         self.setObjectName(text)
         self.scrollWidget = QWidget()
         self.vBoxLayout = QVBoxLayout(self.scrollWidget)
@@ -90,8 +94,7 @@ class Environment(ScrollArea):
         self.environmentInterface = SettingCardGroup(self.scrollWidget)
         self.mongoDBCard = PrimaryPushSettingCard(
             self.tr('打开'),
-            FluentIcon.FIT_PAGE,  # 参数顺序修正
-            
+            FluentIcon.FIT_PAGE,
             self.tr('启动便携版MongoDB数据库'),
             self.tr('打开MongoDB数据库'),
             self
@@ -101,7 +104,7 @@ class Environment(ScrollArea):
         self.init_widget()
 
     def init_widget(self) -> None:
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setViewportMargins(20, 0, 20, 20)
         self.setWidget(self.scrollWidget)
         self.setWidgetResizable(True)
@@ -125,7 +128,7 @@ class Environment(ScrollArea):
             self.tr('下载'), icon=FluentIcon.DOWNLOAD
         )
 
-        self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignLeft)
+        self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignmentFlag.AlignLeft)
         self.vBoxLayout.addWidget(self.stackedWidget)
         self.vBoxLayout.setSpacing(15)
         self.vBoxLayout.setContentsMargins(0, 10, 10, 0)
@@ -141,14 +144,15 @@ class Environment(ScrollArea):
         self.mongoDBCard.clicked.connect(self.handle_mongo_db_open)
         sub_download_cmd_self = SubDownloadCMD(self)
         for i in range(self.environmentDownloadInterface.cardLayout.count()):
-            card = self.environmentDownloadInterface.cardLayout.itemAt(
-                i).widget()
-            if isinstance(card, PrimaryPushSettingCardDownload):
-                card.download_signal.connect(
-                    sub_download_cmd_self.handle_download_started
-                )
-            elif isinstance(card, HyperlinkCardEnvironment) and 'git' in card.links:
-                card.clicked.connect(self.handle_restart_info)
+            item = self.environmentDownloadInterface.cardLayout.itemAt(i)
+            if item is not None:
+                card = item.widget()
+                if isinstance(card, PrimaryPushSettingCardDownload):
+                    card.download_signal.connect(
+                        sub_download_cmd_self.handle_download_started
+                    )
+                elif isinstance(card, HyperlinkCardEnvironment) and 'git' in card.links:
+                    card.clicked.connect(self.handle_restart_info)
         logger.info("信号已连接到槽。")
 
     def load_download_config(self) -> None:
@@ -168,13 +172,13 @@ class Environment(ScrollArea):
         if card_type == 'link':
             return HyperlinkCardEnvironment(
                 title=item['title'],
-                content=item.get('content'),
+                content=item.get('content') or "",
                 links=item.get('links')
             )
         elif card_type == 'download':
             return PrimaryPushSettingCardDownload(
                 title=item['title'],
-                content=item.get('content'),
+                content=item.get('content') or "",
                 options=item.get('options')
             )
         else:
@@ -197,9 +201,10 @@ class Environment(ScrollArea):
 
     def on_current_index_changed(self, index: int) -> None:
         widget = self.stackedWidget.widget(index)
-        self.pivot.setCurrentItem(widget.objectName())
-        qrouter.push(self.stackedWidget, widget.objectName())
-        logger.debug(f"当前索引已更改为 {index} - {widget.objectName()}")
+        if widget:
+            self.pivot.setCurrentItem(widget.objectName())
+            qrouter.push(self.stackedWidget, widget.objectName())
+            logger.debug(f"当前索引已更改为 {index} - {widget.objectName()}")
 
     def handle_mongo_db_open(self) -> None:
         mongo_exe = Path('tool') / 'mongodb' / 'mongod.exe'
@@ -216,19 +221,22 @@ class Environment(ScrollArea):
                 Info(self, 'E', 3000, self.tr("启动数据库失败！"), str(e))
                 logger.error(f"启动 MongoDB 失败: {e}")
         else:
-            InfoBar(
+            file_error = InfoBar(
                 icon=InfoBarIcon.ERROR,
                 title=self.tr('找不到数据库!'),
                 content='',
-                orient=Qt.Horizontal,
+                orient=Qt.Orientation.Horizontal,
                 isClosable=True,
                 position=InfoBarPosition.TOP,
                 duration=3000,
                 parent=self
-            ).addWidget(
-                PrimaryPushButton(
-                    self.tr('前往下载'), self, clicked=lambda: self.stackedWidget.setCurrentIndex(1))
-            ).show()
+            )
+            file_error_button = PrimaryPushButton(
+                self.tr('前往下载'), self)
+            file_error_button.clicked.connect(
+                lambda: self.stackedWidget.setCurrentIndex(1))
+            file_error.addWidget(file_error_button)
+            file_error.show()
             logger.warning("MongoDB 文件不存在。")
 
     def handle_restart_info(self) -> None:
@@ -236,7 +244,7 @@ class Environment(ScrollArea):
             icon=InfoBarIcon.WARNING,
             title=self.tr('重启应用以使用Git命令!'),
             content='',
-            orient=Qt.Horizontal,
+            orient=Qt.Orientation.Horizontal,
             isClosable=True,
             position=InfoBarPosition.TOP,
             duration=-1,
