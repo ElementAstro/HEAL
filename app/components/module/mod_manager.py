@@ -428,9 +428,11 @@ class ModManager(QFrame):
         if selected_items:
             mod_names = [self.get_mod_name_from_item(
                 item) for item in selected_items]
+            # Filter out None values before joining
+            valid_mod_names = [name for name in mod_names if name is not None]
             reply = QMessageBox.warning(
                 self, '确认删除',
-                f"确定要删除以下模组吗？\n{', '.join(mod_names)}",
+                f"确定要删除以下模组吗？\n{', '.join(valid_mod_names)}",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 QMessageBox.StandardButton.No
             )

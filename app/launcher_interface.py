@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QLabel, QStackedWidget, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QStackedWidget, QVBoxLayout
 from PySide6.QtCore import Qt
 from qfluentwidgets import Pivot, qrouter, ScrollArea, PrimaryPushSettingCard, HyperlinkButton, FluentIcon
 from app.model.style_sheet import StyleSheet
@@ -7,15 +7,17 @@ from app.model.download_process import SubDownloadCMD
 from app.model.config import open_file
 
 
-class HyperlinkCard_Launcher(SettingCard):
+class HyperlinkCardLauncher(SettingCard):
     def __init__(self, title, content=None, icon=FluentIcon.LINK):
         super().__init__(icon, title, content)
         self.linkButton_launcher = HyperlinkButton('https://github.com/letheriver2007/Firefly-Launcher',
                                                    'Firefly-Launcher', self)
         self.linkButton_audio = HyperlinkButton('https://github.com/letheriver2007/Firefly-Launcher-Res',
                                                 'Firefly-Launcher-Res', self)
-        self.hBoxLayout.addWidget(self.linkButton_launcher, 0, Qt.AlignRight)
-        self.hBoxLayout.addWidget(self.linkButton_audio, 0, Qt.AlignRight)
+        self.hBoxLayout.addWidget(
+            self.linkButton_launcher, 0, Qt.AlignmentFlag.AlignRight)
+        self.hBoxLayout.addWidget(
+            self.linkButton_audio, 0, Qt.AlignmentFlag.AlignRight)
         self.hBoxLayout.addSpacing(16)
 
 
@@ -24,7 +26,7 @@ class Launcher(ScrollArea):
 
     def __init__(self, text: str, parent=None):
         super().__init__(parent=parent)
-        self.parent = parent
+        self._parent_widget = parent
         self.setObjectName(text)
         self.scrollWidget = QWidget()
         self.vBoxLayout = QVBoxLayout(self.scrollWidget)
@@ -35,7 +37,7 @@ class Launcher(ScrollArea):
 
         # 添加项
         self.LauncherDownloadInterface = SettingCardGroup(self.scrollWidget)
-        self.LauncherRepoCard = HyperlinkCard_Launcher(
+        self.LauncherRepoCard = HyperlinkCardLauncher(
             self.tr('项目仓库'),
             self.tr('打开Firefly-Launcher相关项目仓库')
         )
@@ -56,7 +58,8 @@ class Launcher(ScrollArea):
         self.__initWidget()
 
     def __initWidget(self):
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # 水平滚动条关闭
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)  # 水平滚动条关闭
         self.setViewportMargins(20, 0, 20, 20)
         self.setWidget(self.scrollWidget)
         self.setWidgetResizable(True)  # 必须设置！！！
@@ -81,7 +84,7 @@ class Launcher(ScrollArea):
             '配置'), icon=FluentIcon.EDIT)
 
         # 初始化配置界面
-        self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignLeft)
+        self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignmentFlag.AlignLeft)
         self.vBoxLayout.addWidget(self.stackedWidget)
         self.vBoxLayout.setSpacing(15)
         self.vBoxLayout.setContentsMargins(0, 10, 10, 0)
@@ -92,18 +95,18 @@ class Launcher(ScrollArea):
             self.stackedWidget, self.LauncherDownloadInterface.objectName())
 
     def __connectSignalToSlot(self):
-        SubDownloadCMDSelf = SubDownloadCMD(self)
+        sub_download_cmd_self = SubDownloadCMD(self)
         self.AudioDownloadCard.clicked.connect(
-            lambda: SubDownloadCMDSelf.handleDownloadStarted('audio'))
+            lambda: sub_download_cmd_self.handleDownloadStarted('audio'))
         self.settingConfigCard.clicked.connect(
             lambda: open_file(self, 'config/config.json'))
 
-    def addSubInterface(self, widget: QLabel, objectName, text, icon=None):
-        widget.setObjectName(objectName)
+    def addSubInterface(self, widget: QWidget, object_name: str, text: str, icon=None):
+        widget.setObjectName(object_name)
         self.stackedWidget.addWidget(widget)
         self.pivot.addItem(
             icon=icon,
-            routeKey=objectName,
+            routeKey=object_name,
             text=text,
             onClick=lambda: self.stackedWidget.setCurrentWidget(widget)
         )

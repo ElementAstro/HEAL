@@ -1,4 +1,8 @@
 {
     "python.analysis.typeCheckingMode": "standard",
-    "cmake.ignoreCMakeListsMissing": true
+    "cmake.ignoreCMakeListsMissing": true,
+    "sonarlint.connectedMode.project": {
+        "connectionId": "elementastro",
+        "projectKey": "ElementAstro_HEAL"
+    }
 }

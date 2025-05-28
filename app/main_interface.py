@@ -86,9 +86,9 @@ class Main(MSFluentWindow):
         ]
 
         for interface in interfaces:
-            widget, icon, text, fillIcon, *position = interface
+            widget, icon, text, fill_icon, *position = interface
             pos = position[0] if position else NavigationItemPosition.TOP
-            self.addSubInterface(widget, icon, text, fillIcon, pos)
+            self.addSubInterface(widget, icon, text, fill_icon, pos)
 
         self.navigationInterface.addItem(
             routeKey='theme',
@@ -141,7 +141,7 @@ class Main(MSFluentWindow):
         QApplication.processEvents()
 
     def handleFontCheck(self) -> None:
-        isSetupFont = False
+        is_setup_font = False
         registry_keys = [
             (winreg.HKEY_LOCAL_MACHINE,
              r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"),
@@ -157,14 +157,14 @@ class Main(MSFluentWindow):
                             try:
                                 name, _, _ = winreg.EnumValue(reg_key, i)
                                 if cfg.APP_FONT.lower() in name.lower():
-                                    isSetupFont = True
+                                    is_setup_font = True
                                 i += 1
                             except OSError:
                                 break
         except Exception as e:
             Info(self, 'E', 3000, self.tr('检查字体失败: ') + str(e))
 
-        if not isSetupFont:
+        if not is_setup_font:
             subprocess.run('cd src/patch/font && start zh-cn.ttf', shell=True)
             sys.exit()
 
@@ -179,8 +179,8 @@ class Main(MSFluentWindow):
                 self.handleMediaPlay('success')
             self.login_card.close()
         else:
-            Info(self, 'E', 3000, f"{self.tr('密码错误!')} {
-                 self.tr('次数: ')}{self.count_pwd}")
+            Info(self, 'E', 3000,
+                 f"{self.tr('密码错误!')} {self.tr('次数: ')}{self.count_pwd}")
             self.count_pwd += 1
             if cfg.useAudio.value:
                 self.handleMediaPlay('error')

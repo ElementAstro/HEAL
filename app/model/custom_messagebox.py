@@ -52,8 +52,8 @@ class CustomMessageBox(QDialog):
         self.button_layout.addWidget(button)
 
     def buttonClicked(self, role: QMessageBox.ButtonRole) -> None:
-        # 存储role作为结果
-        self._result = role
+        # 存储ButtonRole的枚举值
+        self._result = role.value
         self.accept()
 
     def exec_(self) -> int:
