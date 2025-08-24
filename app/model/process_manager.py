@@ -4,7 +4,6 @@ import json
 import time
 import psutil
 import signal
-import logging
 import threading
 from enum import Enum
 from typing import Dict, List, Optional, Callable, Any, Union
@@ -15,7 +14,10 @@ from pathlib import Path
 from PySide6.QtCore import QObject, Signal, QTimer, QThread
 from PySide6.QtWidgets import QMessageBox
 
-from loguru import logger
+from app.common.logging_config import get_logger, log_performance, log_exception
+
+# 使用统一日志配置
+logger = get_logger('process_manager')
 
 
 class ProcessStatus(Enum):
@@ -117,15 +119,9 @@ class ProcessManager(QObject):
         self._setup_logging()
         
     def _setup_logging(self):
-        """设置日志"""
-        log_file = self.log_dir / "process_manager.log"
-        logger.add(
-            str(log_file),
-            rotation="10 MB",
-            retention="7 days",
-            level="INFO",
-            format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {name} | {message}"
-        )
+        """设置日志 - 使用统一日志配置"""
+        # 日志配置现在在统一的 logging_config 中处理
+        logger.info("Process manager logging initialized")
         
     def register_process(self, name: str, command: str, working_dir: Optional[str] = None,
                         auto_restart: bool = True, max_restarts: int = 3,

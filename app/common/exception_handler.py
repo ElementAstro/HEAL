@@ -11,9 +11,8 @@ from copy import deepcopy
 from PySide6.QtCore import QObject, Signal, QTimer, Qt
 from PySide6.QtWidgets import QApplication, QMessageBox, QWidget
 from qfluentwidgets import InfoBar, InfoBarIcon, InfoBarPosition
-from loguru import logger
 
-from .logging_config import get_logger
+from .logging_config import get_logger, log_exception
 from .i18n import tr
 from .setting import DEBUG
 
@@ -291,7 +290,18 @@ class ExceptionHandler(QObject):
 
     def _log_exception(self, exception_info: ExceptionInfo):
         """记录异常信息"""
-        logger.error(
+        # 使用统一异常日志记录
+        log_exception(
+            exception_info.exception,
+            f"Exception occurred: {exception_info.exc_type} | "
+            f"Severity: {exception_info.severity} | "
+            f"Message: {exception_info.user_message} | "
+            f"Details: {exception_info.technical_details}",
+            severity=exception_info.severity,
+            exc_type=exception_info.exc_type
+        )
+        
+        app_logger.error(
             f"Exception occurred: {exception_info.exc_type} | "
             f"Severity: {exception_info.severity} | "
             f"Message: {exception_info.user_message} | "
@@ -406,10 +416,10 @@ class ExceptionHandler(QObject):
                 recovery_callback(exception_info)
                 self.recovery_attempted.emit(
                     f"尝试恢复: {exception_info.exc_type}")
-                logger.info(
+                app_logger.info(
                     f"Recovery attempted for {exception_info.exc_type}")
             except Exception as e:
-                logger.error(
+                app_logger.error(
                     f"Recovery failed for {exception_info.exc_type}: {e}")
 
     def _schedule_retry(self, exception_info: ExceptionInfo):
@@ -428,7 +438,7 @@ class ExceptionHandler(QObject):
 
         exception_info = self.pending_retries.pop(0)
 
-        logger.info(
+        app_logger.info(
             f"Auto retry attempt {exception_info.retry_count} for {exception_info.exc_type}")
 
         # 尝试重新执行失败的操作
@@ -450,7 +460,7 @@ class ExceptionHandler(QObject):
         """清除错误历史"""
         self.error_history.clear()
         self.error_counts.clear()
-        logger.info("Error history cleared")
+        app_logger.info("Error history cleared")
 
 
 # 全局异常处理器实例
@@ -561,7 +571,7 @@ def exception_handler_legacy(log: str, *default):
                 return func(*args, **kwargs)
             except Exception as e:
                 if DEBUG:
-                    logger.bind(name=log).error(
+                    app_logger.error(
                         f"{e.__class__.__name__}: {traceback.format_exc()}")
 
                 value = deepcopy(default)
@@ -595,7 +605,7 @@ def exception_traceback_handler_legacy(log: str, *default):
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                logger.bind(name=log).error(
+                app_logger.error(
                     f"{e.__class__.__name__}: {traceback.format_exc()}")
 
                 value = deepcopy(default)

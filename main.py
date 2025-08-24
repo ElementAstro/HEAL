@@ -6,7 +6,7 @@ from pathlib import Path
 from app.common.application import SingletonApplication
 from app.common.logging_config import setup_logging, get_logger
 from app.common.i18n import setup_i18n, set_language, t
-from app.common.enhanced_exception_handler import EnhancedExceptionHandler
+from app.common.exception_handler import ExceptionHandler
 
 # 设置工作目录
 source_file = getsourcefile(lambda: 0)
@@ -16,10 +16,10 @@ if source_file:
 # 初始化系统
 setup_logging()
 logger = get_logger('main')
-exception_handler = EnhancedExceptionHandler()
+exception_handler = ExceptionHandler()
 
 # 安装全局异常处理器
-sys.excepthook = exception_handler.handle_uncaught_exception
+sys.excepthook = exception_handler.handle_exception
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt, QTranslator
@@ -81,5 +81,10 @@ try:
     
 except Exception as e:
     logger.critical(t('app.startup_error', error=str(e)))
-    exception_handler.handle_exception(e, 'startup_error')
+    exception_handler.handle_known_exception(
+        exception=e,
+        exc_type='startup_error',
+        severity='critical',
+        user_message='启动失败'
+    )
     sys.exit(1)

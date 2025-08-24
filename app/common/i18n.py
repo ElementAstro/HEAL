@@ -6,7 +6,10 @@ from enum import Enum
 from functools import lru_cache
 
 from PySide6.QtCore import QObject, Signal, QTranslator, QCoreApplication
-from loguru import logger
+from app.common.logging_config import get_logger
+
+# 使用统一日志配置
+logger = get_logger('i18n')
 
 
 class Language(Enum):

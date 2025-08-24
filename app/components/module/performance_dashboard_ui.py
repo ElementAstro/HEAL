@@ -13,7 +13,7 @@ import time
 import queue
 from datetime import datetime
 import json
-from typing import Dict, Any
+from typing import Dict, Any, List
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
@@ -21,7 +21,9 @@ import numpy as np
 import psutil
 import os
 
-from loguru import logger
+from app.common.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class PerformanceMonitor:
@@ -183,8 +185,8 @@ class PerformanceChartWidget:
         self.ax.grid(True, alpha=0.3)
 
         # Data storage
-        self.times = []
-        self.values = []
+        self.times: List[datetime] = []
+        self.values: List[float] = []
 
         # Setup plot
         self.line, = self.ax.plot([], [], 'b-', linewidth=2)
@@ -368,7 +370,7 @@ class PerformanceDashboardUI:
         self.performance_monitor = performance_monitor
         self.update_thread = None
         self.running = False
-        self.update_queue = queue.Queue()
+        self.update_queue: queue.Queue = queue.Queue()
 
         # Setup UI
         self.setup_ui()

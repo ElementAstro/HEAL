@@ -12,7 +12,9 @@ from enum import Enum
 import json
 
 from PySide6.QtCore import QObject, QTimer, Signal
-from loguru import logger
+from app.common.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class MetricType(Enum):
@@ -82,7 +84,7 @@ class PerformanceAlert:
         self.message = message
         self.severity = severity
         self.triggered = False
-        self.last_trigger_time = 0
+        self.last_trigger_time = 0.0
         self.trigger_count = 0
 
     def check(self, value: float) -> bool:
@@ -317,7 +319,7 @@ class PerformanceMonitor(QObject):
     def export_metrics(self, filepath: str):
         """导出指标数据"""
         try:
-            data = {
+            data: Dict[str, Any] = {
                 'timestamp': time.time(),
                 'metrics': {}
             }
@@ -354,7 +356,7 @@ class PerformanceMonitor(QObject):
 
     def get_performance_report(self) -> Dict[str, Any]:
         """获取性能报告"""
-        report = {
+        report: Dict[str, Any] = {
             'timestamp': time.time(),
             'monitoring_duration': time.time() - self.start_time if self.running else 0,
             'system_info': {

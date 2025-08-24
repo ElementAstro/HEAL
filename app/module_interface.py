@@ -6,12 +6,10 @@ Provides comprehensive module management with robust validation, monitoring, and
 import time
 import json
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, field
-from enum import Enum
 from pathlib import Path
 
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QStackedWidget, QFrame
-from PySide6.QtCore import Qt, QTimer, QObject, Signal
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QStackedWidget
+from PySide6.QtCore import Qt, QTimer, Signal
 from qfluentwidgets import (
     Pivot, qrouter, ScrollArea, FluentIcon, InfoBar, InfoBarPosition,
     MessageBox
@@ -19,69 +17,15 @@ from qfluentwidgets import (
 
 from app.model.style_sheet import StyleSheet
 from app.model.setting_card import CustomFrameGroup
-from loguru import logger
+from app.common.logging_config import get_logger, log_performance, with_correlation_id
 
 from app.components.module.mod_manager import ModManager
 from app.components.module.mod_download import ModDownload
-from app.components.tools.scaffold import ScaffoldApp
-
-
-class ModuleState(Enum):
-    """模块状态枚举"""
-    IDLE = "idle"
-    LOADING = "loading"
-    LOADED = "loaded"
-    ACTIVE = "active"
-    INACTIVE = "inactive"
-    ERROR = "error"
-    UPDATING = "updating"
-
-
-@dataclass
-class ModuleMetrics:
-    """模块性能指标"""
-    load_time: float = 0.0
-    memory_usage: float = 0.0
-    cpu_usage: float = 0.0
-    error_count: int = 0
-    last_error: Optional[str] = None
-    operations_count: int = 0
-    success_rate: float = 100.0
-
-
-@dataclass
-class ModuleConfig:
-    """模块配置"""
-    name: str
-    enabled: bool = True
-    auto_refresh: bool = True
-    refresh_interval: int = 30  # seconds
-    max_retries: int = 3
-    timeout: int = 10  # seconds
-    validation_enabled: bool = True
-    performance_monitoring: bool = True
-    custom_settings: Dict[str, Any] = field(default_factory=dict)
-
-
-class ModuleEventManager(QObject):
-    """模块事件管理器"""
-    module_loaded = Signal(str)
-    module_unloaded = Signal(str)
-    module_error = Signal(str, str)
-    performance_updated = Signal(str, dict)
-    validation_completed = Signal(str, bool, list)
-
-
-class ScaffoldAppWrapper(QFrame):
-    """ScaffoldApp包装器，使其兼容QFrame"""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        self.scaffold_app = ScaffoldApp()
-        layout.addWidget(self.scaffold_app)
+from app.components.module import (
+    ModuleState, ModuleMetrics, ModuleConfig, ModuleEventManager,
+    ModuleConfigManager, ModuleMetricsManager, ModuleOperationHandler,
+    ScaffoldAppWrapper
+)
 
 
 class Module(ScrollArea):
@@ -99,14 +43,17 @@ class Module(ScrollArea):
         self.setObjectName(text)
 
         # 初始化日志
-        self.logger = logger.bind(component="ModuleInterface")
+        self.logger = get_logger('module_interface', module='ModuleInterface')
 
         # 核心组件初始化
         self.event_manager = ModuleEventManager()
-
-        # 模块配置
-        self.module_configs: Dict[str, ModuleConfig] = {}
-        self.module_metrics: Dict[str, ModuleMetrics] = {}
+        self.config_manager = ModuleConfigManager()
+        self.metrics_manager = ModuleMetricsManager()
+        self.operation_handler = ModuleOperationHandler(
+            self.event_manager, 
+            self.config_manager, 
+            self.metrics_manager
+        )
 
         # UI组件
         self.scrollWidget = QWidget()
@@ -126,7 +73,7 @@ class Module(ScrollArea):
         self.performance_timer.start(5000)  # 5秒更新一次
 
         # 初始化刷新时间记录
-        self.last_refresh_times = {}
+        self.last_refresh_times: Dict[str, float] = {}
 
         # 自动刷新定时器
         self.refresh_timer = QTimer()
@@ -243,45 +190,13 @@ class Module(ScrollArea):
 
     def _load_module_configurations(self):
         """加载模块配置"""
-        try:
-            config_path = Path("config/module_configs.json")
-            if config_path.exists():
-                with open(config_path, 'r', encoding='utf-8') as f:
-                    config_data = json.load(f)
-
-                for name, config in config_data.items():
-                    self.module_configs[name] = ModuleConfig(**config)
-
-                self.logger.info(f"已加载 {len(self.module_configs)} 个模块配置")
-        except Exception as e:
-            self.logger.error(f"加载模块配置失败: {e}")
+        self.config_manager.load_configurations()
+        self.logger.info("模块配置加载完成")
 
     def _save_module_configurations(self):
         """保存模块配置"""
-        try:
-            config_path = Path("config/module_configs.json")
-            config_path.parent.mkdir(exist_ok=True)
-
-            config_data = {}
-            for name, config in self.module_configs.items():
-                config_data[name] = {
-                    'name': config.name,
-                    'enabled': config.enabled,
-                    'auto_refresh': config.auto_refresh,
-                    'refresh_interval': config.refresh_interval,
-                    'max_retries': config.max_retries,
-                    'timeout': config.timeout,
-                    'validation_enabled': config.validation_enabled,
-                    'performance_monitoring': config.performance_monitoring,
-                    'custom_settings': config.custom_settings
-                }
-
-            with open(config_path, 'w', encoding='utf-8') as f:
-                json.dump(config_data, f, indent=2, ensure_ascii=False)
-
-            self.logger.info("模块配置已保存")
-        except Exception as e:
-            self.logger.error(f"保存模块配置失败: {e}")
+        self.config_manager.save_configurations()
+        self.logger.info("模块配置保存完成")
 
     def _start_monitoring(self):
         """启动监控系统"""
@@ -291,14 +206,15 @@ class Module(ScrollArea):
     def _configure_auto_refresh(self):
         """配置自动刷新"""
         # 检查是否有模块启用了自动刷新
+        all_configs = self.config_manager.get_all_configs()
         auto_refresh_enabled = any(
-            config.auto_refresh for config in self.module_configs.values()
+            config.auto_refresh for config in all_configs.values()
         )
 
         if auto_refresh_enabled:
             # 使用最小的刷新间隔
             min_interval = min(
-                (config.refresh_interval for config in self.module_configs.values()
+                (config.refresh_interval for config in all_configs.values()
                  if config.auto_refresh),
                 default=30
             )
@@ -309,21 +225,19 @@ class Module(ScrollArea):
     def _auto_refresh_modules(self):
         """自动刷新模块"""
         current_time = time.time()
+        all_configs = self.config_manager.get_all_configs()
 
-        for name, config in self.module_configs.items():
+        for name, config in all_configs.items():
             if config.auto_refresh:
                 # 检查是否需要刷新
-                if hasattr(self, 'last_refresh_times'):
-                    last_refresh = self.last_refresh_times.get(name, 0)
-                    if current_time - last_refresh >= config.refresh_interval:
-                        self._refresh_module(name)
+                last_refresh = self.last_refresh_times.get(name, 0)
+                if current_time - last_refresh >= config.refresh_interval:
+                    self._refresh_module(name)
 
     def _refresh_module(self, module_name: str):
         """刷新单个模块"""
         try:
             # 记录刷新时间
-            if not hasattr(self, 'last_refresh_times'):
-                pass  # 'self.last_refresh_times' is already initialized in __init__
             self.last_refresh_times[module_name] = time.time()
 
             self.logger.debug(f"模块 {module_name} 已刷新")
@@ -334,14 +248,13 @@ class Module(ScrollArea):
         """更新性能指标"""
         try:
             # 模拟性能数据更新
-            for module_name in self.module_configs.keys():
-                if module_name not in self.module_metrics:
-                    self.module_metrics[module_name] = ModuleMetrics()
+            all_configs = self.config_manager.get_all_configs()
+            for module_name in all_configs.keys():
+                # 初始化指标（如果不存在）
+                self.metrics_manager.initialize_metrics(module_name)
 
                 # 更新一些基本指标
-                metrics = self.module_metrics[module_name]
-                metrics.cpu_usage = 0
-                metrics.memory_usage = 0
+                self.metrics_manager.update_resource_usage(module_name, 0.0, 0.0)
 
         except Exception as e:
             self.logger.error(f"更新性能指标失败: {e}")
@@ -387,32 +300,7 @@ class Module(ScrollArea):
 
     def _handle_module_operation(self, operation: str, module_name: str):
         """处理模块操作请求"""
-        if operation == "load":
-            self._load_module_internal(module_name)
-        elif operation == "unload":
-            self.unload_module(module_name)
-        elif operation == "reload":
-            self.reload_module(module_name)
-        elif operation == "validate":
-            self._validate_module_internal(module_name)
-        else:
-            self.logger.warning(f"未知操作: {operation}")
-
-    def _load_module_internal(self, module_name: str):
-        """内部模块加载实现"""
-        try:
-            self.logger.info(f"正在加载模块: {module_name}")
-            # 这里添加实际的模块加载逻辑
-        except Exception as e:
-            self.logger.error(f"加载模块 {module_name} 失败: {e}")
-
-    def _validate_module_internal(self, module_name: str):
-        """内部模块验证实现"""
-        try:
-            self.logger.info(f"正在验证模块: {module_name}")
-            # 这里添加实际的模块验证逻辑
-        except Exception as e:
-            self.logger.error(f"验证模块 {module_name} 失败: {e}")
+        self.operation_handler.handle_operation(operation, module_name)
 
     # 事件处理方法
     def _on_module_loaded(self, module_name: str):
@@ -483,7 +371,8 @@ class Module(ScrollArea):
     def load_module(self, module_name: str, force: bool = False):
         """加载模块"""
         # 使用force参数进行条件检查
-        if force or module_name not in self.module_configs:
+        all_configs = self.config_manager.get_all_configs()
+        if force or module_name not in all_configs:
             self.module_operation_requested.emit("load", module_name)
             self.logger.info(f"请求加载模块: {module_name} (force={force})")
         else:
@@ -506,12 +395,11 @@ class Module(ScrollArea):
 
     def get_module_config(self, module_name: str) -> Optional[ModuleConfig]:
         """获取模块配置"""
-        return self.module_configs.get(module_name)
+        return self.config_manager.get_config(module_name)
 
     def update_module_config(self, module_name: str, config: ModuleConfig):
         """更新模块配置"""
-        self.module_configs[module_name] = config
-        self._save_module_configurations()
+        self.config_manager.update_config(module_name, config)
 
         # 如果配置了自动刷新，重新配置定时器
         if config.auto_refresh:
@@ -519,23 +407,24 @@ class Module(ScrollArea):
 
     def get_module_metrics(self, module_name: str) -> Optional[ModuleMetrics]:
         """获取模块性能指标"""
-        return self.module_metrics.get(module_name)
+        return self.metrics_manager.get_metrics(module_name)
 
     def get_all_module_metrics(self) -> Dict[str, ModuleMetrics]:
         """获取所有模块性能指标"""
-        return self.module_metrics.copy()
+        return self.metrics_manager.get_all_metrics()
 
     def export_module_data(self, filepath: str):
         """导出模块数据"""
         try:
-            data = {
+            data: Dict[str, Any] = {
                 'timestamp': time.time(),
                 'configs': {},
                 'metrics': {}
             }
 
             # 导出配置
-            for name, config in self.module_configs.items():
+            all_configs = self.config_manager.get_all_configs()
+            for name, config in all_configs.items():
                 data['configs'][name] = {
                     'name': config.name,
                     'enabled': config.enabled,
@@ -546,7 +435,8 @@ class Module(ScrollArea):
                 }
 
             # 导出性能指标
-            for name, metrics in self.module_metrics.items():
+            all_metrics = self.metrics_manager.get_all_metrics()
+            for name, metrics in all_metrics.items():
                 data['metrics'][name] = {
                     'load_time': metrics.load_time,
                     'memory_usage': metrics.memory_usage,
@@ -569,9 +459,10 @@ class Module(ScrollArea):
 
     def get_system_status(self) -> Dict[str, Any]:
         """获取系统状态"""
+        all_configs = self.config_manager.get_all_configs()
         return {
             'module_interface_state': self.current_state.value,
-            'total_modules': len(self.module_configs),
+            'total_modules': len(all_configs),
             'performance_monitoring': self.performance_timer.isActive(),
             'auto_refresh': self.refresh_timer.isActive(),
             'cpu_usage': 0,
@@ -606,7 +497,7 @@ class Module(ScrollArea):
             self.refresh_timer.stop()
 
         # 保存配置
-        self._save_module_configurations()
+        self.config_manager.save_configurations()
 
         self.logger.info("Module Interface 资源清理完成")
 

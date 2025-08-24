@@ -156,7 +156,7 @@ class JsonEditor(QWidget):
         main_layout.addWidget(self.status_bar)
 
         self.setLayout(main_layout)
-        self.clipboard = None
+        self.clipboard: Optional[QTreeWidgetItem] = None
 
     def open_file(self) -> None:
         file_name, _ = QFileDialog.getOpenFileName(

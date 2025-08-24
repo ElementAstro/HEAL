@@ -1,7 +1,9 @@
 # markdown_renderer.py
 import markdown
 from PySide6.QtWidgets import QTextBrowser
-from loguru import logger
+from app.common.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 class MarkdownRenderer:
     """Markdown Rendering Component"""

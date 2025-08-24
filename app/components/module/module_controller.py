@@ -12,7 +12,10 @@ import json
 from concurrent.futures import ThreadPoolExecutor, Future
 
 from PySide6.QtCore import QObject, QTimer, Signal
-from loguru import logger
+from app.common.logging_config import get_logger, log_performance, with_correlation_id, log_exception
+
+# 使用统一日志配置
+logger = get_logger('module_controller')
 
 
 class ValidationLevel(Enum):
@@ -693,7 +696,7 @@ class ModuleController(QObject):
     def export_configuration(self, filepath: str):
         """导出配置"""
         try:
-            config_data = {
+            config_data: Dict[str, Any] = {
                 'modules': {},
                 'config': self.config,
                 'timestamp': time.time()

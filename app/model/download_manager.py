@@ -14,7 +14,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from urllib.parse import urlparse
 from PySide6.QtCore import QObject, Signal, QThread, QTimer
-from loguru import logger
+from app.common.logging_config import get_logger, log_performance, log_download, log_exception
+
+# 使用统一日志配置
+logger = get_logger('download_manager')
 
 
 class DownloadStatus(Enum):

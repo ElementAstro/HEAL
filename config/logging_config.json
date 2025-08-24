@@ -1,0 +1,100 @@
+{
+  "logging": {
+    "description": "统一日志系统配置",
+    "version": "2.0",
+    "features": {
+      "correlation_tracking": {
+        "enabled": true,
+        "description": "启用关联ID追踪，可以跟踪相关的操作序列"
+      },
+      "performance_monitoring": {
+        "enabled": true,
+        "threshold_slow_operation": 1.0,
+        "description": "性能监控，记录执行时间超过阈值的操作"
+      },
+      "structured_logging": {
+        "enabled": true,
+        "json_serialization": true,
+        "description": "结构化日志，便于自动化分析"
+      },
+      "async_logging": {
+        "enabled": true,
+        "queue_size": 1000,
+        "description": "异步日志写入，提升性能"
+      },
+      "log_filtering": {
+        "enabled": true,
+        "custom_filters": [],
+        "description": "智能日志过滤"
+      }
+    },
+    "log_levels": {
+      "console": "INFO",
+      "file": "DEBUG",
+      "error_file": "ERROR",
+      "performance_file": "INFO",
+      "description": "各种输出目标的日志级别"
+    },
+    "rotation": {
+      "application_log": {
+        "size": "10 MB",
+        "retention": "30 days"
+      },
+      "error_log": {
+        "size": "5 MB", 
+        "retention": "60 days"
+      },
+      "performance_log": {
+        "size": "5 MB",
+        "retention": "7 days"
+      },
+      "download_log": {
+        "size": "5 MB",
+        "retention": "14 days"
+      },
+      "network_log": {
+        "size": "5 MB",
+        "retention": "7 days"
+      },
+      "exception_log": {
+        "size": "10 MB",
+        "retention": "90 days"
+      }
+    },
+    "alerting": {
+      "enabled": false,
+      "error_threshold": 10,
+      "critical_threshold": 1,
+      "notification_channels": [],
+      "description": "错误告警配置"
+    },
+    "cleanup": {
+      "auto_archive_days": 30,
+      "max_directory_size_mb": 100,
+      "cleanup_schedule": "daily",
+      "description": "自动清理和归档配置"
+    }
+  },
+  "modules": {
+    "download_interface": {
+      "log_level": "DEBUG",
+      "performance_monitoring": true
+    },
+    "module_interface": {
+      "log_level": "INFO", 
+      "performance_monitoring": true
+    },
+    "proxy_interface": {
+      "log_level": "INFO",
+      "performance_monitoring": false
+    },
+    "process_manager": {
+      "log_level": "DEBUG",
+      "performance_monitoring": true
+    },
+    "quality_assurance": {
+      "log_level": "INFO",
+      "performance_monitoring": true
+    }
+  }
+}

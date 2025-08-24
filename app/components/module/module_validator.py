@@ -13,7 +13,9 @@ from dataclasses import dataclass
 from enum import Enum
 import re
 
-from loguru import logger
+from app.common.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class ValidationLevel(Enum):
@@ -268,7 +270,7 @@ class ModuleValidator:
 
     def _validate_metadata(self, path: Path) -> Tuple[List[ValidationIssue], Dict[str, Any]]:
         """元数据验证"""
-        issues = []
+        issues: List[ValidationIssue] = []
         metadata = {}
 
         # 查找元数据文件
@@ -342,7 +344,7 @@ class ModuleValidator:
 
     def _validate_version_format(self, metadata: Dict[str, Any]) -> List[ValidationIssue]:
         """验证版本格式"""
-        issues = []
+        issues: List[ValidationIssue] = []
 
         if 'version' in metadata:
             version = metadata['version']
@@ -358,7 +360,7 @@ class ModuleValidator:
 
     def _validate_dependencies(self) -> List[ValidationIssue]:
         """依赖验证"""
-        issues = []
+        issues: List[ValidationIssue] = []
         return issues
 
     def _validate_security(self, path: Path) -> List[ValidationIssue]:

@@ -2,14 +2,12 @@ import os
 import json
 from typing import Optional
 import requests
-from loguru import logger
+from app.common.logging_config import get_logger, log_performance, log_network, log_exception
 from PySide6.QtCore import QThread, Signal
 from app.model.config import cfg, get_json
 
-
-# Configure Loguru
-logger.remove()
-logger.add("check_update.log", rotation="1 MB")
+# 使用统一日志配置
+logger = get_logger('check_update')
 
 
 def get_latest_version() -> Optional[str]:

@@ -21,14 +21,15 @@ import shutil
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
-import logging
+import sys
+import os
 
-# Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# 添加项目根目录到路径以导入统一日志配置
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from app.common.logging_config import get_logger, log_performance, health_check
+
+# 使用统一日志配置
+logger = get_logger('quality_assurance')
 
 
 @dataclass
@@ -803,7 +804,8 @@ def main():
     args = parser.parse_args()
     
     if args.verbose:
-        logging.getLogger().setLevel(logging.DEBUG)
+        # Enable debug logging
+        logger.info("Debug mode enabled")
     
     # Validate project path
     if not os.path.exists(args.project_path):

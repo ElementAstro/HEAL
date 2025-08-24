@@ -4,7 +4,10 @@ import inspect
 from functools import wraps
 from typing import Callable, Dict, Any, List, Optional, Union, Protocol
 from dataclasses import dataclass, field
-from loguru import logger
+from app.common.logging_config import get_logger, log_performance
+
+# 使用统一日志配置
+logger = get_logger('dispatch')
 
 
 class CommandError(Exception):
@@ -198,14 +201,14 @@ class CommandDispatcher:
 
     def add_middleware(self, middleware: Middleware) -> None:
         self._middleware.append(middleware)
-        logger.info(f"Added middleware: {middleware.__name__}")
+        logger.info(f"Added middleware: {getattr(middleware, '__name__', str(middleware))}")
 
     def remove_middleware(self, middleware: Middleware) -> None:
         if middleware in self._middleware:
             self._middleware.remove(middleware)
-            logger.info(f"Removed middleware: {middleware.__name__}")
+            logger.info(f"Removed middleware: {getattr(middleware, '__name__', str(middleware))}")
         else:
-            logger.warning(f"Middleware '{middleware.__name__}' not found.")
+            logger.warning(f"Middleware '{getattr(middleware, '__name__', str(middleware))}' not found.")
 
     def add_event_listener(self, event_name: str, listener: EventListener) -> None:
         if event_name not in self._events:
@@ -270,11 +273,11 @@ def command(
     cooldown: float = 0.0
 ) -> Callable:
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-        func._is_command = True
-        func._description = description
-        func._aliases = aliases or []
-        func._permissions = permissions or []
-        func._cooldown = cooldown
+        func._is_command = True  # type: ignore
+        func._description = description  # type: ignore
+        func._aliases = aliases or []  # type: ignore
+        func._permissions = permissions or []  # type: ignore
+        func._cooldown = cooldown  # type: ignore
 
         @wraps(func)
         def wrapper(*args, **kwargs):

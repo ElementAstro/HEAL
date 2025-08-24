@@ -16,10 +16,9 @@ from qfluentwidgets import (
     FluentIcon, PushButton, ListWidget, MessageBox, ProgressBar, ToolButton,
     ComboBox, LineEdit, CheckBox, SpinBox
 )
-from loguru import logger
+from app.common.logging_config import get_logger
 
-# 配置loguru
-logger.add("mod_manager.log", rotation="500 MB")
+logger = get_logger(__name__)
 
 @dataclass
 class Mod:

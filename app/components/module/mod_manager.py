@@ -326,8 +326,7 @@ class ModManager(QFrame):
                             )
                             self.mods[mod_name] = mod_info
                     except Exception as e:
-                        QMessageBox.critical(self, '错误', f"加载模组 '{
-                                             mod_dir}' 时发生错误: {e}")
+                        QMessageBox.critical(self, '错误', f"加载模组 '{mod_dir}' 时发生错误: {e}")
 
         self.filtered_mods = self.mods.copy()
         self.update_mod_list()
@@ -463,8 +462,7 @@ class ModManager(QFrame):
                 os.rmdir(mod_path)
                 QMessageBox.information(self, '成功', f"模组 '{mod_name}' 已删除。")
             except Exception as e:
-                QMessageBox.critical(self, '错误', f"删除模组 '{
-                                     mod_name}' 时发生错误: {e}")
+                QMessageBox.critical(self, '错误', f"删除模组 '{mod_name}' 时发生错误: {e}")
             self.load_mods()
 
     def enable_mod(self):

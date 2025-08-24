@@ -1,44 +1,21 @@
 import sys
 import json
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QStackedWidget,
-    QPushButton, QApplication
+    QWidget, QVBoxLayout, QStackedWidget
 )
-from PySide6.QtGui import QPixmap, QPainter, QPainterPath, QDesktopServices, QFont, QIntValidator, QClipboard
-from PySide6.QtCore import Qt, QUrl, QSize, QProcess, Signal
+from PySide6.QtCore import Qt
 from qfluentwidgets import (
-    Pivot, qrouter, ScrollArea, CustomColorSettingCard, PushButton,
-    PrimaryPushSettingCard, setCustomStyleSheet, SwitchSettingCard,
-    ComboBoxSettingCard, LineEdit, PrimaryPushButton, FluentIcon, setThemeColor
+    Pivot, qrouter, ScrollArea
 )
-from app.model.setting_card import SettingCard, SettingCardGroup, CustomDialog
 from app.model.style_sheet import StyleSheet
-from app.model.check_update import check_update
-from app.model.config import cfg, get_json, Info
-from app.components.tools.editor import JsonEditor
-
-
-class LineEditSettingCardPort(SettingCard):
-    set_port = Signal()
-
-    def __init__(self, title, icon=FluentIcon.SETTING):
-        super().__init__(icon, title)
-        self.port_edit = LineEdit(self)
-        self.port_edit.setFixedWidth(85)
-        self.port_edit.setPlaceholderText(self.tr("端口"))
-        self.port_edit.setValidator(QIntValidator(1, 99999, self))
-        self.set_port_button = PrimaryPushButton(self.tr('设置'), self)
-
-        self.hBoxLayout.addWidget(
-            self.port_edit, 0, Qt.AlignmentFlag.AlignRight)
-        self.hBoxLayout.addSpacing(10)
-        self.hBoxLayout.addWidget(
-            self.set_port_button, 0, Qt.AlignmentFlag.AlignRight)
-        self.hBoxLayout.addSpacing(16)
-        self.set_port_button.clicked.connect(self.set_port.emit)
+from app.model.config import cfg
+from app.components.setting import (
+    SettingsManager, SettingsLayoutManager
+)
 
 
 class Setting(ScrollArea):
+    """Main settings interface with navigation and different setting categories."""
     Nav = Pivot
 
     def __init__(self, text: str, parent=None):
@@ -48,85 +25,13 @@ class Setting(ScrollArea):
         self.scrollWidget = QWidget()
         self.vBoxLayout = QVBoxLayout(self.scrollWidget)
 
+        # Initialize components
+        self.settings_manager = SettingsManager(self)
+        self.layout_manager = SettingsLayoutManager(self)
+
         # 栏定义
         self.pivot = self.Nav(self)
         self.stackedWidget = QStackedWidget(self)
-
-        # 添加项
-        self.PersonalInterface = SettingCardGroup(self.scrollWidget)
-        self.themeColorCard = CustomColorSettingCard(
-            cfg.themeColor,
-            FluentIcon.PALETTE,
-            self.tr('主题色'),
-            self.tr('默认流萤主题色，开拓者你不会改的吧?')
-        )
-        self.zoomCard = ComboBoxSettingCard(
-            cfg.dpiScale,
-            FluentIcon.ZOOM,
-            "DPI",
-            self.tr("调整全局缩放"),
-            texts=["100%", "125%", "150%", "175%", "200%", self.tr("跟随系统设置")]
-        )
-        self.languageCard = ComboBoxSettingCard(
-            cfg.language,
-            FluentIcon.LANGUAGE,
-            self.tr('语言'),
-            self.tr('界面显示语言'),
-            texts=['简体中文', '繁體中文', 'English', self.tr('跟随系统设置')]
-        )
-        self.updateOnStartUpCard = PrimaryPushSettingCard(
-            self.tr('检查更新'),
-            FluentIcon.UPDATE,
-            self.tr('手动检查更新'),
-            self.tr('当前版本 : ') + cfg.APP_VERSION
-        )
-        self.restartCard = PrimaryPushSettingCard(
-            self.tr('重启程序'),
-            FluentIcon.ROTATE,
-            self.tr('重启程序'),
-            self.tr('无奖竞猜，存在即合理')
-        )
-        self.configEditorCard = PrimaryPushSettingCard(
-            self.tr('打开配置'),
-            FluentIcon.PENCIL_INK,
-            self.tr('打开配置'),
-            self.tr('自实现Json编辑器')
-        )
-        self.FunctionInterface = SettingCardGroup(self.scrollWidget)
-        self.autoCopyCard = SwitchSettingCard(
-            FluentIcon.COPY,
-            self.tr('命令自动复制'),
-            self.tr('选择命令时，自动复制命令到剪贴板'),
-            configItem=cfg.autoCopy
-        )
-        self.useLoginCard = SwitchSettingCard(
-            FluentIcon.PENCIL_INK,
-            self.tr('启用登录功能'),
-            self.tr('使用自定义登陆彩蛋'),
-            configItem=cfg.useLogin
-        )
-        self.useAudioCard = SwitchSettingCard(
-            FluentIcon.MUSIC,
-            self.tr('启用流萤语音'),
-            self.tr('使用随机流萤语音彩蛋'),
-            configItem=cfg.useAudio
-        )
-        self.ProxyInterface = SettingCardGroup(self.scrollWidget)
-        self.proxyCard = SwitchSettingCard(
-            FluentIcon.CERTIFICATE,
-            self.tr('使用代理端口'),
-            self.tr('启用代理，在配置文件里更改地址'),
-            configItem=cfg.proxyStatus
-        )
-        self.proxyPortCard = LineEditSettingCardPort(
-            self.tr('代理端口')
-        )
-        self.chinaCard = SwitchSettingCard(
-            FluentIcon.CALORIES,
-            self.tr('使用国内镜像'),
-            self.tr('为Github下载启用国内镜像站链接'),
-            configItem=cfg.chinaStatus
-        )
 
         self.__initWidget()
 
@@ -146,218 +51,31 @@ class Setting(ScrollArea):
         self.__connectSignalToSlot()
 
     def __initLayout(self):
-        # 项绑定到栏目
-        self.PersonalInterface.addSettingCard(self.themeColorCard)
-        self.PersonalInterface.addSettingCard(self.zoomCard)
-        self.PersonalInterface.addSettingCard(self.languageCard)
-        self.PersonalInterface.addSettingCard(self.updateOnStartUpCard)
-        self.PersonalInterface.addSettingCard(self.restartCard)
-        self.PersonalInterface.addSettingCard(self.configEditorCard)
-        self.FunctionInterface.addSettingCard(self.autoCopyCard)
-        self.FunctionInterface.addSettingCard(self.useLoginCard)
-        self.FunctionInterface.addSettingCard(self.useAudioCard)
-        self.ProxyInterface.addSettingCard(self.proxyCard)
-        self.ProxyInterface.addSettingCard(self.proxyPortCard)
-        self.ProxyInterface.addSettingCard(self.chinaCard)
+        # Create setting interfaces using manager
+        self.PersonalInterface = self.settings_manager.create_personal_interface()
+        self.FunctionInterface = self.settings_manager.create_function_interface()
+        self.ProxyInterface = self.settings_manager.create_proxy_interface()
 
-        # 栏绑定界面
-        self.addSubInterface(self.PersonalInterface, 'PersonalInterface', self.tr(
-            '程序'), icon=FluentIcon.SETTING)
-        self.addSubInterface(self.FunctionInterface, 'FunctionInterface', self.tr(
-            '功能'), icon=FluentIcon.TILES)
-        self.addSubInterface(self.ProxyInterface, 'ProxyInterface', self.tr(
-            '代理'), icon=FluentIcon.CERTIFICATE)
-        self.AboutInterface = About('AboutInterface', self)
-        self.addSubInterface(self.AboutInterface, 'AboutInterface', self.tr(
-            '关于'), icon=FluentIcon.INFO)
-
-        self.config_editor = JsonEditor()
-
-        # 初始化配置界面
-        self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignmentFlag.AlignLeft)
-        self.vBoxLayout.addWidget(self.stackedWidget)
-        self.vBoxLayout.setSpacing(15)
-        self.vBoxLayout.setContentsMargins(0, 10, 10, 0)
-        self.stackedWidget.currentChanged.connect(self.onCurrentIndexChanged)
-        self.stackedWidget.setCurrentWidget(self.PersonalInterface)
-        self.pivot.setCurrentItem(self.PersonalInterface.objectName())
-        qrouter.setDefaultRouteKey(
-            self.stackedWidget, self.PersonalInterface.objectName())
+        # Setup layout using layout manager
+        self.layout_manager.setup_layout(self.pivot, self.stackedWidget)
+        self.layout_manager.setup_interfaces(
+            self.pivot, self.stackedWidget,
+            self.PersonalInterface, self.FunctionInterface, self.ProxyInterface
+        )
 
     def __initInfo(self):
-        port = get_json('./config/config.json', 'PROXY_PORT')
-        self.proxyPortCard.titleLabel.setText(self.tr(f'代理端口 (当前: {port})'))
-        self.proxyPortCard.setDisabled(not cfg.proxyStatus.value)
+        self.settings_manager.init_proxy_info()
 
     def __connectSignalToSlot(self):
-        self.themeColorCard.colorChanged.connect(
-            lambda c: setThemeColor(c, lazy=True))
-        self.zoomCard.comboBox.currentIndexChanged.connect(
-            self.restart_application)
-        self.languageCard.comboBox.currentIndexChanged.connect(
-            self.restart_application)
-        self.updateOnStartUpCard.clicked.connect(
-            lambda: check_update() if self.parent_widget else check_update())
-        self.restartCard.clicked.connect(self.restart_application)
-        self.configEditorCard.clicked.connect(self.open_config_editor)
-
-        self.autoCopyCard.checkedChanged.connect(
-            lambda: self.handleChoiceChanged(cfg.autoCopy.value, self.tr('自动复制已开启!'), self.tr('自动复制已关闭!')))
-        self.useLoginCard.checkedChanged.connect(
-            lambda: self.handleChoiceChanged(cfg.useLogin.value, self.tr('登录功能已开启!'), self.tr('登录功能已关闭!')))
-        self.useAudioCard.checkedChanged.connect(
-            lambda: self.handleChoiceChanged(cfg.useAudio.value, self.tr('流萤语音已开启!'), self.tr('流萤语音已关闭!')))
-
-        self.proxyCard.checkedChanged.connect(
-            lambda: self.handleProxyChanged(cfg.proxyStatus.value, self.tr('代理端口已开启!'), self.tr('代理端口已关闭!')))
-        self.chinaCard.checkedChanged.connect(
-            lambda: self.handleProxyChanged(cfg.chinaStatus.value, self.tr('国内镜像已开启!'), self.tr('国内镜像已关闭!')))
-        self.proxyPortCard.set_port.connect(self.handleSetProxyPort)
+        self.settings_manager.connect_signals()
 
     def addSubInterface(self, widget: QWidget, objectName: str, text: str, icon=None):
-        widget.setObjectName(objectName)
-        self.stackedWidget.addWidget(widget)
-        self.pivot.addItem(
-            icon=icon,
-            routeKey=objectName,
-            text=text,
-            onClick=lambda: self.stackedWidget.setCurrentWidget(widget)
+        """Legacy method for compatibility."""
+        self.layout_manager.add_sub_interface(
+            self.pivot, self.stackedWidget, widget, objectName, text, icon
         )
 
     def onCurrentIndexChanged(self, index):
-        widget = self.stackedWidget.widget(index)
-        self.pivot.setCurrentItem(widget.objectName())
-        qrouter.push(self.stackedWidget, widget.objectName())
+        """Legacy method for compatibility."""
+        self.layout_manager.on_current_index_changed(self.pivot, self.stackedWidget, index)
 
-    def restart_application(self):
-        current_process = QProcess()
-        current_process.startDetached(sys.executable, sys.argv)
-        sys.exit()
-
-    def open_config_editor(self):
-        self.config_editor_dialog = CustomDialog(self.config_editor)
-        self.config_editor_dialog.show()
-
-    def handleChoiceChanged(self, status, title_true, title_false):
-        if status:
-            Info(self, 'S', 1000, title_true)
-        else:
-            Info(self, 'S', 1000, title_false)
-
-    def handleProxyChanged(self, status, title_true, title_false):
-        if status:
-            Info(self, 'S', 1000, title_true)
-        else:
-            Info(self, 'S', 1000, title_false)
-
-        if cfg.chinaStatus.value and cfg.proxyStatus.value:
-            Info(self, 'W', 3000, self.tr("代理设置冲突,优先使用国内镜像!"))
-
-        self.__initInfo()
-
-    def handleSetProxyPort(self):
-        new_port = self.proxyPortCard.port_edit.text()
-        if new_port:
-            config_path = 'config/config.json'
-            with open(config_path, 'r', encoding='utf-8') as file:
-                data = json.load(file)
-                data['PROXY_PORT'] = new_port
-            with open(config_path, 'w', encoding='utf-8') as file:
-                json.dump(data, file, indent=2, ensure_ascii=False)
-
-            # 复制到剪贴板
-            clipboard: QClipboard = QApplication.clipboard()
-            clipboard.setText(new_port)
-            Info(self, 'S', 1000, self.tr('代理端口已复制到剪贴板!'))
-
-        self.__initInfo()
-
-
-class AboutBackground(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        pixmap = QPixmap("./src/image/bg_about.png")
-        path = QPainterPath()
-        path.addRoundedRect(self.rect(), 20, 20)
-        painter.setClipPath(path)
-        painter.drawPixmap(0, 0, self.width(), self.height(), pixmap)
-
-        painter.setPen(Qt.GlobalColor.white)
-        painter.setFont(QFont(cfg.APP_FONT, 45))
-        painter.drawText(self.rect().adjusted(0, -30, 0, 0),
-                         Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter, cfg.APP_NAME)
-        painter.setFont(QFont(cfg.APP_FONT, 30))
-        painter.drawText(self.rect().adjusted(0, 120, 0, 0),
-                         Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter, cfg.APP_VERSION)
-
-
-class About(QWidget):
-    def __init__(self, text: str, parent=None):
-        super().__init__(parent=parent)
-        self.setObjectName(text)
-
-        self.__initWidget()
-
-    def __initWidget(self):
-        self.about_image = AboutBackground()
-        self.about_image.setFixedSize(1100, 500)
-
-        self.link_writer = PushButton(FluentIcon.HOME, self.tr('   作者主页'))
-        self.link_repo = PushButton(FluentIcon.GITHUB, self.tr('   项目仓库'))
-        self.link_releases = PushButton(FluentIcon.MESSAGE, self.tr('   版本发布'))
-        self.link_issues = PushButton(FluentIcon.HELP, self.tr('   反馈交流'))
-
-        for link_button in [self.link_writer, self.link_repo, self.link_releases, self.link_issues]:
-            link_button.setFixedSize(260, 70)
-            link_button.setIconSize(QSize(16, 16))
-            link_button.setFont(QFont(cfg.APP_FONT, 12))
-            setCustomStyleSheet(
-                link_button, 'PushButton{border-radius: 12px}', 'PushButton{border-radius: 12px}')
-
-        # 增加复制按钮
-        self.copyButton = QPushButton(self.tr('复制版本信息'), self)
-        self.copyButton.setFixedSize(200, 50)
-        self.copyButton.setFont(QFont(cfg.APP_FONT, 12))
-        self.copyButton.clicked.connect(self.copy_version_info)
-
-        self.__initLayout()
-        self.__connectSignalToSlot()
-
-    def __initLayout(self):
-        self.image_layout = QVBoxLayout()
-        self.image_layout.addWidget(
-            self.about_image, alignment=Qt.AlignmentFlag.AlignHCenter)
-
-        self.info_button_layout = QHBoxLayout()
-        self.info_button_layout.addWidget(self.link_writer)
-        self.info_button_layout.addWidget(self.link_repo)
-        self.info_button_layout.addWidget(self.link_releases)
-        self.info_button_layout.addWidget(self.link_issues)
-
-        self.main_layout = QVBoxLayout(self)
-        self.main_layout.addLayout(self.image_layout)
-        self.main_layout.addSpacing(20)
-        self.main_layout.addLayout(self.info_button_layout)
-        self.main_layout.addWidget(
-            self.copyButton, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.setLayout(self.main_layout)
-
-    def __connectSignalToSlot(self):
-        self.link_writer.clicked.connect(
-            lambda: QDesktopServices.openUrl(QUrl(cfg.URL_WRITER)))
-        self.link_repo.clicked.connect(
-            lambda: QDesktopServices.openUrl(QUrl(cfg.URL_REPO)))
-        self.link_releases.clicked.connect(
-            lambda: QDesktopServices.openUrl(QUrl(cfg.URL_RELEASES)))
-        self.link_issues.clicked.connect(
-            lambda: QDesktopServices.openUrl(QUrl(cfg.URL_ISSUES)))
-
-    def copy_version_info(self):
-        clipboard: QClipboard = QApplication.clipboard()
-        version_info = f"{cfg.APP_NAME} - {cfg.APP_VERSION}"
-        clipboard.setText(version_info)
-        Info(self, 'S', 1000, self.tr('版本信息已复制到剪贴板!'))

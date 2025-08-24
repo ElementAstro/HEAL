@@ -25,7 +25,9 @@ from qfluentwidgets import (
     ToolButton, ProgressRing, MessageBox
 )
 
-from loguru import logger
+from app.common.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 # 样式常量

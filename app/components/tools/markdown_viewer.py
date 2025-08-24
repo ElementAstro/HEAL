@@ -14,7 +14,9 @@ import markdown
 from qfluentwidgets import (
     FluentIcon, PushButton, ToolButton, MessageBox, LineEdit, Slider, CheckBox, TextEdit, ProgressBar, SubtitleLabel
 )
-from loguru import logger
+from app.common.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 from markdown_renderer import MarkdownRenderer  # Import the new renderer
 
@@ -140,8 +142,6 @@ class MarkdownEditor(QMainWindow):
         )
         self.current_theme = self.light_theme
 
-        # Set up Loguru
-        logger.add("markdown_viewer.log", rotation="500 MB")
         logger.info("Application started.")
 
         # Central Widget

@@ -1,25 +1,13 @@
 from PySide6.QtWidgets import QWidget, QStackedWidget, QVBoxLayout
 from PySide6.QtCore import Qt
-from qfluentwidgets import Pivot, qrouter, ScrollArea, PrimaryPushSettingCard, HyperlinkButton, FluentIcon
+from qfluentwidgets import Pivot, qrouter, ScrollArea, PrimaryPushSettingCard, FluentIcon
 from app.model.style_sheet import StyleSheet
-from app.model.setting_card import SettingCard, SettingCardGroup
-from app.model.download_process import SubDownloadCMD
-from app.model.config import open_file
+from app.model.setting_card import SettingCardGroup
 
-
-class HyperlinkCardLauncher(SettingCard):
-    def __init__(self, title, content=None, icon=FluentIcon.LINK):
-        super().__init__(icon, title, content)
-        self.linkButton_launcher = HyperlinkButton('https://github.com/letheriver2007/Firefly-Launcher',
-                                                   'Firefly-Launcher', self)
-        self.linkButton_audio = HyperlinkButton('https://github.com/letheriver2007/Firefly-Launcher-Res',
-                                                'Firefly-Launcher-Res', self)
-        self.hBoxLayout.addWidget(
-            self.linkButton_launcher, 0, Qt.AlignmentFlag.AlignRight)
-        self.hBoxLayout.addWidget(
-            self.linkButton_audio, 0, Qt.AlignmentFlag.AlignRight)
-        self.hBoxLayout.addSpacing(16)
-
+# Import launcher components
+from app.components.launcher import (
+    HyperlinkCardLauncher, LauncherNavigationManager, LauncherSignalManager
+)
 
 class Launcher(ScrollArea):
     Nav = Pivot
@@ -55,6 +43,10 @@ class Launcher(ScrollArea):
             self.tr('自定义启动器配置')
         )
 
+        # 初始化管理器
+        self.navigation_manager = LauncherNavigationManager(self)
+        self.signal_manager = LauncherSignalManager(self)
+
         self.__initWidget()
 
     def __initWidget(self):
@@ -77,41 +69,31 @@ class Launcher(ScrollArea):
         self.LauncherDownloadInterface.addSettingCard(self.AudioDownloadCard)
         self.ConfigInterface.addSettingCard(self.settingConfigCard)
 
+        # 设置导航管理器
+        self.navigation_manager.setup_navigation(self.pivot, self.stackedWidget)
+
         # 栏绑定界面
-        self.addSubInterface(self.LauncherDownloadInterface, 'LauncherDownloadInterface', self.tr('下载'),
-                             icon=FluentIcon.DOWNLOAD)
-        self.addSubInterface(self.ConfigInterface, 'configInterface', self.tr(
-            '配置'), icon=FluentIcon.EDIT)
+        self.navigation_manager.add_sub_interface(
+            self.LauncherDownloadInterface, 'LauncherDownloadInterface',
+            self.tr('下载'), icon=FluentIcon.DOWNLOAD
+        )
+        self.navigation_manager.add_sub_interface(
+            self.ConfigInterface, 'configInterface',
+            self.tr('配置'), icon=FluentIcon.EDIT
+        )
 
         # 初始化配置界面
         self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignmentFlag.AlignLeft)
         self.vBoxLayout.addWidget(self.stackedWidget)
         self.vBoxLayout.setSpacing(15)
         self.vBoxLayout.setContentsMargins(0, 10, 10, 0)
-        self.stackedWidget.currentChanged.connect(self.onCurrentIndexChanged)
-        self.stackedWidget.setCurrentWidget(self.LauncherDownloadInterface)
-        self.pivot.setCurrentItem(self.LauncherDownloadInterface.objectName())
-        qrouter.setDefaultRouteKey(
-            self.stackedWidget, self.LauncherDownloadInterface.objectName())
+        
+        # 设置默认界面
+        self.navigation_manager.set_default_interface(self.LauncherDownloadInterface)
 
     def __connectSignalToSlot(self):
-        sub_download_cmd_self = SubDownloadCMD(self)
-        self.AudioDownloadCard.clicked.connect(
-            lambda: sub_download_cmd_self.handleDownloadStarted('audio'))
-        self.settingConfigCard.clicked.connect(
-            lambda: open_file(self, 'config/config.json'))
+        # 使用信号管理器连接信号
+        self.signal_manager.connect_audio_download_signal(self.AudioDownloadCard)
+        self.signal_manager.connect_config_signal(self.settingConfigCard)
 
-    def addSubInterface(self, widget: QWidget, object_name: str, text: str, icon=None):
-        widget.setObjectName(object_name)
-        self.stackedWidget.addWidget(widget)
-        self.pivot.addItem(
-            icon=icon,
-            routeKey=object_name,
-            text=text,
-            onClick=lambda: self.stackedWidget.setCurrentWidget(widget)
-        )
 
-    def onCurrentIndexChanged(self, index):
-        widget = self.stackedWidget.widget(index)
-        self.pivot.setCurrentItem(widget.objectName())
-        qrouter.push(self.stackedWidget, widget.objectName())

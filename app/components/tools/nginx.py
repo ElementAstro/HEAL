@@ -9,9 +9,12 @@ from PySide6.QtWidgets import (
     QMessageBox, QFrame, QPushButton, QLineEdit, QTextEdit, QWidget
 )
 from qfluentwidgets import PushButton, SpinBox, TableWidget
-from loguru import logger
+from app.common.logging_config import get_logger, log_performance, with_correlation_id
 
 from app.model.setting_card import CustomInputDialog
+
+# 使用统一日志配置
+logger = get_logger('nginx_configurator')
 
 
 @dataclass
@@ -30,8 +33,8 @@ class NginxConfigurator(QFrame):
     def __init__(self):
         super().__init__()
 
-        # 初始化日志
-        logger.add("nginx_configurator.log", rotation="1 MB")
+        # 日志现在使用统一配置
+        logger.info("NginxConfigurator initialized")
 
         # 设置布局
         main_layout = QVBoxLayout()

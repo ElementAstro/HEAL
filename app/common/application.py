@@ -7,8 +7,11 @@ from PySide6.QtCore import QIODevice, QSharedMemory, Signal
 from PySide6.QtNetwork import QLocalServer, QLocalSocket
 from PySide6.QtWidgets import QApplication
 
-from loguru import logger
+from app.common.logging_config import get_logger, log_exception
 from .signal_bus import signalBus
+
+# 使用统一日志配置
+logger = get_logger('application')
 
 
 class SingletonApplication(QApplication):
@@ -70,12 +73,12 @@ class SingletonApplication(QApplication):
         socket.disconnectFromServer()
 
 
-def exception_hook(exception: BaseException, value, tb):
+def exception_hook(exception_type, value, tb):
     """ exception callback function """
     logger.bind(name="application").error(
-        "Unhandled exception: {}: {}", type(exception).__name__, value)
+        "Unhandled exception: {}: {}", exception_type.__name__, value)
     message = '\n'.join([''.join(traceback.format_tb(tb)),
-                        '{0}: {1}'.format(type(exception).__name__, value)])
+                        '{0}: {1}'.format(exception_type.__name__, value)])
     signalBus.appErrorSig.emit(message)
 
 
