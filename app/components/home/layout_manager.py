@@ -1,22 +1,34 @@
-from typing import List, Sequence
+from typing import List, Sequence, Dict, Any
 from PySide6.QtCore import Qt, QSize
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QToolBar
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QToolBar,
+                               QGridLayout, QFrame, QScrollArea)
 from PySide6.QtGui import QFont
-from qfluentwidgets import (PrimaryPushButton, FlowLayout, HorizontalFlipView, 
+from qfluentwidgets import (PrimaryPushButton, FlowLayout, HorizontalFlipView,
                             FluentIcon, setCustomStyleSheet)
 from app.model.config import cfg
 from app.components.home.custom_flip_delegate import CustomFlipItemDelegate
+from app.components.home.server_status_card import ServerStatusCard
+from app.components.home.status_overview_widget import StatusOverviewWidget
+from app.components.home.quick_action_bar import QuickActionBar
+from app.components.home.compact_banner_widget import CompactBannerWidget
+from app.common.i18n_ui import tr
 
 # 定义常量避免重复
 BUTTON_BORDER_RADIUS_STYLE = 'PushButton{border-radius: 12px}'
-ONE_CLICK_START_TEXT = ' 一键启动'
 
 
 class HomeLayoutManager:
     """Manages the layout and UI components for the home interface."""
-    
+
     def __init__(self, parent_widget: QWidget):
         self.parent = parent_widget
+        self.use_optimized_layout = True  # Flag to enable new layout
+
+        # Store references to new components
+        self.compact_banner = None
+        self.status_overview = None
+        self.quick_action_bar = None
+        self.server_status_cards = []
         
     def create_flip_view(self) -> HorizontalFlipView:
         """创建并配置翻页视图"""
@@ -34,7 +46,7 @@ class HomeLayoutManager:
         
     def create_toggle_button(self) -> PrimaryPushButton:
         """创建切换按钮"""
-        button_toggle = PrimaryPushButton(FluentIcon.PLAY_SOLID, ONE_CLICK_START_TEXT)
+        button_toggle = PrimaryPushButton(FluentIcon.PLAY_SOLID, tr("home.one_click_start"))
         button_toggle.setFixedSize(200, 65)
         button_toggle.setIconSize(QSize(20, 20))
         button_toggle.setFont(QFont(f'{cfg.APP_FONT}', 18))
@@ -47,6 +59,29 @@ class HomeLayoutManager:
         toolbar = QToolBar(self.parent)
         toolbar.setVisible(False)
         return toolbar
+
+    def create_compact_banner(self) -> CompactBannerWidget:
+        """创建紧凑横幅组件"""
+        self.compact_banner = CompactBannerWidget(self.parent)
+        return self.compact_banner
+
+    def create_status_overview(self) -> StatusOverviewWidget:
+        """创建状态概览组件"""
+        self.status_overview = StatusOverviewWidget(self.parent)
+        return self.status_overview
+
+    def create_quick_action_bar(self) -> QuickActionBar:
+        """创建快速操作栏"""
+        self.quick_action_bar = QuickActionBar(self.parent)
+        return self.quick_action_bar
+
+    def create_server_status_cards(self, server_configs: Dict[str, Any]) -> List[ServerStatusCard]:
+        """创建服务器状态卡片"""
+        self.server_status_cards = []
+        for server_name, server_config in server_configs.items():
+            card = ServerStatusCard(server_name, server_config, self.parent)
+            self.server_status_cards.append(card)
+        return self.server_status_cards
         
     def setup_main_layout(self, flip_view: HorizontalFlipView, 
                          server_buttons: Sequence[QWidget], 
@@ -88,3 +123,95 @@ class HomeLayoutManager:
         main_layout.addWidget(toolbar)
         
         return main_layout
+
+    def setup_optimized_layout(self, compact_banner: CompactBannerWidget,
+                              status_overview: StatusOverviewWidget,
+                              server_status_cards: List[ServerStatusCard],
+                              quick_action_bar: QuickActionBar,
+                              toolbar: QToolBar) -> QVBoxLayout:
+        """设置优化后的主布局"""
+        # 主布局
+        main_layout = QVBoxLayout(self.parent)
+        main_layout.setContentsMargins(15, 20, 15, 15)
+        main_layout.setSpacing(15)
+
+        # 1. 紧凑横幅 (顶部)
+        main_layout.addWidget(compact_banner)
+
+        # 2. 状态概览 (横幅下方)
+        main_layout.addWidget(status_overview)
+
+        # 3. 服务器状态卡片网格 (主要内容区域)
+        if server_status_cards:
+            cards_scroll_area = self._create_server_cards_area(server_status_cards)
+            main_layout.addWidget(cards_scroll_area, 1)  # 给予最大空间
+        else:
+            # 如果没有服务器，显示占位符
+            placeholder = self._create_no_servers_placeholder()
+            main_layout.addWidget(placeholder, 1)
+
+        # 4. 快速操作栏 (底部)
+        main_layout.addWidget(quick_action_bar)
+
+        # 5. 工具栏 (隐藏)
+        main_layout.addWidget(toolbar)
+
+        return main_layout
+
+    def _create_server_cards_area(self, server_cards: List[ServerStatusCard]) -> QScrollArea:
+        """创建服务器卡片滚动区域"""
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll_area.setFrameStyle(QFrame.Shape.NoFrame)
+
+        # 卡片容器
+        cards_widget = QWidget()
+        cards_layout = QGridLayout(cards_widget)
+        cards_layout.setContentsMargins(5, 5, 5, 5)
+        cards_layout.setSpacing(15)
+
+        # 按网格排列卡片 (每行最多2个卡片)
+        columns = 2
+        for i, card in enumerate(server_cards):
+            row = i // columns
+            col = i % columns
+            cards_layout.addWidget(card, row, col)
+
+        # 添加拉伸以保持卡片在顶部对齐
+        cards_layout.setRowStretch(len(server_cards) // columns + 1, 1)
+
+        scroll_area.setWidget(cards_widget)
+        return scroll_area
+
+    def _create_no_servers_placeholder(self) -> QWidget:
+        """创建无服务器时的占位符"""
+        placeholder = QFrame()
+        placeholder.setFrameStyle(QFrame.Shape.Box)
+        placeholder.setStyleSheet("""
+            QFrame {
+                border: 2px dashed rgba(0, 0, 0, 0.2);
+                border-radius: 8px;
+                background-color: rgba(240, 240, 240, 0.5);
+            }
+        """)
+
+        layout = QVBoxLayout(placeholder)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        title = QLabel(tr("home.no_servers_title"))
+        title.setFont(QFont(cfg.APP_FONT, 14, QFont.Weight.Bold))
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title.setStyleSheet("QLabel { color: #7F8C8D; }")
+
+        subtitle = QLabel(tr("home.no_servers_subtitle"))
+        subtitle.setFont(QFont(cfg.APP_FONT, 11))
+        subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        subtitle.setStyleSheet("QLabel { color: #95A5A6; }")
+        subtitle.setWordWrap(True)
+
+        layout.addWidget(title)
+        layout.addWidget(subtitle)
+
+        return placeholder

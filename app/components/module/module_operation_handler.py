@@ -4,6 +4,7 @@ Handles module operations like load, unload, reload, validate
 """
 
 import time
+import threading
 from typing import Dict, Any, List, Optional
 
 from PySide6.QtCore import QObject, Signal
@@ -33,48 +34,66 @@ class ModuleOperationHandler(QObject):
         self.config_manager = config_manager
         self.metrics_manager = metrics_manager
         
-        # 操作队列
+        # 操作队列 - 添加线程安全保护
         self.operation_queue: List[Dict[str, Any]] = []
         self.is_processing = False
-        
+        self._queue_lock = threading.Lock()  # 队列操作锁
+        self._processing_lock = threading.Lock()  # 处理状态锁
+
         # 模块状态跟踪
         self.module_states: Dict[str, ModuleState] = {}
+        self._state_lock = threading.Lock()  # 状态操作锁
 
     def handle_operation(self, operation: str, module_name: str, **kwargs):
-        """处理模块操作请求"""
+        """处理模块操作请求 - 线程安全版本"""
         try:
             self.logger.info(f"处理操作请求: {operation} for {module_name}")
-            
-            # 添加到操作队列
+
+            # 线程安全地添加到操作队列
             operation_data = {
                 'operation': operation,
                 'module_name': module_name,
                 'timestamp': time.time(),
                 'kwargs': kwargs
             }
-            self.operation_queue.append(operation_data)
-            
-            # 如果没有在处理，立即处理
-            if not self.is_processing:
-                self._process_queue()
-                
+
+            with self._queue_lock:
+                self.operation_queue.append(operation_data)
+
+            # 线程安全地检查并开始处理
+            with self._processing_lock:
+                if not self.is_processing:
+                    self._process_queue()
+
         except Exception as e:
             self.logger.error(f"处理操作请求失败: {e}")
 
     def _process_queue(self):
-        """处理操作队列"""
-        if not self.operation_queue or self.is_processing:
-            return
-            
-        self.is_processing = True
-        
+        """处理操作队列 - 线程安全版本"""
+        # 检查是否需要处理（在锁外进行初步检查以提高性能）
+        with self._queue_lock:
+            if not self.operation_queue:
+                return
+
+        with self._processing_lock:
+            if self.is_processing:
+                return
+            self.is_processing = True
+
         try:
-            while self.operation_queue:
-                operation_data = self.operation_queue.pop(0)
+            while True:
+                # 线程安全地获取下一个操作
+                with self._queue_lock:
+                    if not self.operation_queue:
+                        break
+                    operation_data = self.operation_queue.pop(0)
+
+                # 执行操作（在锁外执行以避免长时间持有锁）
                 self._execute_operation(operation_data)
-                
+
         finally:
-            self.is_processing = False
+            with self._processing_lock:
+                self.is_processing = False
 
     def _execute_operation(self, operation_data: Dict[str, Any]):
         """执行单个操作"""
@@ -219,28 +238,34 @@ class ModuleOperationHandler(QObject):
             return False
 
     def _update_module_state(self, module_name: str, new_state: ModuleState):
-        """更新模块状态"""
-        old_state = self.module_states.get(module_name, ModuleState.IDLE)
-        self.module_states[module_name] = new_state
-        
+        """更新模块状态 - 线程安全版本"""
+        with self._state_lock:
+            old_state = self.module_states.get(module_name, ModuleState.IDLE)
+            self.module_states[module_name] = new_state
+
+            if old_state != new_state:
+                self.logger.debug(f"模块 {module_name} 状态变更: {old_state.value} -> {new_state.value}")
+                # 信号发射在锁外进行，避免潜在的死锁
+
+        # 在锁外发射信号
         if old_state != new_state:
-            self.logger.debug(f"模块 {module_name} 状态变更: {old_state.value} -> {new_state.value}")
             self.state_changed.emit(module_name, new_state.value)
 
     def get_module_state(self, module_name: str) -> ModuleState:
-        """获取模块状态"""
-        return self.module_states.get(module_name, ModuleState.IDLE)
+        """获取模块状态 - 线程安全版本"""
+        with self._state_lock:
+            return self.module_states.get(module_name, ModuleState.IDLE)
 
     def get_all_module_states(self) -> Dict[str, ModuleState]:
-        """获取所有模块状态"""
-        return self.module_states.copy()
+        """获取所有模块状态 - 线程安全版本"""
+        with self._state_lock:
+            return self.module_states.copy()
 
     def get_queue_status(self) -> Dict[str, Any]:
-        """获取队列状态"""
-        return {
-            'queue_length': len(self.operation_queue),
-            'is_processing': self.is_processing,
-            'pending_operations': [
+        """获取队列状态 - 线程安全版本"""
+        with self._queue_lock:
+            queue_length = len(self.operation_queue)
+            pending_operations = [
                 {
                     'operation': op['operation'],
                     'module_name': op['module_name'],
@@ -248,4 +273,12 @@ class ModuleOperationHandler(QObject):
                 }
                 for op in self.operation_queue
             ]
+
+        with self._processing_lock:
+            is_processing = self.is_processing
+
+        return {
+            'queue_length': queue_length,
+            'is_processing': is_processing,
+            'pending_operations': pending_operations
         }

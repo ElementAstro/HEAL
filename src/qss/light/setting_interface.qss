@@ -1,3 +1,5 @@
+/* Enhanced Settings Interface - Light Theme */
+
 SettingInterface, #scrollWidget {
     background-color: transparent;
 }
@@ -7,9 +9,137 @@ QScrollArea {
     border: none;
 }
 
-
-/* 标签 */
-QLabel#settingLabel {
-    font: 33px 'Microsoft YaHei Light';
+/* Navigation Pivot Styling */
+Pivot {
     background-color: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+
+Pivot::item {
+    padding: 8px 16px;
+    margin: 0 4px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #323130;
+}
+
+Pivot::item:selected {
+    background-color: rgba(0, 120, 212, 0.1);
+    color: #0078d4;
+    border: 1px solid rgba(0, 120, 212, 0.2);
+}
+
+Pivot::item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Setting Card Group Enhancements */
+SettingCardGroup {
+    background-color: transparent;
+    padding: 8px 0;
+}
+
+/* Individual Setting Cards */
+SettingCard {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    margin: 4px 0;
+    padding: 12px 16px;
+}
+
+SettingCard:hover {
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Content Styling */
+SettingCard QLabel {
+    color: #323130;
+    font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC';
+}
+
+SettingCard QLabel#contentLabel {
+    color: #605e5c;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Section Headers */
+QLabel#sectionHeader {
+    font: 18px 'Segoe UI Semibold', 'Microsoft YaHei';
+    color: #323130;
+    background-color: transparent;
+    padding: 16px 0 8px 0;
+    margin-top: 16px;
+}
+
+QLabel#sectionDescription {
+    font: 12px 'Segoe UI', 'Microsoft YaHei';
+    color: #605e5c;
+    background-color: transparent;
+    padding-bottom: 12px;
+}
+
+/* Button Enhancements */
+PrimaryPushButton {
+    background-color: #0078d4;
+    border: 1px solid #0078d4;
+    border-radius: 4px;
+    color: white;
+    font-weight: 500;
+    padding: 6px 12px;
+}
+
+PrimaryPushButton:hover {
+    background-color: #106ebe;
+    border: 1px solid #106ebe;
+}
+
+PrimaryPushButton:pressed {
+    background-color: #005a9e;
+    border: 1px solid #005a9e;
+}
+
+/* Switch and Combo Box Styling */
+SwitchButton {
+    background-color: #e1dfdd;
+    border-radius: 10px;
+}
+
+SwitchButton:checked {
+    background-color: #0078d4;
+}
+
+ComboBox {
+    background-color: #ffffff;
+    border: 1px solid #d2d0ce;
+    border-radius: 4px;
+    padding: 6px 8px;
+    color: #323130;
+}
+
+ComboBox:hover {
+    border: 1px solid #0078d4;
+}
+
+ComboBox:focus {
+    border: 2px solid #0078d4;
+}
+
+/* Responsive spacing */
+@media (max-width: 768px) {
+    SettingCard {
+        margin: 2px 0;
+        padding: 8px 12px;
+    }
+
+    Pivot::item {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
 }

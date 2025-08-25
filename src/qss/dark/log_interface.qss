@@ -1,0 +1,274 @@
+/* Log Interface Dark Theme Styles */
+
+/* 主日志界面 */
+LogManagement {
+    background-color: transparent;
+}
+
+LogManagement > #scrollWidget {
+    background-color: transparent;
+    border: none;
+}
+
+/* 日志头部卡片 */
+HeaderCardWidget {
+    background-color: rgba(45, 45, 45, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+HeaderCardWidget:hover {
+    background-color: rgba(55, 55, 55, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* 日志查看器 */
+LogViewer {
+    background-color: rgba(35, 35, 35, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    font-family: "Consolas", "Monaco", "Courier New", monospace;
+    font-size: 12px;
+}
+
+/* 日志过滤器 */
+LogFilter {
+    background-color: rgba(45, 45, 45, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 8px;
+}
+
+/* 日志级别按钮 */
+LogLevelButton {
+    background-color: rgba(60, 60, 60, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 6px 12px;
+    color: white;
+    min-width: 60px;
+}
+
+LogLevelButton:hover {
+    background-color: rgba(80, 80, 80, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+LogLevelButton:checked {
+    background-color: #0078d4;
+    border: 1px solid #106ebe;
+}
+
+/* 日志搜索框 */
+LogSearchLineEdit {
+    background-color: rgba(60, 60, 60, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: white;
+}
+
+LogSearchLineEdit:focus {
+    border: 2px solid #0078d4;
+    background-color: rgba(70, 70, 70, 0.9);
+}
+
+LogSearchLineEdit:hover {
+    background-color: rgba(65, 65, 65, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 日志导出按钮 */
+LogExportButton {
+    background-color: rgba(0, 120, 212, 0.8);
+    border: 1px solid rgba(0, 120, 212, 0.6);
+    border-radius: 6px;
+    color: white;
+    padding: 8px 16px;
+    font-weight: 500;
+}
+
+LogExportButton:hover {
+    background-color: rgba(0, 120, 212, 1.0);
+    border: 1px solid rgba(0, 120, 212, 0.8);
+}
+
+LogExportButton:pressed {
+    background-color: rgba(0, 100, 180, 1.0);
+}
+
+/* 日志面板 */
+LogPanel {
+    background-color: rgba(35, 35, 35, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+/* 日志统计卡片 */
+LogStatsCard {
+    background-color: rgba(40, 40, 40, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    padding: 12px;
+}
+
+/* 日志条目 */
+LogEntry {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 4px 8px;
+}
+
+LogEntry:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+LogEntry[level="ERROR"] {
+    background-color: rgba(255, 68, 68, 0.1);
+    border-left: 3px solid #ff4444;
+}
+
+LogEntry[level="WARNING"] {
+    background-color: rgba(255, 140, 0, 0.1);
+    border-left: 3px solid #ff8c00;
+}
+
+LogEntry[level="INFO"] {
+    background-color: rgba(0, 120, 212, 0.1);
+    border-left: 3px solid #0078d4;
+}
+
+LogEntry[level="DEBUG"] {
+    background-color: rgba(128, 128, 128, 0.1);
+    border-left: 3px solid #808080;
+}
+
+/* 滚动条样式 */
+QScrollArea QScrollBar:vertical {
+    background-color: rgba(40, 40, 40, 0.5);
+    width: 8px;
+    border-radius: 4px;
+}
+
+QScrollArea QScrollBar::handle:vertical {
+    background-color: rgba(120, 120, 120, 0.8);
+    border-radius: 4px;
+    min-height: 20px;
+}
+
+QScrollArea QScrollBar::handle:vertical:hover {
+    background-color: rgba(150, 150, 150, 0.9);
+}
+
+/* 工具栏样式 */
+LogToolBar {
+    background-color: rgba(45, 45, 45, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 8px;
+}
+
+/* 标签样式 */
+LogLabel {
+    color: white;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+LogCaptionLabel {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 11px;
+}
+
+/* 分组框样式 */
+LogGroupBox {
+    background-color: rgba(40, 40, 40, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-top: 8px;
+    padding-top: 16px;
+}
+
+LogGroupBox::title {
+    color: white;
+    font-weight: 600;
+    padding: 0 8px;
+    background-color: rgba(40, 40, 40, 0.8);
+}
+
+/* 复选框样式 */
+LogCheckBox {
+    color: white;
+    spacing: 8px;
+}
+
+LogCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    background-color: rgba(60, 60, 60, 0.8);
+}
+
+LogCheckBox::indicator:checked {
+    background-color: #0078d4;
+    border: 1px solid #106ebe;
+}
+
+LogCheckBox::indicator:hover {
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* 组合框样式 */
+LogComboBox {
+    background-color: rgba(60, 60, 60, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: white;
+    min-width: 120px;
+}
+
+LogComboBox:hover {
+    background-color: rgba(70, 70, 70, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+LogComboBox:focus {
+    border: 2px solid #0078d4;
+}
+
+/* 进度条样式 */
+LogProgressBar {
+    background-color: rgba(60, 60, 60, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    text-align: center;
+    color: white;
+}
+
+LogProgressBar::chunk {
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                      stop:0 #0078d4, stop:1 #106ebe);
+    border-radius: 3px;
+}
+
+/* 分割器样式 */
+LogSplitter::handle {
+    background-color: rgba(255, 255, 255, 0.1);
+    width: 2px;
+}
+
+LogSplitter::handle:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 动画效果 - Note: Qt QSS doesn't support CSS transitions */
+/* LogPanel, LogStatsCard, HeaderCardWidget {
+    transition: all 0.2s ease-in-out;
+} */

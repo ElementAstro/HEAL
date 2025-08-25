@@ -4,6 +4,10 @@ from enum import Enum
 from PySide6.QtCore import Qt, QLocale
 from qfluentwidgets import (qconfig, QConfig, Theme, ConfigItem, BoolValidator, OptionsValidator,
                             InfoBar, InfoBarPosition, OptionsConfigItem, ConfigSerializer)
+from app.common.logging_config import get_logger
+
+# 使用统一日志配置
+logger = get_logger('config')
 
 
 def Info(self, types, time, title, content=''):
@@ -47,10 +51,10 @@ def open_file(self, file_path):
         Info(self, "E", 3000, self.tr("找不到文件!"))
 
 
-def get_json(file_path, key):
-    with open(f'{file_path}', 'r') as file:
-        json_data = json.load(file)
-        return json_data[f"{key}"]
+# 使用新的JSON工具替换原有实现
+from app.common.json_utils import get_json
+
+logger.debug("配置模块已加载")
 
 
 def save_json(data, types):

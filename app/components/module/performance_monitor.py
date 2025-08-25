@@ -5,6 +5,7 @@ Provides real-time performance monitoring and metrics collection for modules.
 
 import time
 import psutil
+import threading
 from typing import Dict, Optional, Any, Callable
 from dataclasses import dataclass, field
 from collections import deque
@@ -13,6 +14,7 @@ import json
 
 from PySide6.QtCore import QObject, QTimer, Signal
 from app.common.logging_config import get_logger
+from app.common.resource_manager import register_timer
 
 logger = get_logger(__name__)
 
@@ -35,12 +37,14 @@ class MetricValue:
 
 @dataclass
 class PerformanceMetric:
-    """性能指标"""
+    """性能指标 - 增强版本，支持数据清理"""
     name: str
     type: MetricType
     description: str
     unit: str
     values: deque = field(default_factory=lambda: deque(maxlen=1000))
+    max_age_seconds: float = field(default=24 * 3600)  # 默认保留24小时
+    last_cleanup: float = field(default_factory=time.time)
 
     def add_value(self, value: float, tags: Optional[Dict[str, str]] = None):
         """添加指标值"""
@@ -50,6 +54,25 @@ class PerformanceMetric:
             tags=tags or {}
         )
         self.values.append(metric_value)
+
+        # 定期清理旧数据
+        self._cleanup_old_data()
+
+    def _cleanup_old_data(self):
+        """清理过期数据"""
+        current_time = time.time()
+
+        # 每5分钟清理一次
+        if current_time - self.last_cleanup < 300:
+            return
+
+        cutoff_time = current_time - self.max_age_seconds
+
+        # 从左侧移除过期数据
+        while self.values and self.values[0].timestamp < cutoff_time:
+            self.values.popleft()
+
+        self.last_cleanup = current_time
 
     @property
     def latest_value(self) -> Optional[float]:
@@ -138,11 +161,12 @@ class SystemResourceMonitor:
 
 
 class PerformanceMonitor(QObject):
-    """性能监控器"""
+    """性能监控器 - 增强版本，支持内存管理和数据清理"""
 
     # 信号
     metric_updated = Signal(str, float)
     alert_triggered = Signal(str, str, str)  # name, message, severity
+    memory_cleanup_performed = Signal(int)  # cleaned_items_count
 
     def __init__(self, update_interval: int = 1000):  # ms
         super().__init__()
@@ -152,9 +176,28 @@ class PerformanceMonitor(QObject):
         self.system_monitor = SystemResourceMonitor()
         self.logger = logger.bind(component="PerformanceMonitor")
 
+        # 线程安全锁
+        self._metrics_lock = threading.RLock()
+
+        # 内存管理配置
+        self.max_memory_usage_mb = 100  # 最大内存使用量(MB)
+        self.cleanup_threshold_mb = 80   # 清理阈值(MB)
+        self.last_memory_check = time.time()
+
         # 定时器
         self.timer = QTimer()
         self.timer.timeout.connect(self._update_metrics)
+
+        # 清理定时器
+        self.cleanup_timer = QTimer()
+        self.cleanup_timer.timeout.connect(self._perform_cleanup)
+        self.cleanup_timer.start(300000)  # 每5分钟清理一次
+
+        # 注册定时器到资源管理器
+        register_timer(f"performance_monitor_timer_{id(self)}", self.timer,
+                      "性能监控主定时器")
+        register_timer(f"performance_cleanup_timer_{id(self)}", self.cleanup_timer,
+                      "性能监控清理定时器")
 
         # 运行状态
         self.running = False
@@ -230,18 +273,22 @@ class PerformanceMonitor(QObject):
         self.logger.debug(f"添加性能告警: {name}")
 
     def record_metric(self, name: str, value: float, tags: Optional[Dict[str, str]] = None):
-        """记录性能指标"""
-        if name in self.metrics:
-            self.metrics[name].add_value(value, tags)
-            self.metric_updated.emit(name, value)
+        """记录性能指标 - 线程安全版本"""
+        with self._metrics_lock:
+            if name in self.metrics:
+                self.metrics[name].add_value(value, tags)
+                self.metric_updated.emit(name, value)
 
-            # 检查告警
-            if name in self.alerts:
-                alert = self.alerts[name]
-                if alert.check(value):
-                    self.alert_triggered.emit(
-                        alert.name, alert.message, alert.severity)
-                    self.logger.warning(f"性能告警触发: {alert.message}")
+                # 检查告警
+                if name in self.alerts:
+                    alert = self.alerts[name]
+                    if alert.check(value):
+                        self.alert_triggered.emit(
+                            alert.name, alert.message, alert.severity)
+                        self.logger.warning(f"性能告警触发: {alert.message}")
+
+        # 定期检查内存使用
+        self._check_memory_usage()
 
     def start_monitoring(self):
         """开始监控"""
@@ -396,8 +443,108 @@ class PerformanceMonitor(QObject):
 
     def _get_metric_latest_value(self, metric_name: str) -> Optional[float]:
         """安全地获取指标的最新值"""
-        metric = self.metrics.get(metric_name)
-        return metric.latest_value if metric else None
+        with self._metrics_lock:
+            metric = self.metrics.get(metric_name)
+            return metric.latest_value if metric else None
+
+    def _check_memory_usage(self):
+        """检查内存使用情况"""
+        current_time = time.time()
+
+        # 每分钟检查一次
+        if current_time - self.last_memory_check < 60:
+            return
+
+        try:
+            # 估算当前内存使用量
+            memory_usage = self._estimate_memory_usage()
+
+            if memory_usage > self.cleanup_threshold_mb:
+                self.logger.warning(f"内存使用量过高: {memory_usage:.1f}MB, 开始清理")
+                self._perform_aggressive_cleanup()
+
+            self.last_memory_check = current_time
+
+        except Exception as e:
+            self.logger.error(f"检查内存使用时发生错误: {e}")
+
+    def _estimate_memory_usage(self) -> float:
+        """估算内存使用量(MB)"""
+        total_values = 0
+
+        with self._metrics_lock:
+            for metric in self.metrics.values():
+                total_values += len(metric.values)
+
+        # 粗略估算：每个MetricValue约占用100字节
+        estimated_mb = (total_values * 100) / (1024 * 1024)
+        return estimated_mb
+
+    def _perform_cleanup(self):
+        """执行定期清理"""
+        try:
+            cleaned_count = 0
+
+            with self._metrics_lock:
+                for metric in self.metrics.values():
+                    old_count = len(metric.values)
+                    metric._cleanup_old_data()
+                    cleaned_count += old_count - len(metric.values)
+
+            if cleaned_count > 0:
+                self.logger.debug(f"定期清理完成，清理了 {cleaned_count} 个过期数据点")
+                self.memory_cleanup_performed.emit(cleaned_count)
+
+        except Exception as e:
+            self.logger.error(f"执行定期清理时发生错误: {e}")
+
+    def _perform_aggressive_cleanup(self):
+        """执行激进清理（内存压力大时）"""
+        try:
+            cleaned_count = 0
+
+            with self._metrics_lock:
+                for metric in self.metrics.values():
+                    old_count = len(metric.values)
+
+                    # 只保留最近1小时的数据
+                    cutoff_time = time.time() - 3600
+                    while metric.values and metric.values[0].timestamp < cutoff_time:
+                        metric.values.popleft()
+
+                    # 如果还是太多，只保留最近500个数据点
+                    while len(metric.values) > 500:
+                        metric.values.popleft()
+
+                    cleaned_count += old_count - len(metric.values)
+
+            self.logger.info(f"激进清理完成，清理了 {cleaned_count} 个数据点")
+            self.memory_cleanup_performed.emit(cleaned_count)
+
+        except Exception as e:
+            self.logger.error(f"执行激进清理时发生错误: {e}")
+
+    def configure_memory_limits(self, max_memory_mb: int, cleanup_threshold_mb: int):
+        """配置内存限制"""
+        self.max_memory_usage_mb = max_memory_mb
+        self.cleanup_threshold_mb = cleanup_threshold_mb
+        self.logger.info(f"内存限制已配置: 最大 {max_memory_mb}MB, 清理阈值 {cleanup_threshold_mb}MB")
+
+    def get_memory_stats(self) -> Dict[str, Any]:
+        """获取内存统计信息"""
+        with self._metrics_lock:
+            total_metrics = len(self.metrics)
+            total_values = sum(len(metric.values) for metric in self.metrics.values())
+            estimated_memory = self._estimate_memory_usage()
+
+        return {
+            'total_metrics': total_metrics,
+            'total_values': total_values,
+            'estimated_memory_mb': estimated_memory,
+            'max_memory_mb': self.max_memory_usage_mb,
+            'cleanup_threshold_mb': self.cleanup_threshold_mb,
+            'memory_usage_percent': (estimated_memory / self.max_memory_usage_mb) * 100
+        }
 
 
 class ModulePerformanceTracker:

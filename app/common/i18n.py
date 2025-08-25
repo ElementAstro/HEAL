@@ -480,6 +480,12 @@ class TranslationManager(QObject):
         """获取当前语言"""
         return self.current_language
 
+    def reload_translations(self):
+        """重新加载翻译文件"""
+        self._load_translations()
+        self.language_changed.emit(self.current_language)
+        logger.info("翻译文件已重新加载")
+
     def load_qt_translations(self, app: QCoreApplication):
         """加载Qt翻译文件"""
         try:

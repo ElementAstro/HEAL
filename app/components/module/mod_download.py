@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
 )
 from qfluentwidgets import (
     FluentIcon, PushButton, ListWidget, MessageBox, ProgressBar, ToolButton,
-    ComboBox, LineEdit, CheckBox, SpinBox
+    ComboBox, LineEdit, CheckBox, SpinBox, ScrollArea
 )
 from app.common.logging_config import get_logger
 
@@ -150,17 +150,27 @@ class SettingsWindow(QDialog):
             logger.error(f"保存设置失败: {e}")
             QMessageBox.warning(self, "保存失败", "设置保存失败。")
 
-class ModDownload(QFrame):
+class ModDownload(ScrollArea):
     def __init__(self, parent=None):
         super().__init__(parent)
 
         # 加载设置
         self.settings = self.load_settings()
 
+        # 设置ScrollArea属性
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.enableTransparentBackground()
+
+        # 创建主容器widget
+        main_widget = QWidget()
+        self.setWidget(main_widget)
+        self.setWidgetResizable(True)
+
         # 主容器
-        self.main_layout = QVBoxLayout(self)
-        self.main_layout.setContentsMargins(10, 10, 10, 10)
-        self.main_layout.setSpacing(10)
+        self.main_layout = QVBoxLayout(main_widget)
+        self.main_layout.setContentsMargins(20, 20, 20, 20)
+        self.main_layout.setSpacing(15)
 
         # 搜索栏、分类选择和设置按钮
         search_settings_layout = QHBoxLayout()
@@ -186,14 +196,16 @@ class ModDownload(QFrame):
 
         # 左侧模组列表
         self.mod_list = ListWidget()
-        self.mod_list.setFixedWidth(300)
+        self.mod_list.setMinimumWidth(250)
+        self.mod_list.setMaximumWidth(400)
         self.mod_list.itemClicked.connect(self.display_mod_details)
 
         # 下载历史记录
         self.history_label = QLabel("下载历史")
         self.history_label.setFont(QFont("Arial", 12, QFont.Weight.Bold))
         self.history_list = ListWidget()
-        self.history_list.setFixedHeight(150)
+        self.history_list.setMinimumHeight(120)
+        self.history_list.setMaximumHeight(200)
 
         # 右侧模组详情和下载
         self.details_widget = QStackedWidget()
@@ -214,9 +226,24 @@ class ModDownload(QFrame):
         splitter = QSplitter(Qt.Orientation.Horizontal)
         left_panel = QWidget()
         left_panel.setLayout(mod_list_layout)
+
+        # 设置左侧面板的大小策略
+        left_panel.setMinimumWidth(250)
+        left_panel.setMaximumWidth(400)
+
         splitter.addWidget(left_panel)
         splitter.addWidget(self.details_widget)
-        splitter.setStretchFactor(1, 3)
+
+        # 设置分割器比例 - 左侧1，右侧2
+        splitter.setStretchFactor(0, 1)
+        splitter.setStretchFactor(1, 2)
+
+        # 设置分割器的初始大小
+        splitter.setSizes([300, 600])
+
+        # 设置分割器样式
+        splitter.setHandleWidth(2)
+        splitter.setChildrenCollapsible(False)
 
         self.main_layout.addWidget(splitter)
 

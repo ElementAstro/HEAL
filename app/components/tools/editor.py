@@ -11,6 +11,10 @@ from qfluentwidgets import (
     TextEdit, MessageBox, Action, FluentIcon, InfoBar, InfoBarPosition, TreeWidget,
     LineEdit
 )
+from app.common.logging_config import get_logger, log_performance, with_correlation_id, log_exception
+
+# 使用统一日志配置
+logger = get_logger(__name__)
 
 
 class JsonTextEdit(TextEdit):
@@ -158,11 +162,13 @@ class JsonEditor(QWidget):
         self.setLayout(main_layout)
         self.clipboard: Optional[QTreeWidgetItem] = None
 
+    @log_performance("open_json_file")
     def open_file(self) -> None:
         file_name, _ = QFileDialog.getOpenFileName(
             self, "打开JSON文件", "", "JSON文件 (*.json);;所有文件 (*)"
         )
         if file_name:
+            logger.info(f"打开JSON文件: {file_name}")
             try:
                 with open(file_name, 'r', encoding='utf-8') as file:
                     data = json.load(file)
@@ -170,7 +176,10 @@ class JsonEditor(QWidget):
                         data, indent=4, ensure_ascii=False))
                     self.auto_parse_render()
                     self.status_bar.showMessage("文件打开成功", 5000)
+                    logger.info(f"JSON文件打开成功: {file_name}")
             except Exception as e:
+                logger.error(f"打开JSON文件失败: {file_name}, 错误: {e}")
+                log_exception(e, f"打开JSON文件失败: {file_name}")
                 MessageBox.critical(self, "错误", f"无法打开文件: {e}")
 
     def save_file(self) -> None:

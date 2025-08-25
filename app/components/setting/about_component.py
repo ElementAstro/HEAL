@@ -43,10 +43,10 @@ class About(QWidget):
         self.about_image = AboutBackground()
         self.about_image.setFixedSize(1100, 500)
 
-        self.link_writer = PushButton(FluentIcon.HOME, self.tr('   作者主页'))
-        self.link_repo = PushButton(FluentIcon.GITHUB, self.tr('   项目仓库'))
-        self.link_releases = PushButton(FluentIcon.MESSAGE, self.tr('   版本发布'))
-        self.link_issues = PushButton(FluentIcon.HELP, self.tr('   反馈交流'))
+        self.link_writer = PushButton(FluentIcon.HOME, self.tr('about.author_homepage'))
+        self.link_repo = PushButton(FluentIcon.GITHUB, self.tr('about.project_repository'))
+        self.link_releases = PushButton(FluentIcon.MESSAGE, self.tr('about.version_releases'))
+        self.link_issues = PushButton(FluentIcon.HELP, self.tr('about.feedback_discussion'))
 
         for link_button in [self.link_writer, self.link_repo, self.link_releases, self.link_issues]:
             link_button.setFixedSize(260, 70)

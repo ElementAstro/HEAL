@@ -3,11 +3,15 @@ from PySide6.QtCore import Qt
 from qfluentwidgets import Pivot, qrouter, ScrollArea, PrimaryPushSettingCard, FluentIcon
 from app.model.style_sheet import StyleSheet
 from app.model.setting_card import SettingCardGroup
+from app.common.logging_config import get_logger, log_performance
 
 # Import launcher components
 from app.components.launcher import (
     HyperlinkCardLauncher, LauncherNavigationManager, LauncherSignalManager
 )
+
+# 使用统一日志配置
+logger = get_logger(__name__)
 
 class Launcher(ScrollArea):
     Nav = Pivot
@@ -18,6 +22,8 @@ class Launcher(ScrollArea):
         self.setObjectName(text)
         self.scrollWidget = QWidget()
         self.vBoxLayout = QVBoxLayout(self.scrollWidget)
+
+        logger.info(f"初始化Launcher界面: {text}")
 
         # 栏定义
         self.pivot = self.Nav(self)

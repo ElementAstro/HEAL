@@ -12,6 +12,7 @@ from PySide6.QtCore import QObject, Signal
 from app.common.logging_config import get_logger
 from app.common.i18n import t
 from app.common.exception_handler import exception_handler, ExceptionType
+from app.common.json_utils import JsonUtils, JsonLoadResult
 
 
 class DownloadConfigManager(QObject):
@@ -31,35 +32,37 @@ class DownloadConfigManager(QObject):
     
     @exception_handler(exc_type=ExceptionType.DOWNLOAD_ERROR)
     def load_configuration(self) -> bool:
-        """从JSON文件加载界面配置"""
-        try:
-            with self.config_path.open('r', encoding="utf-8") as f:
-                self.interface_data = json.load(f)
-                
-            self.logger.debug(t('download.json_loaded', 
-                              filename=self.config_path.name, 
-                              data=str(self.interface_data)))
-            
-            # 验证配置数据
-            if self._validate_config():
-                self.config_loaded.emit(self.interface_data)
-                return True
-            else:
-                error_msg = t('download.invalid_config')
-                self.config_load_failed.emit(error_msg)
-                return False
-                
-        except FileNotFoundError:
+        """从JSON文件加载界面配置 - 使用统一JSON工具"""
+        # 使用统一的JSON加载工具
+        result = JsonUtils.load_json_file(
+            self.config_path,
+            create_if_missing=False,
+            default_content={}
+        )
+
+        if not result.success:
             error_msg = t('download.config_not_found', path=str(self.config_path))
-            self.logger.error(error_msg)
+            self.logger.error(f"配置加载失败: {result.error}")
             self._show_error_dialog(t('common.error'), error_msg)
             self.config_load_failed.emit(error_msg)
             return False
-            
-        except json.JSONDecodeError as e:
-            error_msg = t('download.json_decode_error', error=str(e))
-            self.logger.error(error_msg)
-            self._show_error_dialog(t('common.error'), error_msg)
+
+        # 处理警告
+        for warning in result.warnings:
+            self.logger.warning(f"配置加载警告: {warning}")
+
+        self.interface_data = result.data
+
+        self.logger.debug(t('download.json_loaded',
+                          filename=self.config_path.name,
+                          data=str(self.interface_data)))
+
+        # 验证配置数据
+        if self._validate_config():
+            self.config_loaded.emit(self.interface_data)
+            return True
+        else:
+            error_msg = t('download.invalid_config')
             self.config_load_failed.emit(error_msg)
             return False
     

@@ -519,10 +519,10 @@ print(f"Currently loaded: {loaded}")
 Enable debug mode for detailed logging:
 
 ```python
-import logging
+from app.common.logging_config import get_logger, get_logging_config
 
-# Enable debug logging
-logging.basicConfig(level=logging.DEBUG)
+# Get logger for debugging
+logger = get_logger(__name__)
 
 # Configure interface for debugging
 config = {
@@ -531,6 +531,10 @@ config = {
     'error_reporting': True
 }
 interface = ModuleInterface(config)
+
+# Enable debug level logging
+logging_config = get_logging_config()
+logging_config.set_level('DEBUG')
 ```
 
 ### Log Analysis

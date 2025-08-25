@@ -8,6 +8,10 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QSizePolicy, QScrollArea, QMessageBox
 )
+from app.common.logging_config import get_logger
+
+# 使用统一日志配置
+logger = get_logger('drag')
 
 
 @dataclass

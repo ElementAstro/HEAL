@@ -16,7 +16,17 @@ class DialogManager:
         self.config_fields: Dict[str, LineEdit] = {}
 
     def show_log_dialog(self, server_name: str):
-        """显示服务器日志对话框"""
+        """显示服务器日志对话框 - 现在使用统一日志面板"""
+        try:
+            # 尝试使用统一日志面板
+            from app.components.logging import show_server_log
+            show_server_log(server_name)
+        except ImportError:
+            # 如果统一日志面板不可用，回退到传统对话框
+            self._show_legacy_log_dialog(server_name)
+
+    def _show_legacy_log_dialog(self, server_name: str):
+        """显示传统的日志对话框（备用方案）"""
         log_dialog = QDialog(self.parent)
         log_dialog.setWindowTitle(f"{server_name} 日志")
         log_layout = QVBoxLayout(log_dialog)

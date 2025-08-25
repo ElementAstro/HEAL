@@ -9,6 +9,7 @@ from pathlib import Path
 from PySide6.QtCore import QObject, Signal
 
 from app.common.logging_config import get_logger
+from app.common.json_utils import JsonUtils
 from app.model.setting_card import SettingCard
 from .environment_cards import HyperlinkCardEnvironment, PrimaryPushSettingCardDownload
 
@@ -28,32 +29,47 @@ class EnvironmentConfigManager(QObject):
         self.config_data: List[Dict[str, Any]] = []
     
     def load_download_config(self) -> List[SettingCard]:
-        """加载下载配置"""
+        """加载下载配置 - 使用统一JSON工具"""
         cards = []
-        
-        if self.config_file.exists():
+
+        # 使用统一的JSON加载工具
+        result = JsonUtils.load_json_file(
+            self.config_file,
+            create_if_missing=False,
+            default_content=[]
+        )
+
+        if not result.success:
+            error_msg = f"加载配置文件失败: {result.error}"
+            self.logger.error(error_msg)
+            self.config_load_failed.emit(error_msg)
+            return cards
+
+        # 处理警告
+        for warning in result.warnings:
+            self.logger.warning(f"配置加载警告: {warning}")
+
+        self.config_data = result.data
+
+        # 确保数据是列表格式
+        if not isinstance(self.config_data, list):
+            error_msg = "配置数据格式错误，期望列表格式"
+            self.logger.error(error_msg)
+            self.config_load_failed.emit(error_msg)
+            return cards
+
+        # 创建卡片
+        for item in self.config_data:
             try:
-                with self.config_file.open('r', encoding='utf-8') as f:
-                    self.config_data = json.load(f)
-                
-                for item in self.config_data:
-                    card = self.create_card_from_config(item)
-                    if card:
-                        cards.append(card)
-                        self.card_created.emit(item['title'])
-                        self.logger.info(f"Loaded card from config: {item['title']}")
-                
-                self.config_loaded.emit(self.config_data)
-                
+                card = self.create_card_from_config(item)
+                if card:
+                    cards.append(card)
+                    self.card_created.emit(item.get('title', 'Unknown'))
+                    self.logger.info(f"Loaded card from config: {item.get('title', 'Unknown')}")
             except Exception as e:
-                error_msg = f"加载配置文件失败: {e}"
-                self.logger.error(error_msg)
-                self.config_load_failed.emit(error_msg)
-        else:
-            warning_msg = f"下载配置文件不存在: {self.config_file}"
-            self.logger.warning(warning_msg)
-            self.config_load_failed.emit(warning_msg)
-        
+                self.logger.error(f"创建卡片失败: {e}")
+
+        self.config_loaded.emit(self.config_data)
         return cards
     
     def create_card_from_config(self, item: Dict[str, Any]) -> SettingCard:

@@ -43,22 +43,27 @@ class SettingsLayoutManager:
         )
     
     def setup_interfaces(self, pivot: Pivot, stacked_widget: QStackedWidget,
-                        personal_interface: SettingCardGroup,
-                        function_interface: SettingCardGroup,
-                        proxy_interface: SettingCardGroup):
+                        appearance_interface: SettingCardGroup,
+                        behavior_interface: SettingCardGroup,
+                        network_interface: SettingCardGroup,
+                        system_interface: SettingCardGroup):
         """Setup all setting interfaces."""
-        # Add interfaces to navigation
+        # Add interfaces to navigation with improved labels and icons
         self.add_sub_interface(
-            pivot, stacked_widget, personal_interface, 'PersonalInterface', 
-            self.parent.tr('程序'), icon=FluentIcon.SETTING
+            pivot, stacked_widget, appearance_interface, 'AppearanceInterface',
+            self.parent.tr('外观显示'), icon=FluentIcon.PALETTE
         )
         self.add_sub_interface(
-            pivot, stacked_widget, function_interface, 'FunctionInterface', 
-            self.parent.tr('功能'), icon=FluentIcon.TILES
+            pivot, stacked_widget, behavior_interface, 'BehaviorInterface',
+            self.parent.tr('应用行为'), icon=FluentIcon.TILES
         )
         self.add_sub_interface(
-            pivot, stacked_widget, proxy_interface, 'ProxyInterface', 
-            self.parent.tr('代理'), icon=FluentIcon.CERTIFICATE
+            pivot, stacked_widget, network_interface, 'NetworkInterface',
+            self.parent.tr('网络连接'), icon=FluentIcon.CERTIFICATE
+        )
+        self.add_sub_interface(
+            pivot, stacked_widget, system_interface, 'SystemInterface',
+            self.parent.tr('系统维护'), icon=FluentIcon.SETTING
         )
         
         # Create and add about interface
@@ -72,11 +77,11 @@ class SettingsLayoutManager:
         stacked_widget.currentChanged.connect(
             lambda index: self.on_current_index_changed(pivot, stacked_widget, index)
         )
-        
-        # Set default interface
-        stacked_widget.setCurrentWidget(personal_interface)
-        pivot.setCurrentItem(personal_interface.objectName())
-        qrouter.setDefaultRouteKey(stacked_widget, personal_interface.objectName())
+
+        # Set default interface to appearance (most frequently used)
+        stacked_widget.setCurrentWidget(appearance_interface)
+        pivot.setCurrentItem(appearance_interface.objectName())
+        qrouter.setDefaultRouteKey(stacked_widget, appearance_interface.objectName())
     
     def on_current_index_changed(self, pivot: Pivot, stacked_widget: QStackedWidget, index: int):
         """Handle navigation index changes."""

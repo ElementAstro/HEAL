@@ -143,3 +143,23 @@ class DownloadNavigationManager(QObject):
         
         vbox_layout.setSpacing(15)
         vbox_layout.setContentsMargins(0, 10, 10, 0)
+
+    def navigate_to_category(self, category: str):
+        """导航到指定分类"""
+        self.logger.info(f"导航到分类: {category}")
+        # 这里可以实现分类导航逻辑
+        # 例如：切换到对应的分类页面或过滤显示
+
+    def navigate_to_section_by_id(self, section_id: str):
+        """根据ID导航到指定部分"""
+        for i, widget in enumerate(self.section_widgets):
+            # 假设widget有一个section_id属性或者可以通过其他方式识别
+            if hasattr(widget, 'section_id') and widget.section_id == section_id:
+                if self.stacked_widget:
+                    self.stacked_widget.setCurrentIndex(i)
+                if self.pivot:
+                    self.pivot.setCurrentItem(widget.objectName())
+                self.logger.info(f"导航到部分ID: {section_id}")
+                return
+
+        self.logger.warning(f"未找到部分ID: {section_id}")

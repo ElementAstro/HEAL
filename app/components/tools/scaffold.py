@@ -17,6 +17,7 @@ from app.components.utils.scaffold import (
     create_component_main, create_component_hpp, create_component_cpp
 )
 from app.model.custom_messagebox import CustomMessageBox
+from app.common.i18n_ui import setup_component_i18n, tr, tr_button, tr_label
 
 
 @dataclass
@@ -36,7 +37,12 @@ class ModuleDetails:
 class ScaffoldApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("模块脚手架生成器")
+
+        # 设置国际化支持
+        self.i18n = setup_component_i18n(self)
+        self.i18n.register_window_title("scaffold.title")
+
+        self.setWindowTitle(tr("scaffold.title"))
         self.setGeometry(100, 100, 800, 600)
 
         self.layout = QVBoxLayout()

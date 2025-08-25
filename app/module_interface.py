@@ -50,16 +50,20 @@ class Module(ScrollArea):
         self.config_manager = ModuleConfigManager()
         self.metrics_manager = ModuleMetricsManager()
         self.operation_handler = ModuleOperationHandler(
-            self.event_manager, 
-            self.config_manager, 
+            self.event_manager,
+            self.config_manager,
             self.metrics_manager
         )
 
-        # UI组件
+        # 正确初始化ScrollArea的scrollWidget
         self.scrollWidget = QWidget()
+        self.setWidget(self.scrollWidget)
+        self.setWidgetResizable(True)
+
+        # UI组件 - 使用正确的父组件
         self.vBoxLayout = QVBoxLayout(self.scrollWidget)
-        self.pivot = self.Nav(self)
-        self.stackedWidget = QStackedWidget(self)
+        self.pivot = self.Nav(self.scrollWidget)
+        self.stackedWidget = QStackedWidget(self.scrollWidget)
 
         # 状态管理
         self.current_state = ModuleState.IDLE
@@ -134,41 +138,53 @@ class Module(ScrollArea):
 
     def _initLayout(self):
         """初始化增强的布局"""
-        # 核心界面
-        self.addSubInterface(
-            self.ModuleManagerInterface,
-            'ModuleManagerInterface',
-            self.tr('模组管理'),
-            icon=FluentIcon.IOT
+        # 设置ScrollArea属性
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.enableTransparentBackground()
+
+        # 添加Pivot导航项
+        self.pivot.addItem(
+            routeKey='ModuleManagerInterface',
+            text=self.tr('模组管理'),
+            onClick=lambda: self.stackedWidget.setCurrentWidget(self.ModuleManagerInterface)
         )
 
-        self.addSubInterface(
-            self.ModuleDownloadInterface,
-            'ModuleDownloadInterface',
-            self.tr('模组下载'),
-            icon=FluentIcon.DOWNLOAD
+        self.pivot.addItem(
+            routeKey='ModuleDownloadInterface',
+            text=self.tr('模组下载'),
+            onClick=lambda: self.stackedWidget.setCurrentWidget(self.ModuleDownloadInterface)
         )
 
-        self.addSubInterface(
-            self.ScaffoldAppInterface,
-            'ScaffoldAppInterface',
-            self.tr('模组生成器'),
-            icon=FluentIcon.IOT
+        self.pivot.addItem(
+            routeKey='ScaffoldAppInterface',
+            text=self.tr('模组生成器'),
+            onClick=lambda: self.stackedWidget.setCurrentWidget(self.ScaffoldAppInterface)
         )
 
-        # 布局设置
+        # 添加界面到StackedWidget
+        self.stackedWidget.addWidget(self.ModuleManagerInterface)
+        self.stackedWidget.addWidget(self.ModuleDownloadInterface)
+        self.stackedWidget.addWidget(self.ScaffoldAppInterface)
+
+        # 布局设置 - 正确的间距和边距
         self.vBoxLayout.addWidget(self.pivot, 0, Qt.AlignmentFlag.AlignLeft)
-        self.vBoxLayout.addWidget(self.stackedWidget)
-        self.vBoxLayout.setSpacing(15)
-        self.vBoxLayout.setContentsMargins(0, 10, 10, 0)
+        self.vBoxLayout.addWidget(self.stackedWidget, 1)
+        self.vBoxLayout.setSpacing(20)
+        self.vBoxLayout.setContentsMargins(20, 20, 20, 20)
 
         # 连接信号
         self.stackedWidget.currentChanged.connect(self.onCurrentIndexChanged)
+        self.pivot.currentItemChanged.connect(self._onPivotItemChanged)
+
+        # 设置默认页面
         self.stackedWidget.setCurrentWidget(self.ModuleManagerInterface)
-        self.pivot.setCurrentItem(self.ModuleManagerInterface.objectName())
+        self.pivot.setCurrentItem('ModuleManagerInterface')
+
+        # 设置路由
         qrouter.setDefaultRouteKey(
             self.stackedWidget,
-            self.ModuleManagerInterface.objectName()
+            'ModuleManagerInterface'
         )
 
     def _connectSignalToSlot(self):
@@ -176,6 +192,15 @@ class Module(ScrollArea):
         # 内部信号
         self.module_operation_requested.connect(self._handle_module_operation)
         self.performance_alert.connect(self._show_performance_alert)
+
+    def _onPivotItemChanged(self, routeKey: str):
+        """处理Pivot项目改变事件"""
+        if routeKey == 'ModuleManagerInterface':
+            self.stackedWidget.setCurrentWidget(self.ModuleManagerInterface)
+        elif routeKey == 'ModuleDownloadInterface':
+            self.stackedWidget.setCurrentWidget(self.ModuleDownloadInterface)
+        elif routeKey == 'ScaffoldAppInterface':
+            self.stackedWidget.setCurrentWidget(self.ScaffoldAppInterface)
 
     def _setup_event_connections(self):
         """设置事件连接"""
@@ -506,4 +531,4 @@ class Module(ScrollArea):
         try:
             self.cleanup()
         except Exception as e:
-            print(f"Error during Module Interface cleanup: {e}")
+            self.logger.error(f"模块界面清理时发生错误: {e}")

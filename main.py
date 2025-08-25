@@ -7,6 +7,7 @@ from app.common.application import SingletonApplication
 from app.common.logging_config import setup_logging, get_logger
 from app.common.i18n import setup_i18n, set_language, t
 from app.common.exception_handler import ExceptionHandler
+from app.common.resource_manager import resource_manager, cleanup_on_exit
 
 # 设置工作目录
 source_file = getsourcefile(lambda: 0)
@@ -18,8 +19,40 @@ setup_logging()
 logger = get_logger('main')
 exception_handler = ExceptionHandler()
 
-# 安装全局异常处理器
+# 验证配置文件
+from app.common.config_validator import validate_all_configs
+logger.info(t('app.validating_configs'))
+validation_results = validate_all_configs(auto_fix=True)
+
+# 检查验证结果
+config_errors = []
+for filename, result in validation_results.items():
+    if result.has_errors:
+        config_errors.extend([f"{filename}: {error}" for error in result.errors])
+    if result.warnings:
+        for warning in result.warnings:
+            logger.warning(f"配置警告 {filename}: {warning}")
+
+if config_errors:
+    logger.error("配置文件验证失败:")
+    for error in config_errors:
+        logger.error(f"  {error}")
+    # 可以选择继续运行或退出
+    # sys.exit(1)
+else:
+    logger.info(t('app.configs_validated'))
+
+# 安装全局异常处理器 - 统一在这里设置，避免冲突
 sys.excepthook = exception_handler.handle_exception
+
+# 连接应用级别的异常信号处理
+from app.common.signal_bus import signalBus
+from app.common.application import application_exception_hook
+
+# 连接异常信号到应用级别的处理函数
+exception_handler.exception_occurred.connect(
+    lambda exc_info: signalBus.appErrorSig.emit(str(exc_info.exception))
+)
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt, QTranslator
@@ -59,6 +92,14 @@ def restart_app():
 def shutdown_app():
     """关闭应用程序"""
     logger.info(t('app.shutting_down'))
+
+    # 清理所有资源
+    try:
+        cleanup_on_exit()
+        logger.info(t('app.resources_cleaned'))
+    except Exception as e:
+        logger.error(t('app.cleanup_error', error=str(e)))
+
     QApplication.quit()
 
 

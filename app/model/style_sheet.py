@@ -1,5 +1,9 @@
 from enum import Enum
 from qfluentwidgets import StyleSheetBase, Theme, qconfig
+from app.common.logging_config import get_logger
+
+# 使用统一日志配置
+logger = get_logger('style_sheet')
 
 
 class StyleSheet(StyleSheetBase, Enum):
@@ -11,6 +15,8 @@ class StyleSheet(StyleSheetBase, Enum):
     SETTING_INTERFACE = "setting_interface"
     GALLERY_INTERFACE = "gallery_interface"
     NAVIGATION_VIEW_INTERFACE = "navigation_view_interface"
+    LOG_INTERFACE = "log_interface"
+    ENVIRONMENT_INTERFACE = "environment_interface"
 
     def path(self, theme=Theme.AUTO):
         theme = qconfig.theme if theme == Theme.AUTO else theme

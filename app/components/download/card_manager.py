@@ -12,6 +12,10 @@ from app.common.i18n import t
 from app.common.exception_handler import exception_handler, ExceptionType
 from src.icon.astro import AstroIcon
 from app.model.setting_card import SettingCardGroup
+from app.components.download.enhanced_cards import (
+    EnhancedHyperlinkCard, EnhancedPrimaryPushSettingCard,
+    DownloadCategoryCard, FavoriteCard
+)
 
 
 class DownloadCardManager:
@@ -56,13 +60,40 @@ class DownloadCardManager:
         return FIF.DOWNLOAD
 
     def create_card(self, item_type: str, item: Dict[str, Any], required_fields: List[str]) -> QWidget:
-        """创建卡片"""
+        """创建增强的卡片"""
         card_args = {field: item[field] for field in required_fields}
+
         if item_type == 'hyperlink':
-            return HyperlinkCard(**card_args)
+            # 使用增强的超链接卡片
+            card = EnhancedHyperlinkCard(**card_args)
+            # 连接增强功能信号
+            card.favorited.connect(self._on_item_favorited)
+            card.quick_download.connect(self._on_quick_download)
+            return card
         elif item_type == 'primary_push_setting':
-            return PrimaryPushSettingCard(**card_args)
+            # 使用增强的主要推送设置卡片
+            card = EnhancedPrimaryPushSettingCard(**card_args)
+            # 连接增强功能信号
+            card.favorited.connect(self._on_item_favorited)
+            card.options_requested.connect(self._on_options_requested)
+            return card
+
         raise ValueError(t('download.unknown_item_type', item_type=item_type))
+
+    def _on_item_favorited(self, title: str):
+        """处理项目收藏"""
+        self.logger.info(f"项目收藏状态变更: {title}")
+        # 这里可以添加收藏管理逻辑
+
+    def _on_quick_download(self, title: str, url: str):
+        """处理快速下载"""
+        self.logger.info(f"快速下载请求: {title} - {url}")
+        # 这里可以添加快速下载逻辑
+
+    def _on_options_requested(self, title: str):
+        """处理下载选项请求"""
+        self.logger.info(f"下载选项请求: {title}")
+        # 这里可以添加下载选项对话框逻辑
 
     def create_section_cards(self, parent_widget: QWidget, sections: List[Dict[str, Any]]) -> List[SettingCardGroup]:
         """创建所有部分的卡片"""

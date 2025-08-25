@@ -152,8 +152,8 @@ class ExceptionHandler(QObject):
         self.auto_retry_timer.timeout.connect(self._process_auto_retry)
         self.pending_retries = []
 
-        # 设置全局异常处理
-        sys.excepthook = self.handle_exception
+        # 注意：全局异常处理器将在外部设置，避免重复设置
+        # sys.excepthook = self.handle_exception
 
     def register_recovery_callback(self, exc_type: str, callback: Callable):
         """注册异常恢复回调函数"""

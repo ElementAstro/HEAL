@@ -11,6 +11,10 @@ from qfluentwidgets import (
     isDarkTheme, setTheme, Theme, MessageBox
 )
 from PySide6.QtCore import Qt
+from app.common.logging_config import get_logger, log_performance, with_correlation_id
+
+# 使用统一日志配置
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -78,6 +82,9 @@ class TelescopeCatalog(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("望远镜目录")
+
+        logger.info("初始化望远镜目录")
+
         self.telescopes: List[Telescope] = [
             Telescope(make="Zhumell", model="Z12", aperture=304.8, focal_length=1500.0),
             # 添加更多望远镜数据
@@ -85,6 +92,8 @@ class TelescopeCatalog(QWidget):
         self.filtered_telescopes = self.telescopes.copy()
 
         self.layout = QVBoxLayout(self)
+
+        logger.debug(f"加载了 {len(self.telescopes)} 个望远镜")
 
         # 搜索输入
         search_layout = QHBoxLayout()

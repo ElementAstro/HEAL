@@ -6,7 +6,7 @@ from app.common.logging_config import get_logger, log_performance, with_correlat
 from app.common.i18n import t
 from app.common.exception_handler import exception_handler, ExceptionType, global_exception_handler
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget, QMessageBox, QApplication
+    QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget, QMessageBox, QApplication, QSplitter
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QClipboard
@@ -23,6 +23,11 @@ from app.components.download import (
     DownloadSearchManager, DownloadCardManager, DownloadHandler,
     DownloadConfigManager, DownloadNavigationManager
 )
+from app.components.download.download_panel import DownloadPanel
+from app.components.download.header_section import DownloadHeaderSection
+from app.components.download.featured_downloads import FeaturedDownloadsSection
+from app.components.download.category_grid import CategoryGridWidget
+from app.components.download.responsive_layout import ResponsiveLayoutManager
 
 # 初始化logger和异常处理器
 logger = get_logger('download_interface')
@@ -69,16 +74,41 @@ class Download(ScrollArea):
 
     def _init_ui_components(self):
         """初始化UI组件"""
-        # 初始化搜索组件
+        # 初始化新的头部组件
+        self.header_section = DownloadHeaderSection(self.scroll_widget)
+        self.header_section.search_requested.connect(self._on_search_requested)
+        self.header_section.category_selected.connect(self._on_category_selected)
+        self.header_section.download_requested.connect(self._on_quick_download_requested)
+        self.header_section.status_clicked.connect(self._on_download_status_clicked)
+
+        # 初始化精选下载组件
+        self.featured_section = FeaturedDownloadsSection(self.scroll_widget)
+        self.featured_section.download_requested.connect(self._on_featured_download_requested)
+        self.featured_section.favorite_toggled.connect(self._on_favorite_toggled)
+        self.featured_section.view_all_requested.connect(self._on_view_all_requested)
+
+        # 初始化分类网格组件
+        self.category_grid = CategoryGridWidget(self.scroll_widget)
+        self.category_grid.category_selected.connect(self._on_category_grid_selected)
+        self.category_grid.view_all_categories.connect(self._on_view_all_categories)
+
+        # 初始化搜索组件（保留用于兼容性）
         search_components = self.search_manager.init_search_components()
-        self.search_box, self.search_button, self.toggle_search_button, self.combo_box = search_components
-        
+        self.search_container, self.search_box, self.combo_box = search_components
+
         # 初始化导航组件
         self.pivot, self.stacked_widget = self.navigation_manager.init_navigation_components(self.Nav)
-        
+
+        # 初始化下载管理面板（转换为侧边栏）
+        self.download_panel = DownloadPanel(self.scroll_widget)
+        self.download_panel.download_requested.connect(self._on_quick_download_requested)
+
         # 初始化刷新按钮
         self.refresh_button = PushButton(t('common.refresh'), self.scroll_widget)
         self.refresh_button.clicked.connect(self.load_interface_from_json)
+
+        # 初始化响应式布局管理器
+        self.responsive_manager = ResponsiveLayoutManager(self.scroll_widget)
 
     def _connect_manager_signals(self):
         """连接管理器信号"""
@@ -107,6 +137,20 @@ class Download(ScrollArea):
         """配置加载完成处理"""
         self.interface = interface_data
         self.search_manager.set_interface_data(interface_data)
+
+        # 设置新组件的数据
+        sections = interface_data.get('sections', [])
+        self.header_section.set_categories(sections)
+        self.category_grid.set_categories(sections)
+
+        # 更新分类项目计数
+        category_counts = {}
+        for section in sections:
+            section_id = section.get('id', '')
+            items = section.get('items', [])
+            category_counts[section_id] = len(items)
+        self.category_grid.update_category_counts(category_counts)
+
         self.load_interface_cards()
 
     def _on_config_load_failed(self, error_message: str):
@@ -138,6 +182,94 @@ class Download(ScrollArea):
     def _on_navigation_changed(self, section_title: str, index: int):
         """导航变更处理"""
         logger.debug(f"导航到: {section_title} (索引: {index})")
+
+    def _on_quick_download_requested(self, name: str, url: str):
+        """快速下载请求处理"""
+        logger.info(f"快速下载请求: {name} - {url}")
+        # 这里可以集成实际的下载逻辑
+        InfoBar.success(
+            title="下载开始",
+            content=f"开始下载 {name}",
+            isClosable=True,
+            position=InfoBarPosition.TOP,
+            duration=2000,
+            parent=self.scroll_widget
+        )
+
+    def _on_search_requested(self, search_text: str, category: str):
+        """搜索请求处理"""
+        logger.info(f"搜索请求: {search_text} in {category}")
+        # 集成现有搜索逻辑
+        self.search_manager.perform_search(search_text, category)
+
+    def _on_category_selected(self, category: str):
+        """分类选择处理"""
+        logger.info(f"分类选择: {category}")
+        # 导航到指定分类
+        self.navigation_manager.navigate_to_category(category)
+
+    def _on_download_status_clicked(self):
+        """下载状态点击处理"""
+        logger.info("下载状态被点击")
+        # 显示下载管理面板或切换到下载页面
+        self.download_panel.setVisible(not self.download_panel.isVisible())
+
+    def _on_featured_download_requested(self, name: str, url: str, category: str):
+        """精选下载请求处理"""
+        logger.info(f"精选下载请求: {name} - {url} ({category})")
+        # 处理精选下载
+        self._on_quick_download_requested(name, url)
+
+    def _on_favorite_toggled(self, name: str, is_favorited: bool):
+        """收藏状态切换处理"""
+        logger.info(f"收藏状态变更: {name} - {is_favorited}")
+        # 这里可以添加收藏管理逻辑
+
+    def _on_view_all_requested(self):
+        """查看全部请求处理"""
+        logger.info("查看全部下载请求")
+        # 切换到完整下载列表视图
+
+    def _on_category_grid_selected(self, category_id: str, category_title: str):
+        """分类网格选择处理"""
+        logger.info(f"分类网格选择: {category_title} ({category_id})")
+        # 导航到指定分类
+        self.navigation_manager.navigate_to_section_by_id(category_id)
+
+    def _on_view_all_categories(self):
+        """查看全部分类处理"""
+        logger.info("查看全部分类请求")
+        # 显示完整分类列表
+
+    def _on_layout_mode_changed(self, mode: str):
+        """响应式布局模式变更处理"""
+        logger.info(f"布局模式变更: {mode}")
+        # 根据布局模式调整组件显示
+        if mode == "mobile":
+            # 移动端优化
+            self.header_section.setVisible(True)  # 保持头部可见
+            self.featured_section.setVisible(True)  # 保持精选可见
+            # 可以隐藏一些次要组件
+        elif mode == "tablet":
+            # 平板端优化
+            self.header_section.setVisible(True)
+            self.featured_section.setVisible(True)
+            self.category_grid.setVisible(True)
+        else:
+            # 桌面端显示所有组件
+            self.header_section.setVisible(True)
+            self.featured_section.setVisible(True)
+            self.category_grid.setVisible(True)
+
+    def _on_sidebar_toggled(self, is_visible: bool):
+        """侧边栏切换处理"""
+        logger.info(f"侧边栏切换: {'显示' if is_visible else '隐藏'}")
+        # 可以添加额外的侧边栏切换逻辑
+
+    def toggle_sidebar(self):
+        """切换侧边栏显示"""
+        if self.responsive_manager:
+            self.responsive_manager.toggle_sidebar()
 
 
 
@@ -187,14 +319,73 @@ class Download(ScrollArea):
         self._complete_layout_setup()
 
     def _complete_layout_setup(self):
-        """完成布局设置"""
-        search_components = (self.search_box, self.search_button, self.toggle_search_button, self.combo_box)
-        self.navigation_manager.setup_layout(self.vbox_layout, self.refresh_button, search_components)
+        """完成布局设置 - 使用改进的响应式布局"""
+        # 创建主分割器（水平方向，右侧为可折叠侧边栏）
+        main_splitter = QSplitter(Qt.Orientation.Horizontal)
+
+        # 左侧：主内容区域（垂直布局）
+        main_content = QWidget()
+        main_layout = QVBoxLayout(main_content)
+        main_layout.setContentsMargins(16, 16, 16, 16)  # 增加边距
+        main_layout.setSpacing(20)  # 增加组件间距
+
+        # 添加头部组件
+        main_layout.addWidget(self.header_section)
+
+        # 添加精选下载组件
+        main_layout.addWidget(self.featured_section)
+
+        # 添加分类网格组件
+        main_layout.addWidget(self.category_grid)
+
+        # 添加传统的导航和内容区域（保持兼容性）
+        traditional_content = QWidget()
+        traditional_layout = QVBoxLayout(traditional_content)
+        traditional_layout.setContentsMargins(0, 16, 0, 0)  # 顶部边距
+        traditional_layout.setSpacing(12)
+
+        # 导航和内容
+        content_layout = QHBoxLayout()
+        content_layout.setSpacing(12)
+        content_layout.addWidget(self.pivot)
+        content_layout.addWidget(self.stacked_widget, 1)
+        traditional_layout.addLayout(content_layout)
+
+        # 刷新按钮
+        refresh_layout = QHBoxLayout()
+        refresh_layout.setContentsMargins(0, 12, 0, 0)
+        refresh_layout.addStretch()
+        refresh_layout.addWidget(self.refresh_button)
+        traditional_layout.addLayout(refresh_layout)
+
+        main_layout.addWidget(traditional_content)
+
+        # 右侧：下载管理面板（可折叠侧边栏）
+        self.download_panel.setMaximumWidth(380)  # 稍微增加最大宽度
+        self.download_panel.setMinimumWidth(280)  # 减少最小宽度以适应小屏幕
+
+        # 添加到分割器
+        main_splitter.addWidget(main_content)
+        main_splitter.addWidget(self.download_panel)
+
+        # 设置更合理的初始大小比例
+        main_splitter.setSizes([1000, 320])  # 主内容区域更大，侧边栏适中
+        main_splitter.setStretchFactor(0, 1)  # 主内容区域可拉伸
+        main_splitter.setStretchFactor(1, 0)  # 侧边栏固定大小
+
+        # 添加到主布局
+        self.vbox_layout.addWidget(main_splitter)
+
+        # 设置响应式布局管理器
+        self.responsive_manager.set_components(main_splitter, self.download_panel, main_content)
+        self.responsive_manager.layout_changed.connect(self._on_layout_mode_changed)
+        self.responsive_manager.sidebar_toggled.connect(self._on_sidebar_toggled)
 
     def init_widgets(self):
         """初始化窗口组件"""
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.setViewportMargins(20, 0, 20, 20)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.setViewportMargins(0, 0, 0, 0)  # 移除边距，让组件自己控制
         self.setWidget(self.scroll_widget)
         self.setWidgetResizable(True)
 

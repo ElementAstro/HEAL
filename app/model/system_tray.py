@@ -2,6 +2,10 @@ from PySide6.QtWidgets import QSystemTrayIcon
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import QCoreApplication, QTimer
 from qfluentwidgets import Action, FluentIcon, RoundMenu
+from app.common.logging_config import get_logger
+
+# 使用统一日志配置
+logger = get_logger('system_tray')
 
 
 class SystemTray(QSystemTrayIcon):
@@ -19,8 +23,8 @@ class SystemTray(QSystemTrayIcon):
         if parent and hasattr(parent, 'toggle_window'):
             self.toggle_action.triggered.connect(parent.toggle_window)
         else:
-            print(
-                f"Warning: SystemTray parent {parent} does not have 'toggle_window' method or parent is None.")
+            logger.warning(
+                f"系统托盘父组件 {parent} 没有 'toggle_window' 方法或父组件为空")
         self.tray_menu.addAction(self.toggle_action)
 
         # 添加退出的菜单项
@@ -29,8 +33,8 @@ class SystemTray(QSystemTrayIcon):
         if app_instance:
             quit_action.triggered.connect(app_instance.quit)
         else:
-            print(
-                "Warning: QCoreApplication.instance() is None, cannot connect quit action.")
+            logger.warning(
+                "QCoreApplication.instance() 为空，无法连接退出操作")
         self.tray_menu.addAction(quit_action)
 
         # 将菜单应用到托盘图标
@@ -43,8 +47,8 @@ class SystemTray(QSystemTrayIcon):
         if parent and hasattr(parent, 'on_tray_icon_activated'):
             self.activated.connect(parent.on_tray_icon_activated)
         else:
-            print(
-                f"Warning: SystemTray parent {parent} does not have 'on_tray_icon_activated' method or parent is None.")
+            logger.warning(
+                f"系统托盘父组件 {parent} 没有 'on_tray_icon_activated' 方法或父组件为空")
 
         # 显示图标提示
         self.setToolTip("My Application is running")

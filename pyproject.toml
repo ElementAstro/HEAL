@@ -5,9 +5,16 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "aiofiles>=24.1.0",
+    "jsonschema>=4.25.1",
     "loguru>=0.7.3",
     "matplotlib>=3.10.3",
     "psutil>=7.0.0",
     "pyside6-fluent-widgets[full]>=1.8.1",
     "requests>=2.32.3",
+]
+
+[dependency-groups]
+dev = [
+    "types-aiofiles>=24.1.0.20250822",
 ]

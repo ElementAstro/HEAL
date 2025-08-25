@@ -3,6 +3,7 @@ from PySide6.QtGui import QIntValidator
 from PySide6.QtCore import Qt, Signal
 from qfluentwidgets import FluentIcon, LineEdit, PrimaryPushButton
 from app.model.setting_card import SettingCard
+from app.common.i18n_ui import setup_component_i18n, tr
 
 
 class LineEditSettingCardPort(SettingCard):
@@ -11,11 +12,19 @@ class LineEditSettingCardPort(SettingCard):
 
     def __init__(self, title, icon=FluentIcon.SETTING):
         super().__init__(icon, title)
+
+        # 设置国际化支持
+        self.i18n = setup_component_i18n(self)
+
         self.port_edit = LineEdit(self)
         self.port_edit.setFixedWidth(85)
-        self.port_edit.setPlaceholderText(self.tr("端口"))
+        self.port_edit.setPlaceholderText(tr("setting_cards.port"))
         self.port_edit.setValidator(QIntValidator(1, 99999, self))
-        self.set_port_button = PrimaryPushButton(self.tr('设置'), self)
+        self.set_port_button = PrimaryPushButton(tr('setting_cards.set'), self)
+
+        # 注册国际化元素
+        self.i18n.register_placeholder(self.port_edit, "setting_cards.port")
+        self.i18n.register_text(self.set_port_button, "setting_cards.set")
 
         self.hBoxLayout.addWidget(
             self.port_edit, 0, Qt.AlignmentFlag.AlignRight)

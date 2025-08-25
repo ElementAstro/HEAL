@@ -8,6 +8,10 @@ from qfluentwidgets import (MessageBoxBase, TitleLabel, SubtitleLabel, BodyLabel
                             PlainTextEdit, FluentIconBase, HyperlinkButton, IndeterminateProgressBar)
 from app.model.config import cfg
 from app.model.setting_card import SettingCard
+from app.common.logging_config import get_logger, log_performance, log_download
+
+# 使用统一日志配置
+logger = get_logger('message_download')
 
 
 class HyperlinkCard(SettingCard):

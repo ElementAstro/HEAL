@@ -1,9 +1,9 @@
 import json
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Any
 from PySide6.QtWidgets import QWidget, QApplication
 from PySide6.QtGui import QClipboard
-from PySide6.QtCore import QProcess
+from PySide6.QtCore import QProcess, QObject, Signal
 from qfluentwidgets import (
     CustomColorSettingCard, ComboBoxSettingCard, PrimaryPushSettingCard,
     SwitchSettingCard, FluentIcon, setThemeColor
@@ -13,21 +13,60 @@ from app.model.check_update import check_update
 from app.model.config import cfg, get_json, Info
 from app.components.tools.editor import JsonEditor
 from app.components.setting.setting_cards import LineEditSettingCardPort
+from app.components.setting.performance_manager import get_performance_manager, performance_optimized
+from app.components.setting.lazy_settings import get_lazy_manager
+from app.components.setting.error_handler import get_error_handler, settings_error_handler, ErrorSeverity
+from app.common.logging_config import get_logger
 
 if TYPE_CHECKING:
     from app.setting_interface import Setting
 
 
-class SettingsManager:
-    """Manages all setting cards and their operations."""
-    
+class SettingsManager(QObject):
+    """Manages all setting cards and their operations with performance optimizations."""
+
+    # Signals for performance monitoring
+    interface_created = Signal(str)  # interface_name
+    setting_changed = Signal(str, object)  # setting_key, value
+    performance_stats = Signal(dict)  # performance statistics
+
     def __init__(self, parent_widget: "Setting"):
+        super().__init__(parent_widget)
         self.parent = parent_widget
         self.config_editor = JsonEditor()
-        
-    def create_personal_interface(self) -> SettingCardGroup:
-        """Create personal settings interface."""
-        personal_interface = SettingCardGroup(self.parent.scrollWidget)
+
+        # Performance managers
+        self.performance_manager = get_performance_manager()
+        self.lazy_manager = get_lazy_manager()
+        self.error_handler = get_error_handler()
+        self.logger = get_logger('settings_manager', module='SettingsManager')
+
+        # Interface cache for performance
+        self._interface_cache: Dict[str, SettingCardGroup] = {}
+
+        # Connect performance manager signals
+        self.performance_manager.setting_saved.connect(self._on_setting_saved)
+
+        self.logger.info("Performance-optimized settings manager initialized")
+
+    def _on_setting_saved(self, setting_key: str, success: bool):
+        """Handle setting saved signal from performance manager"""
+        if success:
+            self.setting_changed.emit(setting_key, True)
+        else:
+            self.logger.warning(f"Failed to save setting: {setting_key}")
+
+    @performance_optimized
+    def create_appearance_interface(self) -> SettingCardGroup:
+        """Create appearance and display settings interface with caching."""
+        cache_key = 'appearance_interface'
+
+        # Check cache first
+        if cache_key in self._interface_cache:
+            self.logger.debug("Using cached appearance interface")
+            return self._interface_cache[cache_key]
+
+        appearance_interface = SettingCardGroup(self.parent.scrollWidget)
         
         # Theme color card
         self.themeColorCard = CustomColorSettingCard(
@@ -54,44 +93,29 @@ class SettingsManager:
             self.parent.tr('界面显示语言'),
             texts=['简体中文', '繁體中文', 'English', self.parent.tr('跟随系统设置')]
         )
-        
-        # Update card
-        self.updateOnStartUpCard = PrimaryPushSettingCard(
-            self.parent.tr('检查更新'),
-            FluentIcon.UPDATE,
-            self.parent.tr('手动检查更新'),
-            self.parent.tr('当前版本 : ') + cfg.APP_VERSION
-        )
-        
-        # Restart card
-        self.restartCard = PrimaryPushSettingCard(
-            self.parent.tr('重启程序'),
-            FluentIcon.ROTATE,
-            self.parent.tr('重启程序'),
-            self.parent.tr('无奖竞猜，存在即合理')
-        )
-        
-        # Config editor card
-        self.configEditorCard = PrimaryPushSettingCard(
-            self.parent.tr('打开配置'),
-            FluentIcon.PENCIL_INK,
-            self.parent.tr('打开配置'),
-            self.parent.tr('自实现Json编辑器')
-        )
-        
-        # Add cards to interface
-        personal_interface.addSettingCard(self.themeColorCard)
-        personal_interface.addSettingCard(self.zoomCard)
-        personal_interface.addSettingCard(self.languageCard)
-        personal_interface.addSettingCard(self.updateOnStartUpCard)
-        personal_interface.addSettingCard(self.restartCard)
-        personal_interface.addSettingCard(self.configEditorCard)
-        
-        return personal_interface
+
+        # Add cards to interface - only appearance-related settings
+        appearance_interface.addSettingCard(self.themeColorCard)
+        appearance_interface.addSettingCard(self.zoomCard)
+        appearance_interface.addSettingCard(self.languageCard)
+
+        # Cache the interface for performance
+        self._interface_cache[cache_key] = appearance_interface
+        self.interface_created.emit('appearance')
+        self.logger.debug("Created and cached appearance interface")
+
+        return appearance_interface
     
-    def create_function_interface(self) -> SettingCardGroup:
-        """Create function settings interface."""
-        function_interface = SettingCardGroup(self.parent.scrollWidget)
+    @performance_optimized
+    def create_behavior_interface(self) -> SettingCardGroup:
+        """Create application behavior settings interface with caching."""
+        cache_key = 'behavior_interface'
+
+        if cache_key in self._interface_cache:
+            self.logger.debug("Using cached behavior interface")
+            return self._interface_cache[cache_key]
+
+        behavior_interface = SettingCardGroup(self.parent.scrollWidget)
         
         # Auto copy card
         self.autoCopyCard = SwitchSettingCard(
@@ -118,15 +142,27 @@ class SettingsManager:
         )
         
         # Add cards to interface
-        function_interface.addSettingCard(self.autoCopyCard)
-        function_interface.addSettingCard(self.useLoginCard)
-        function_interface.addSettingCard(self.useAudioCard)
-        
-        return function_interface
+        behavior_interface.addSettingCard(self.autoCopyCard)
+        behavior_interface.addSettingCard(self.useLoginCard)
+        behavior_interface.addSettingCard(self.useAudioCard)
+
+        # Cache the interface
+        self._interface_cache[cache_key] = behavior_interface
+        self.interface_created.emit('behavior')
+        self.logger.debug("Created and cached behavior interface")
+
+        return behavior_interface
     
-    def create_proxy_interface(self) -> SettingCardGroup:
-        """Create proxy settings interface."""
-        proxy_interface = SettingCardGroup(self.parent.scrollWidget)
+    @performance_optimized
+    def create_network_interface(self) -> SettingCardGroup:
+        """Create network and connectivity settings interface with caching."""
+        cache_key = 'network_interface'
+
+        if cache_key in self._interface_cache:
+            self.logger.debug("Using cached network interface")
+            return self._interface_cache[cache_key]
+
+        network_interface = SettingCardGroup(self.parent.scrollWidget)
         
         # Proxy card
         self.proxyCard = SwitchSettingCard(
@@ -150,12 +186,64 @@ class SettingsManager:
         )
         
         # Add cards to interface
-        proxy_interface.addSettingCard(self.proxyCard)
-        proxy_interface.addSettingCard(self.proxyPortCard)
-        proxy_interface.addSettingCard(self.chinaCard)
-        
-        return proxy_interface
-    
+        network_interface.addSettingCard(self.proxyCard)
+        network_interface.addSettingCard(self.proxyPortCard)
+        network_interface.addSettingCard(self.chinaCard)
+
+        # Cache the interface
+        self._interface_cache[cache_key] = network_interface
+        self.interface_created.emit('network')
+        self.logger.debug("Created and cached network interface")
+
+        return network_interface
+
+    @performance_optimized
+    def create_system_interface(self) -> SettingCardGroup:
+        """Create system and maintenance settings interface with lazy loading."""
+        cache_key = 'system_interface'
+
+        if cache_key in self._interface_cache:
+            self.logger.debug("Using cached system interface")
+            return self._interface_cache[cache_key]
+
+        system_interface = SettingCardGroup(self.parent.scrollWidget)
+
+        # Update card
+        self.updateOnStartUpCard = PrimaryPushSettingCard(
+            self.parent.tr('检查更新'),
+            FluentIcon.UPDATE,
+            self.parent.tr('手动检查更新'),
+            self.parent.tr('当前版本 : ') + cfg.APP_VERSION
+        )
+
+        # Restart card
+        self.restartCard = PrimaryPushSettingCard(
+            self.parent.tr('重启程序'),
+            FluentIcon.ROTATE,
+            self.parent.tr('重启程序'),
+            self.parent.tr('无奖竞猜，存在即合理')
+        )
+
+        # Config editor card
+        self.configEditorCard = PrimaryPushSettingCard(
+            self.parent.tr('打开配置'),
+            FluentIcon.PENCIL_INK,
+            self.parent.tr('打开配置'),
+            self.parent.tr('自实现Json编辑器')
+        )
+
+        # Add cards to interface
+        system_interface.addSettingCard(self.updateOnStartUpCard)
+        system_interface.addSettingCard(self.restartCard)
+        system_interface.addSettingCard(self.configEditorCard)
+
+        # Cache the interface
+        self._interface_cache[cache_key] = system_interface
+        self.interface_created.emit('system')
+        self.logger.debug("Created and cached system interface")
+
+        return system_interface
+
     def connect_signals(self):
         """Connect all setting card signals."""
         # Personal interface signals
@@ -225,16 +313,19 @@ class SettingsManager:
 
         self.init_proxy_info()
 
+    @settings_error_handler("handle_set_proxy_port", ErrorSeverity.MEDIUM)
+    @performance_optimized
     def handle_set_proxy_port(self):
-        """Handle proxy port setting."""
+        """Handle proxy port setting with performance optimization and error handling."""
         new_port = self.proxyPortCard.port_edit.text()
         if new_port:
-            config_path = 'config/config.json'
-            with open(config_path, 'r', encoding='utf-8') as file:
-                data = json.load(file)
-                data['PROXY_PORT'] = new_port
-            with open(config_path, 'w', encoding='utf-8') as file:
-                json.dump(data, file, indent=2, ensure_ascii=False)
+            # Use performance manager for optimized saving
+            self.performance_manager.set_setting(
+                'config/config.json',
+                'PROXY_PORT',
+                new_port,
+                immediate=False  # Use batching for better performance
+            )
 
             # 复制到剪贴板
             clipboard: QClipboard = QApplication.clipboard()
@@ -243,8 +334,60 @@ class SettingsManager:
 
         self.init_proxy_info()
 
+    @settings_error_handler("init_proxy_info", ErrorSeverity.LOW)
     def init_proxy_info(self):
-        """Initialize proxy information display."""
-        port = get_json('./config/config.json', 'PROXY_PORT')
+        """Initialize proxy information display with caching."""
+        # Use performance manager for cached access
+        port = self.performance_manager.get_setting(
+            './config/config.json',
+            'PROXY_PORT',
+            '7890'  # default value
+        )
         self.proxyPortCard.titleLabel.setText(self.parent.tr(f'代理端口 (当前: {port})'))
         self.proxyPortCard.setDisabled(not cfg.proxyStatus.value)
+
+    def clear_cache(self):
+        """Clear all cached interfaces and performance data"""
+        self._interface_cache.clear()
+        self.performance_manager.cache.clear()
+        self.logger.info("Cleared all settings caches")
+
+    def get_performance_stats(self) -> Dict[str, Any]:
+        """Get comprehensive performance statistics"""
+        perf_stats = self.performance_manager.get_performance_stats()
+        lazy_stats = self.lazy_manager.get_loading_stats()
+        error_stats = self.error_handler.get_error_statistics()
+
+        return {
+            'performance': perf_stats,
+            'lazy_loading': lazy_stats,
+            'error_handling': error_stats,
+            'cached_interfaces': len(self._interface_cache)
+        }
+
+    def preload_interfaces(self):
+        """Preload interfaces in background for better performance"""
+        try:
+            # Preload most commonly used interfaces
+            self.lazy_manager.load_setting_async('appearance_interface')
+            self.lazy_manager.load_setting_async('behavior_interface')
+            self.logger.info("Started preloading interfaces")
+        except Exception as e:
+            self.logger.error(f"Error preloading interfaces: {e}")
+
+    def cleanup(self):
+        """Cleanup resources and save pending changes"""
+        try:
+            # Flush any pending saves
+            self.performance_manager._flush_pending_saves()
+
+            # Cleanup managers
+            self.performance_manager.cleanup()
+            self.lazy_manager.cleanup()
+
+            # Clear caches
+            self.clear_cache()
+
+            self.logger.info("Settings manager cleanup completed")
+        except Exception as e:
+            self.logger.error(f"Error during cleanup: {e}")

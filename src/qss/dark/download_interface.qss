@@ -1,0 +1,462 @@
+/* Download Interface Dark Theme Styles */
+
+/* 主下载界面 */
+Download {
+    background-color: transparent;
+}
+
+Download > #scrollWidget {
+    background-color: transparent;
+    border: none;
+}
+
+/* 搜索容器样式 */
+CardWidget[objectName="searchContainer"] {
+    background-color: rgba(45, 45, 45, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+/* 搜索框增强样式 */
+SearchLineEdit {
+    background-color: rgba(60, 60, 60, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: white;
+}
+
+SearchLineEdit:focus {
+    border: 2px solid #0078d4;
+    background-color: rgba(70, 70, 70, 0.9);
+}
+
+SearchLineEdit:hover {
+    background-color: rgba(65, 65, 65, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 工具按钮样式 */
+ToolButton {
+    background-color: rgba(60, 60, 60, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 6px;
+    min-width: 32px;
+    min-height: 32px;
+}
+
+ToolButton:hover {
+    background-color: rgba(80, 80, 80, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+ToolButton:pressed {
+    background-color: rgba(50, 50, 50, 0.9);
+}
+
+/* 增强卡片样式 */
+EnhancedHyperlinkCard {
+    background-color: rgba(45, 45, 45, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin: 4px 0;
+}
+
+EnhancedHyperlinkCard:hover {
+    background-color: rgba(55, 55, 55, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+EnhancedPrimaryPushSettingCard {
+    background-color: rgba(45, 45, 45, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin: 4px 0;
+}
+
+EnhancedPrimaryPushSettingCard:hover {
+    background-color: rgba(55, 55, 55, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* 下载面板样式 */
+DownloadPanel {
+    background-color: rgba(35, 35, 35, 0.9);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 下载统计卡片 */
+DownloadStatsCard {
+    background-color: rgba(40, 40, 40, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+/* 快速下载卡片 */
+QuickDownloadCard {
+    background-color: rgba(40, 40, 40, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+/* 新组件样式 */
+
+/* 下载头部区域 */
+DownloadHeaderSection {
+    background-color: transparent;
+    margin-bottom: 16px;
+}
+
+/* 搜索区域 */
+SearchSection {
+    background-color: rgba(45, 45, 45, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+SearchSection:hover {
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* 快速下载区域 */
+QuickDownloadSection {
+    background-color: rgba(45, 45, 45, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+QuickDownloadSection:hover {
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* 下载状态指示器 */
+DownloadStatusIndicator {
+    background-color: rgba(50, 50, 50, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+DownloadStatusIndicator:hover {
+    background-color: rgba(60, 60, 60, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* 精选下载区域 */
+FeaturedDownloadsSection {
+    background-color: rgba(40, 40, 40, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    margin-bottom: 16px;
+}
+
+/* 精选下载卡片 */
+FeaturedDownloadCard {
+    background-color: rgba(50, 50, 50, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+FeaturedDownloadCard:hover {
+    background-color: rgba(60, 60, 60, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 分类网格区域 */
+CategoryGridWidget {
+    background-color: rgba(40, 40, 40, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    margin-bottom: 16px;
+}
+
+/* 分类卡片 */
+CategoryCard {
+    background-color: rgba(50, 50, 50, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+CategoryCard:hover {
+    background-color: rgba(60, 60, 60, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 按钮增强样式 */
+PrimaryPushButton {
+    background-color: #0078d4;
+    border: 1px solid #106ebe;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 600;
+    color: white;
+}
+
+PrimaryPushButton:hover {
+    background-color: #106ebe;
+    border: 1px solid #005a9e;
+}
+
+PrimaryPushButton:pressed {
+    background-color: #005a9e;
+}
+
+PushButton {
+    background-color: rgba(60, 60, 60, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    padding: 8px 16px;
+    color: white;
+}
+
+PushButton:hover {
+    background-color: rgba(80, 80, 80, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* 搜索框增强 */
+SearchLineEdit {
+    background-color: rgba(60, 60, 60, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: white;
+}
+
+SearchLineEdit:focus {
+    border: 2px solid #0078d4;
+    background-color: rgba(70, 70, 70, 0.9);
+}
+
+/* 信息徽章样式 */
+InfoBadge {
+    background-color: rgba(0, 120, 212, 0.8);
+    border-radius: 12px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    FeaturedDownloadCard {
+        min-width: 100%;
+        margin-bottom: 12px;
+    }
+
+    CategoryCard {
+        min-width: 100%;
+        margin-bottom: 8px;
+    }
+
+    QuickDownloadSection PushButton {
+        min-width: 80px;
+        margin: 4px;
+    }
+}
+
+/* 动画和过渡效果 */
+* {
+    transition-property: background-color, border-color;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+}
+
+/* 滚动条样式 */
+QScrollArea QScrollBar:vertical {
+    background-color: rgba(40, 40, 40, 0.5);
+    width: 8px;
+    border-radius: 4px;
+}
+
+QScrollArea QScrollBar::handle:vertical {
+    background-color: rgba(120, 120, 120, 0.8);
+    border-radius: 4px;
+    min-height: 20px;
+}
+
+QScrollArea QScrollBar::handle:vertical:hover {
+    background-color: rgba(150, 150, 150, 0.9);
+}
+
+QuickDownloadCard PushButton {
+    background-color: rgba(0, 120, 212, 0.8);
+    border: 1px solid rgba(0, 120, 212, 0.6);
+    border-radius: 4px;
+    color: white;
+    padding: 6px 12px;
+    font-weight: 500;
+}
+
+QuickDownloadCard PushButton:hover {
+    background-color: rgba(0, 120, 212, 1.0);
+    border: 1px solid rgba(0, 120, 212, 0.8);
+}
+
+QuickDownloadCard PushButton:pressed {
+    background-color: rgba(0, 100, 180, 1.0);
+}
+
+/* 分类卡片样式 */
+DownloadCategoryCard {
+    background-color: rgba(45, 45, 45, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin: 2px 0;
+}
+
+DownloadCategoryCard:hover {
+    background-color: rgba(55, 55, 55, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    cursor: pointer;
+}
+
+/* 收藏卡片样式 */
+FavoriteCard {
+    background-color: rgba(45, 45, 45, 0.7);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 6px;
+    margin: 2px 0;
+}
+
+FavoriteCard:hover {
+    background-color: rgba(55, 55, 55, 0.8);
+    border: 1px solid rgba(255, 215, 0, 0.5);
+}
+
+/* 进度条样式 */
+ProgressBar {
+    background-color: rgba(60, 60, 60, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    text-align: center;
+}
+
+ProgressBar::chunk {
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                      stop:0 #0078d4, stop:1 #106ebe);
+    border-radius: 3px;
+}
+
+/* 分段控件样式 */
+SegmentedWidget {
+    background-color: rgba(45, 45, 45, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+/* 分割器样式 */
+QSplitter::handle {
+    background-color: rgba(255, 255, 255, 0.1);
+    width: 2px;
+}
+
+QSplitter::handle:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 滚动区域样式 */
+ScrollArea {
+    background-color: transparent;
+    border: none;
+}
+
+ScrollArea > QWidget {
+    background-color: transparent;
+}
+
+/* 组合框样式 */
+ComboBox {
+    background-color: rgba(60, 60, 60, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: white;
+    min-width: 120px;
+}
+
+ComboBox:hover {
+    background-color: rgba(70, 70, 70, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+ComboBox:focus {
+    border: 2px solid #0078d4;
+}
+
+/* 标签样式 */
+StrongBodyLabel {
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+BodyLabel {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+}
+
+CaptionLabel {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 11px;
+}
+
+/* 信息栏样式 */
+InfoBar {
+    background-color: rgba(45, 45, 45, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+}
+
+InfoBar[type="success"] {
+    border-left: 4px solid #00aa00;
+}
+
+InfoBar[type="warning"] {
+    border-left: 4px solid #ff8c00;
+}
+
+InfoBar[type="error"] {
+    border-left: 4px solid #ff4444;
+}
+
+InfoBar[type="info"] {
+    border-left: 4px solid #0078d4;
+}
+
+/* 动画效果 - Note: Qt QSS doesn't support CSS transitions */
+/* EnhancedHyperlinkCard, EnhancedPrimaryPushSettingCard, DownloadCategoryCard {
+    transition: all 0.2s ease-in-out;
+} */
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+    DownloadPanel {
+        min-width: 250px;
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 800px) {
+    DownloadPanel {
+        min-width: 200px;
+        max-width: 250px;
+    }
+    
+    QuickDownloadCard PushButton {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+}

@@ -4,6 +4,10 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QVBoxLayout, QLabel, QWidget, QDialog
 from qfluentwidgets import (FluentIconBase, IconWidget, LineEdit,
                             FluentStyleSheet, isDarkTheme, drawIcon, ExpandLayout, PushButton)
+from app.common.logging_config import get_logger
+
+# 使用统一日志配置
+logger = get_logger('setting_card')
 
 
 class SettingCardGroup(QWidget):

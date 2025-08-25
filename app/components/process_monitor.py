@@ -18,6 +18,11 @@ from qfluentwidgets import (
 
 from app.model.process_manager import ProcessManager, ProcessInfo, ProcessStatus
 from app.common.exception_handler import process_exception_handler, global_exception_handler
+from app.common.logging_config import get_logger, log_performance, with_correlation_id
+from app.common.i18n_ui import setup_component_i18n, tr, tr_button, tr_label
+
+# 使用统一日志配置
+logger = get_logger('process_monitor')
 
 
 class ProcessStatusCard(CardWidget):
@@ -30,6 +35,7 @@ class ProcessStatusCard(CardWidget):
     def __init__(self, process_info: ProcessInfo, parent=None):
         super().__init__(parent)
         self.process_info = process_info
+        logger.debug(f"创建进程状态卡片: {process_info.name}")
         self.init_ui()
         self.update_status(process_info)
         
@@ -168,49 +174,51 @@ class ProcessMonitorWidget(QWidget):
         
     def init_ui(self):
         """初始化UI"""
+        # 设置国际化支持
+        self.i18n = setup_component_i18n(self)
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(16)
-        
+
         # 标题和控制按钮
         header_layout = QHBoxLayout()
-        
-        title_label = StrongBodyLabel("进程监控")
-        title_label.setFont(QFont("Microsoft YaHei", 16, QFont.Weight.Bold))
-        
-        self.refresh_btn = PrimaryPushButton("刷新状态")
-        self.refresh_btn.setIcon(FluentIcon.SYNC)
+
+        self.title_label = StrongBodyLabel(tr("process_monitor.title"))
+        self.title_label.setFont(QFont("Microsoft YaHei", 16, QFont.Weight.Bold))
+        self.i18n.register_text(self.title_label, "process_monitor.title")
+
+        self.refresh_btn = tr_button("process_monitor.refresh_status", FluentIcon.SYNC, primary=True)
         self.refresh_btn.clicked.connect(self.refresh_all_processes)
-        
-        self.start_all_btn = PrimaryPushButton("启动全部")
-        self.start_all_btn.setIcon(FluentIcon.PLAY)
+
+        self.start_all_btn = tr_button("process_monitor.start_all", FluentIcon.PLAY, primary=True)
         self.start_all_btn.clicked.connect(self.start_all_processes)
-        
-        self.stop_all_btn = PushButton("停止全部")
-        self.stop_all_btn.setIcon(FluentIcon.PAUSE)
+
+        self.stop_all_btn = tr_button("process_monitor.stop_all", FluentIcon.PAUSE)
         self.stop_all_btn.clicked.connect(self.stop_all_processes)
         
-        header_layout.addWidget(title_label)
+        header_layout.addWidget(self.title_label)
         header_layout.addStretch()
         header_layout.addWidget(self.refresh_btn)
         header_layout.addWidget(self.start_all_btn)
         header_layout.addWidget(self.stop_all_btn)
-        
+
         # 进程列表容器
         self.process_container = QWidget()
         self.process_layout = QVBoxLayout(self.process_container)
         self.process_layout.setContentsMargins(0, 0, 0, 0)
         self.process_layout.setSpacing(8)
-        
+
         # 滚动区域（如果需要的话）
         from qfluentwidgets import ScrollArea
         scroll_area = ScrollArea()
         scroll_area.setWidget(self.process_container)
         scroll_area.setWidgetResizable(True)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        
+
         # 状态栏
-        self.status_label = CaptionLabel("就绪")
+        self.status_label = CaptionLabel(tr("ready"))
+        self.i18n.register_text(self.status_label, "ready")
         
         # 添加到主布局
         layout.addLayout(header_layout)
@@ -331,7 +339,17 @@ class ProcessMonitorWidget(QWidget):
             self.status_label.setText(f"进程 {name} 停止失败")
             
     def show_process_log(self, name: str):
-        """显示进程日志"""
+        """显示进程日志 - 现在使用统一日志面板"""
+        try:
+            # 尝试使用统一日志面板
+            from app.components.logging import show_process_log
+            show_process_log(name)
+        except ImportError:
+            # 如果统一日志面板不可用，回退到传统方式
+            self._show_legacy_process_log(name)
+
+    def _show_legacy_process_log(self, name: str):
+        """显示传统的进程日志（备用方案）"""
         try:
             log_content = self.process_manager.get_process_output(name)
             if log_content:

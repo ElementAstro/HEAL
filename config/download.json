@@ -1,8 +1,10 @@
 [
   {
       "type": "link",
-      "title": "项目仓库",
-      "content": "打开各环境仓库",
+      "title": "官方下载页面",
+      "content": "访问各工具的官方下载页面",
+      "category": "reference",
+      "priority": 1,
       "links": {
           "Git": "https://git-scm.com/download/win",
           "Java": "https://www.oracle.com/java/technologies/javase-downloads.html",
@@ -14,42 +16,91 @@
   {
       "type": "download",
       "title": "Git",
-      "content": "下载Git安装包",
+      "content": "版本控制系统，用于代码管理和协作开发",
+      "category": "version_control",
+      "priority": 10,
+      "description": "Git是一个分布式版本控制系统，是现代软件开发的必备工具",
+      "requirements": {
+          "min_os_version": {
+              "windows": "7",
+              "macos": "10.9",
+              "linux": "any"
+          },
+          "disk_space": "50MB"
+      },
+      "status_check": {
+          "command": ["git", "--version"],
+          "version_regex": "git version ([\\d\\.]+)"
+      },
       "options": [
           {
               "name": "Windows x64",
-              "key": "git_windows_x64"
+              "key": "git_windows_x64",
+              "platform": "windows",
+              "architecture": "x64",
+              "recommended": true
           },
           {
               "name": "Windows x86",
-              "key": "git_windows_x86"
+              "key": "git_windows_x86",
+              "platform": "windows",
+              "architecture": "x86"
           },
           {
               "name": "macOS",
-              "key": "git_macos"
+              "key": "git_macos",
+              "platform": "macos",
+              "architecture": "universal"
           },
           {
               "name": "Linux",
-              "key": "git_linux"
+              "key": "git_linux",
+              "platform": "linux",
+              "architecture": "universal"
           }
       ]
   },
   {
       "type": "download",
       "title": "Java",
-      "content": "下载Java安装包",
+      "content": "Java开发工具包，支持Java应用程序开发和运行",
+      "category": "runtime",
+      "priority": 9,
+      "description": "Oracle JDK提供完整的Java开发环境，包括编译器、运行时和开发工具",
+      "requirements": {
+          "min_os_version": {
+              "windows": "7",
+              "macos": "10.8",
+              "linux": "any"
+          },
+          "disk_space": "300MB"
+      },
+      "status_check": {
+          "command": ["java", "-version"],
+          "version_regex": "version \"([\\d\\._]+)\""
+      },
       "options": [
           {
-              "name": "JDK 17",
-              "key": "java_jdk_17"
+              "name": "JDK 17 (推荐)",
+              "key": "java_jdk_17",
+              "platform": "all",
+              "architecture": "all",
+              "recommended": true,
+              "lts": false
           },
           {
               "name": "JDK 11 (LTS)",
-              "key": "java_jdk_11"
+              "key": "java_jdk_11",
+              "platform": "all",
+              "architecture": "all",
+              "lts": true
           },
           {
               "name": "JDK 8 (LTS)",
-              "key": "java_jdk_8"
+              "key": "java_jdk_8",
+              "platform": "all",
+              "architecture": "all",
+              "lts": true
           }
       ]
   },

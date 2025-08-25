@@ -18,6 +18,7 @@ from app.proxy_interface import Proxy
 from app.setting_interface import Setting
 from app.module_interface import Module
 from app.tool_interface import Tools
+from app.log_interface import LogManagement
 
 
 class MainNavigationManager(QObject):
@@ -47,6 +48,7 @@ class MainNavigationManager(QObject):
             'module': Module('ModuleInterface', self.main_window),
             'proxy': Proxy('ProxyInterface', self.main_window),
             'tools': Tools('ToolsInterface', self.main_window),
+            'logs': LogManagement('LogInterface', self.main_window),
             'setting': Setting('SettingInterface', self.main_window)
         }
         
@@ -59,6 +61,7 @@ class MainNavigationManager(QObject):
             ('module', FluentIcon.APPLICATION, self.main_window.tr('模块'), FluentIcon.APPLICATION),
             ('proxy', FluentIcon.CERTIFICATE, self.main_window.tr('代理'), FluentIcon.CERTIFICATE),
             ('tools', FluentIcon.DEVELOPER_TOOLS, self.main_window.tr('工具'), FluentIcon.DEVELOPER_TOOLS),
+            ('logs', FluentIcon.DOCUMENT, self.main_window.tr('日志'), FluentIcon.DOCUMENT),
             ('setting', FluentIcon.SETTING, self.main_window.tr('设置'), FluentIcon.SETTING, NavigationItemPosition.BOTTOM)
         ]
         

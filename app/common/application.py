@@ -73,13 +73,16 @@ class SingletonApplication(QApplication):
         socket.disconnectFromServer()
 
 
-def exception_hook(exception_type, value, tb):
-    """ exception callback function """
+# 注意：全局异常处理器现在在main.py中统一设置
+# 这里只保留应用级别的异常处理函数，但不设置为全局处理器
+
+def application_exception_hook(exception_type, value, tb):
+    """ Application-level exception callback function """
     logger.bind(name="application").error(
-        "Unhandled exception: {}: {}", exception_type.__name__, value)
+        "Application exception: {}: {}", exception_type.__name__, value)
     message = '\n'.join([''.join(traceback.format_tb(tb)),
                         '{0}: {1}'.format(exception_type.__name__, value)])
     signalBus.appErrorSig.emit(message)
 
-
-sys.excepthook = exception_hook
+# 不再在这里设置全局异常处理器，避免与main.py中的设置冲突
+# sys.excepthook = exception_hook

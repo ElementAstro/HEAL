@@ -1,0 +1,90 @@
+============================================================
+国际化检查报告
+============================================================
+
+统计信息:
+  找到的翻译键: 163
+  en_US 翻译项: 185
+  zh_CN 翻译项: 185
+  zh_TW 翻译项: 175
+
+缺失的翻译:
+  en_US: 124 项
+    - AboutInterface
+    - Arial
+    - COMMAND
+    - Consolas
+    - ERROR
+    - Enabled
+    - EnvironmentInterface
+    - LogInterface
+    - PASSWORD
+    - WARNING
+    ... 还有 114 项
+  zh_CN: 124 项
+    - AboutInterface
+    - Arial
+    - COMMAND
+    - Consolas
+    - ERROR
+    - Enabled
+    - EnvironmentInterface
+    - LogInterface
+    - PASSWORD
+    - WARNING
+    ... 还有 114 项
+  zh_TW: 124 项
+    - AboutInterface
+    - Arial
+    - COMMAND
+    - Consolas
+    - ERROR
+    - Enabled
+    - EnvironmentInterface
+    - LogInterface
+    - PASSWORD
+    - WARNING
+    ... 还有 114 项
+
+未使用的翻译:
+  en_US: 146 项
+    - add
+    - app_name
+    - apply
+    - attempt_count
+    - auto_copy
+    - browse
+    - check_update
+    - china_mirror
+    - clear
+    - clear_logs
+    ... 还有 136 项
+  zh_CN: 146 项
+    - add
+    - app_name
+    - apply
+    - attempt_count
+    - auto_copy
+    - browse
+    - check_update
+    - china_mirror
+    - clear
+    - clear_logs
+    ... 还有 136 项
+  zh_TW: 136 项
+    - add
+    - app_name
+    - apply
+    - attempt_count
+    - auto_copy
+    - browse
+    - check_update
+    - china_mirror
+    - clear
+    - clear_logs
+    ... 还有 126 项
+
+建议:
+  1. 添加缺失的翻译项
+  2. 检查 tools/i18n_missing/ 目录下的模板文件
+  3. 考虑删除未使用的翻译项

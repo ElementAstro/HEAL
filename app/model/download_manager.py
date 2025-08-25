@@ -15,6 +15,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 from PySide6.QtCore import QObject, Signal, QThread, QTimer
 from app.common.logging_config import get_logger, log_performance, log_download, log_exception
+from app.common.performance_analyzer import profile_performance, profile_io
 
 # 使用统一日志配置
 logger = get_logger('download_manager')
@@ -216,6 +217,7 @@ class DownloadWorker(QThread):
             logger.warning(
                 f"Could not determine total file size for {item.id} from headers. Progress may be inaccurate.")
 
+    @profile_performance(threshold=0.1)  # 监控文件写入性能
     def _process_response_content(self, item: DownloadItem, response: requests.Response):
         """Processes the response stream, writes to file, and updates progress."""
         # Determine file mode based on whether we are resuming an existing file part
@@ -224,12 +226,13 @@ class DownloadWorker(QThread):
 
         last_progress_update_time = time.time()
 
-        with open(item.file_path, mode) as f:
-            for chunk in response.iter_content(chunk_size=item.chunk_size):
-                if self.cancelled:
-                    logger.debug(
-                        f"Cancellation detected during content processing for {item.id}")
-                    return
+        with profile_io(f"download_write_{item.id}"):  # 监控IO性能
+            with open(item.file_path, mode) as f:
+                for chunk in response.iter_content(chunk_size=item.chunk_size):
+                    if self.cancelled:
+                        logger.debug(
+                            f"Cancellation detected during content processing for {item.id}")
+                        return
 
                 if chunk:
                     f.write(chunk)

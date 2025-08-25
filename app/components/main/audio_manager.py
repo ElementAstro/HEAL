@@ -35,16 +35,16 @@ class AudioManager(QObject):
     def play_audio(self, status: str) -> None:
         """播放音频"""
         audio_path = Path('src/audio') / status
-        
+
         if not audio_path.exists():
-            self.logger.warning(f"音频目录不存在: {audio_path}")
-            self._show_audio_error()
+            self.logger.debug(f"音频目录不存在: {audio_path}")
+            # Don't show error for missing audio - it's optional
             return
-        
+
         audio_files = list(audio_path.glob('*.wav'))
         if not audio_files:
-            self.logger.warning(f"音频目录中没有音频文件: {audio_path}")
-            self._show_audio_error()
+            self.logger.debug(f"音频目录中没有音频文件: {audio_path}")
+            # Don't show error for missing audio files - it's optional
             return
         
         try:

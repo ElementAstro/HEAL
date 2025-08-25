@@ -6,14 +6,25 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from qfluentwidgets import TitleLabel, PrimaryPushButton  # 移除了未使用的FluentIcon
+from app.common.logging_config import get_logger
+from app.common.i18n_ui import setup_component_i18n, tr
+
+# 使用统一日志配置
+logger = get_logger('custom_messagebox')
 
 
 class CustomMessageBox(QDialog):
     def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(parent)
-        self.setWindowTitle("Custom MessageBox")
+        self.setWindowTitle(tr("custom_messagebox.title"))
         self.setFixedSize(400, 200)
         self.setWindowIcon(QIcon.fromTheme("dialog-information"))
+
+        # 设置国际化支持
+        self.i18n = setup_component_i18n(self)
+        self.i18n.register_window_title("custom_messagebox.title")
+
+        logger.debug(tr("custom_messagebox.creating"))
 
         self._main_layout = QVBoxLayout(self)
 
@@ -68,7 +79,7 @@ class CustomMessageBox(QDialog):
         box.setWindowTitle(title)
         box.setText(text)
         box.setIconType("Information")
-        box.addButton("OK", QMessageBox.ButtonRole.AcceptRole)
+        box.addButton(tr("custom_messagebox.ok"), QMessageBox.ButtonRole.AcceptRole)
         return box.exec_()
 
     @staticmethod
@@ -77,8 +88,8 @@ class CustomMessageBox(QDialog):
         box.setWindowTitle(title)
         box.setText(text)
         box.setIconType("Warning")
-        box.addButton("OK", QMessageBox.ButtonRole.AcceptRole)
-        box.addButton("Cancel", QMessageBox.ButtonRole.RejectRole)
+        box.addButton(tr("custom_messagebox.ok"), QMessageBox.ButtonRole.AcceptRole)
+        box.addButton(tr("cancel"), QMessageBox.ButtonRole.RejectRole)
         return box.exec_()
 
     @staticmethod
@@ -87,7 +98,7 @@ class CustomMessageBox(QDialog):
         box.setWindowTitle(title)
         box.setText(text)
         box.setIconType("Critical")
-        box.addButton("OK", QMessageBox.ButtonRole.AcceptRole)
+        box.addButton(tr("custom_messagebox.ok"), QMessageBox.ButtonRole.AcceptRole)
         return box.exec_()
 
     @staticmethod
@@ -96,8 +107,8 @@ class CustomMessageBox(QDialog):
         box.setWindowTitle(title)
         box.setText(text)
         box.setIconType("Question")
-        box.addButton("Yes", QMessageBox.ButtonRole.YesRole)
-        box.addButton("No", QMessageBox.ButtonRole.NoRole)
+        box.addButton(tr("custom_messagebox.yes"), QMessageBox.ButtonRole.YesRole)
+        box.addButton(tr("custom_messagebox.no"), QMessageBox.ButtonRole.NoRole)
         return box.exec_()
 
 

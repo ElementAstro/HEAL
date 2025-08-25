@@ -3,10 +3,14 @@ from PySide6.QtCore import Qt
 from qfluentwidgets import (Pivot, qrouter, ScrollArea, FluentIcon)
 from app.model.style_sheet import StyleSheet
 from app.model.setting_card import CustomFrameGroup
+from app.common.logging_config import get_logger, log_performance, with_correlation_id
 
 from app.components.tools.nginx import NginxConfigurator
 from app.components.tools.telescope import TelescopeCatalog
 from app.components.tools.system_command import CommandCenter
+
+# 使用统一日志配置
+logger = get_logger('tool_interface')
 
 class Tools(ScrollArea):
     Nav = Pivot
@@ -18,11 +22,14 @@ class Tools(ScrollArea):
         self.scrollWidget = QWidget()
         self.vBoxLayout = QVBoxLayout(self.scrollWidget)
 
+        logger.info(f"初始化工具界面: {text}")
+
         # 栏定义
         self.pivot = self.Nav(self)
         self.stackedWidget = QStackedWidget(self)
 
         # 添加项
+        logger.debug("初始化工具组件")
         self.NginxConfiguratorFrame = NginxConfigurator()
         self.NginxConfiguratorInterface = CustomFrameGroup(self.scrollWidget)
         self.NginxConfiguratorInterface.addCustomFrame(self.NginxConfiguratorFrame)
@@ -36,6 +43,7 @@ class Tools(ScrollArea):
         self.CommandCenterInterface.addCustomFrame(self.CommandCenterFrame)
 
         self.__initWidget()
+        logger.debug("工具界面初始化完成")
 
     def __initWidget(self):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # 水平滚动条关闭

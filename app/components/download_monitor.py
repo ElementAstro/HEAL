@@ -22,6 +22,10 @@ from qfluentwidgets import (
 from app.model.download_manager import DownloadManager, DownloadItem, DownloadStatus
 # global_exception_handler removed as per error
 from app.common.exception_handler import download_exception_handler
+from app.common.logging_config import get_logger, log_performance, log_download
+
+# 使用统一日志配置
+logger = get_logger('download_monitor')
 
 
 class DownloadItemCard(CardWidget):
@@ -153,8 +157,8 @@ class DownloadItemCard(CardWidget):
                     # Insert after progress_bar
                     card_layout.insertWidget(2, self.indeterminate_bar)
                 else:
-                    print(
-                        f"Error: Layout not QVBoxLayout or None in DownloadItemCard for {download_item.id}")
+                    logger.error(
+                        f"下载项卡片布局错误: 布局不是QVBoxLayout类型，下载ID: {download_item.id}")
             if hasattr(self, 'indeterminate_bar'):  # Check again in case insertion failed
                 self.indeterminate_bar.setVisible(True)
         else:

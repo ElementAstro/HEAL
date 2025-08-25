@@ -1,6 +1,10 @@
 import json
 import requests
 from app.model.config import get_json
+from app.common.logging_config import get_logger, log_network, log_exception
+
+# 使用统一日志配置
+logger = get_logger('remote')
 
 
 def get_base_url(route_key: str) -> str:
@@ -22,15 +26,18 @@ def handle_request(url: str, params: dict) -> tuple:
             return 'error', response_json.get('message', 'Unknown error')
 
     except requests.exceptions.HTTPError as http_err:
-        print(f'网络请求失败: {http_err}')
+        logger.error(f'网络请求失败: {http_err}')
+        log_network(f'HTTP错误', url=url, error=str(http_err))
         return 'error', str(http_err)
 
     except requests.exceptions.RequestException as req_err:
-        print(f'请求错误: {req_err}')
+        logger.error(f'请求错误: {req_err}')
+        log_network(f'请求异常', url=url, error=str(req_err))
         return 'error', str(req_err)
 
     except Exception as err:
-        print(f'未知错误: {err}')
+        logger.error(f'未知错误: {err}')
+        log_exception(err, f'远程请求未知错误', url=url)
         return 'error', str(err)
 
 
