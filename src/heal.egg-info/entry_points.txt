@@ -1,0 +1,5 @@
+[console_scripts]
+heal = heal.main:main
+
+[gui_scripts]
+heal-gui = heal.main:main

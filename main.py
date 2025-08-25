@@ -2,12 +2,13 @@ import os
 import sys
 from inspect import getsourcefile
 from pathlib import Path
+from typing import Any
 
-from app.common.application import SingletonApplication
-from app.common.logging_config import setup_logging, get_logger
-from app.common.i18n import setup_i18n, set_language, t
-from app.common.exception_handler import ExceptionHandler
-from app.common.resource_manager import resource_manager, cleanup_on_exit
+from src.heal.common.application import SingletonApplication
+from src.heal.common.logging_config import setup_logging, get_logger
+from src.heal.common.i18n import setup_i18n, set_language, t
+from src.heal.common.exception_handler import ExceptionHandler
+from src.heal.common.resource_manager import resource_manager, cleanup_on_exit
 
 # 设置工作目录
 source_file = getsourcefile(lambda: 0)
@@ -20,12 +21,12 @@ logger = get_logger('main')
 exception_handler = ExceptionHandler()
 
 # 验证配置文件
-from app.common.config_validator import validate_all_configs
+from src.heal.common.config_validator import validate_all_configs
 logger.info(t('app.validating_configs'))
 validation_results = validate_all_configs(auto_fix=True)
 
 # 检查验证结果
-config_errors = []
+config_errors: list[Any] = []
 for filename, result in validation_results.items():
     if result.has_errors:
         config_errors.extend([f"{filename}: {error}" for error in result.errors])
@@ -46,8 +47,8 @@ else:
 sys.excepthook = exception_handler.handle_exception
 
 # 连接应用级别的异常信号处理
-from app.common.signal_bus import signalBus
-from app.common.application import application_exception_hook
+from src.heal.common.signal_bus import signalBus
+from src.heal.common.application import application_exception_hook
 
 # 连接异常信号到应用级别的处理函数
 exception_handler.exception_occurred.connect(
@@ -57,8 +58,8 @@ exception_handler.exception_occurred.connect(
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt, QTranslator
 from qfluentwidgets import FluentTranslator
-from app.main_interface import Main
-from app.model.config import cfg
+from src.heal.interfaces.main_interface import Main
+from src.heal.models.config import cfg
 
 logger.info(t('app.starting'))
 
@@ -75,7 +76,7 @@ setup_i18n(locale.name().lower())
 
 translator = FluentTranslator(locale)
 localTranslator = QTranslator()
-localTranslator.load(f"src\\translate\\{locale.name()}.qm")
+localTranslator.load(f"src\\heal\\resources\\translations\\{locale.name()}.qm")
 
 app.installTranslator(translator)
 app.installTranslator(localTranslator)
@@ -83,13 +84,13 @@ app.installTranslator(localTranslator)
 logger.info(t('app.translators_installed', locale=locale.name()))
 
 
-def restart_app():
+def restart_app() -> None:
     """重启应用程序"""
     logger.info(t('app.restarting'))
     QApplication.exit(1000)
 
 
-def shutdown_app():
+def shutdown_app() -> None:
     """关闭应用程序"""
     logger.info(t('app.shutting_down'))
 

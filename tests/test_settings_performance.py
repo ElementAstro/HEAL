@@ -1,3 +1,4 @@
+from typing import Any
 """
 Settings Performance Testing and Validation
 Tests the performance improvements and validates functionality
@@ -13,49 +14,49 @@ from unittest.mock import Mock, patch, MagicMock
 
 # Mock PySide6 components for testing
 class MockQObject:
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         self.parent = parent
 
 class MockSignal:
-    def __init__(self):
-        self.callbacks = []
+    def __init__(self) -> None:
+        self.callbacks: list[Any] = []
     
-    def connect(self, callback):
+    def connect(self, callback) -> None:
         self.callbacks.append(callback)
     
-    def emit(self, *args, **kwargs):
+    def emit(self, *args, **kwargs) -> None:
         for callback in self.callbacks:
             callback(*args, **kwargs)
 
 class MockQMutex:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
 class MockQMutexLocker:
-    def __init__(self, mutex):
+    def __init__(self, mutex) -> None:
         self.mutex = mutex
     
-    def __enter__(self):
+    def __enter__(self) -> None:
         return self
     
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         pass
 
 class MockQTimer:
-    def __init__(self):
+    def __init__(self) -> None:
         self.timeout = MockSignal()
         self.active = False
     
-    def start(self, interval):
+    def start(self, interval) -> None:
         self.active = True
     
-    def stop(self):
+    def stop(self) -> None:
         self.active = False
     
-    def isActive(self):
+    def isActive(self) -> None:
         return self.active
     
-    def setSingleShot(self, single):
+    def setSingleShot(self, single) -> None:
         pass
 
 # Mock the PySide6 imports
@@ -76,11 +77,11 @@ sys.modules['PySide6.QtCore'].QThread = MockQObject
 sys.modules['PySide6.QtCore'].pyqtSignal = MockSignal
 
 # Now import our performance components
-from app.components.setting.performance_manager import (
+from src.heal.components.setting.performance_manager import (
     SettingsCache, SettingsPerformanceManager, CacheEntry
 )
-from app.components.setting.lazy_settings import LazySettingsManager, LazySettingProxy
-from app.components.setting.error_handler import (
+from src.heal.components.setting.lazy_settings import LazySettingsManager, LazySettingProxy
+from src.heal.components.setting.error_handler import (
     SettingsErrorHandler, SettingsValidator, SettingsBackupManager, ErrorSeverity
 )
 
@@ -88,28 +89,28 @@ from app.components.setting.error_handler import (
 class TestSettingsCache(unittest.TestCase):
     """Test the settings cache functionality"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         self.cache = SettingsCache(max_size=10, default_ttl=1.0)
     
-    def test_cache_set_get(self):
+    def test_cache_set_get(self) -> None:
         """Test basic cache set and get operations"""
         self.cache.set('test_key', 'test_value')
         value = self.cache.get('test_key')
         self.assertEqual(value, 'test_value')
     
-    def test_cache_default_value(self):
+    def test_cache_default_value(self) -> None:
         """Test cache returns default value for missing keys"""
         value = self.cache.get('missing_key', 'default')
         self.assertEqual(value, 'default')
     
-    def test_cache_expiration(self):
+    def test_cache_expiration(self) -> None:
         """Test cache entry expiration"""
         self.cache.set('expire_key', 'expire_value')
         time.sleep(1.1)  # Wait for expiration
         value = self.cache.get('expire_key', 'default')
         self.assertEqual(value, 'default')
     
-    def test_cache_lru_eviction(self):
+    def test_cache_lru_eviction(self) -> None:
         """Test LRU eviction when cache is full"""
         # Fill cache to max size
         for i in range(10):
@@ -126,7 +127,7 @@ class TestSettingsCache(unittest.TestCase):
         value = self.cache.get('new_key')
         self.assertEqual(value, 'new_value')
     
-    def test_cache_stats(self):
+    def test_cache_stats(self) -> None:
         """Test cache statistics"""
         self.cache.set('stat_key', 'stat_value')
         self.cache.get('stat_key')
@@ -142,12 +143,12 @@ class TestSettingsCache(unittest.TestCase):
 class TestLazySettings(unittest.TestCase):
     """Test lazy loading functionality"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         self.lazy_manager = LazySettingsManager()
     
-    def test_lazy_setting_proxy(self):
+    def test_lazy_setting_proxy(self) -> None:
         """Test lazy setting proxy functionality"""
-        def expensive_loader():
+        def expensive_loader() -> None:
             time.sleep(0.1)  # Simulate expensive operation
             return "loaded_value"
         
@@ -173,9 +174,9 @@ class TestLazySettings(unittest.TestCase):
         self.assertEqual(value2, "loaded_value")
         self.assertLess(fast_time, 0.01)  # Should be very fast
     
-    def test_lazy_manager_registration(self):
+    def test_lazy_manager_registration(self) -> None:
         """Test lazy manager setting registration"""
-        def test_loader():
+        def test_loader() -> None:
             return "test_result"
         
         proxy = self.lazy_manager.register_lazy_setting(
@@ -186,9 +187,9 @@ class TestLazySettings(unittest.TestCase):
         self.assertEqual(proxy.setting_key, 'test_lazy')
         self.assertEqual(proxy.fallback_value, 'fallback')
     
-    def test_lazy_manager_get_setting(self):
+    def test_lazy_manager_get_setting(self) -> None:
         """Test getting settings through lazy manager"""
-        def test_loader():
+        def test_loader() -> None:
             return "manager_result"
         
         self.lazy_manager.register_lazy_setting('manager_test', test_loader)
@@ -196,12 +197,12 @@ class TestLazySettings(unittest.TestCase):
         
         self.assertEqual(value, "manager_result")
     
-    def test_lazy_loading_stats(self):
+    def test_lazy_loading_stats(self) -> None:
         """Test lazy loading statistics"""
-        def loader1():
+        def loader1() -> None:
             return "value1"
         
-        def loader2():
+        def loader2() -> None:
             return "value2"
         
         self.lazy_manager.register_lazy_setting('stat1', loader1)
@@ -219,11 +220,11 @@ class TestLazySettings(unittest.TestCase):
 class TestErrorHandler(unittest.TestCase):
     """Test error handling and recovery"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         self.error_handler = SettingsErrorHandler()
         self.validator = SettingsValidator()
     
-    def test_error_handling(self):
+    def test_error_handling(self) -> None:
         """Test basic error handling"""
         test_error = ValueError("Test error")
         result = self.error_handler.handle_error(
@@ -234,9 +235,9 @@ class TestErrorHandler(unittest.TestCase):
         self.assertEqual(self.error_handler.error_stats['total_errors'], 1)
         self.assertTrue(len(self.error_handler.errors) > 0)
     
-    def test_validator_registration(self):
+    def test_validator_registration(self) -> None:
         """Test validation rule registration"""
-        def test_validator(value):
+        def test_validator(value: Any) -> None:
             return isinstance(value, str) and len(value) > 0
         
         self.validator.register_validation_rule('test_setting', test_validator)
@@ -248,7 +249,7 @@ class TestErrorHandler(unittest.TestCase):
         self.assertFalse(self.validator.validate_setting('test_setting', ''))
         self.assertFalse(self.validator.validate_setting('test_setting', 123))
     
-    def test_backup_manager(self):
+    def test_backup_manager(self) -> None:
         """Test backup functionality"""
         with tempfile.TemporaryDirectory() as temp_dir:
             backup_manager = SettingsBackupManager(backup_dir=temp_dir)
@@ -284,7 +285,7 @@ class TestErrorHandler(unittest.TestCase):
 class TestPerformanceIntegration(unittest.TestCase):
     """Test integrated performance improvements"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         # Mock the parent widget
         self.mock_parent = Mock()
         self.mock_parent.tr = lambda x: x
@@ -292,7 +293,7 @@ class TestPerformanceIntegration(unittest.TestCase):
         # Create performance manager
         self.perf_manager = SettingsPerformanceManager()
     
-    def test_performance_manager_get_set(self):
+    def test_performance_manager_get_set(self) -> None:
         """Test performance manager get/set operations"""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
             test_data = {'existing_key': 'existing_value'}
@@ -318,7 +319,7 @@ class TestPerformanceIntegration(unittest.TestCase):
         finally:
             os.unlink(temp_file)
     
-    def test_performance_stats(self):
+    def test_performance_stats(self) -> None:
         """Test performance statistics collection"""
         stats = self.perf_manager.get_performance_stats()
         
@@ -327,7 +328,7 @@ class TestPerformanceIntegration(unittest.TestCase):
         self.assertIn('lazy_loaded_settings', stats)
         self.assertIn('registered_lazy_settings', stats)
     
-    def test_cache_invalidation(self):
+    def test_cache_invalidation(self) -> None:
         """Test cache invalidation"""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
             json.dump({'test': 'value'}, f)
@@ -350,7 +351,7 @@ class TestPerformanceIntegration(unittest.TestCase):
             os.unlink(temp_file)
 
 
-def run_performance_benchmarks():
+def run_performance_benchmarks() -> None:
     """Run performance benchmarks"""
     print("\n=== Settings Performance Benchmarks ===")
     
@@ -372,7 +373,7 @@ def run_performance_benchmarks():
     print(f"Cache reads (1000 items): {read_time:.3f}s ({1000/read_time:.0f} ops/sec)")
     
     # Test lazy loading performance
-    def expensive_operation():
+    def expensive_operation() -> None:
         time.sleep(0.01)  # Simulate 10ms operation
         return "expensive_result"
     

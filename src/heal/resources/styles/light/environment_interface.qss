@@ -1,0 +1,304 @@
+/* Enhanced Environment Interface Styling */
+
+/* Main scroll area */
+Environment {
+    background-color: #fafafa;
+}
+
+Environment #scrollWidget {
+    background-color: transparent;
+}
+
+/* Page header styling */
+Environment BodyLabel {
+    color: #323130;
+    font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC';
+}
+
+Environment CaptionLabel {
+    color: #605e5c;
+    font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC';
+}
+
+/* Quick Action Panel */
+QuickActionPanel {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 8px 0;
+}
+
+QuickActionPanel PushButton {
+    background-color: #f3f2f1;
+    border: 1px solid #d2d0ce;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: #323130;
+}
+
+QuickActionPanel PushButton:hover {
+    background-color: #edebe9;
+    border-color: #c8c6c4;
+}
+
+QuickActionPanel PushButton:pressed {
+    background-color: #e1dfdd;
+    border-color: #b3b0ad;
+}
+
+/* Tool Category Section */
+ToolCategorySection {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 10px;
+    margin: 8px 0;
+}
+
+ToolCategorySection BodyLabel {
+    color: #323130;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+ToolCategorySection CaptionLabel {
+    color: #605e5c;
+    font-size: 12px;
+}
+
+/* Environment Status Card */
+EnvironmentStatusCard {
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 4px 0;
+}
+
+EnvironmentStatusCard:hover {
+    background-color: rgba(255, 255, 255, 1.0);
+    border-color: rgba(0, 120, 212, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Status badges */
+EnvironmentStatusCard InfoBadge {
+    border-radius: 10px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* Status-specific badge colors */
+EnvironmentStatusCard InfoBadge[status="installed"] {
+    background-color: #107c10;
+    color: white;
+}
+
+EnvironmentStatusCard InfoBadge[status="not_installed"] {
+    background-color: #d83b01;
+    color: white;
+}
+
+EnvironmentStatusCard InfoBadge[status="needs_update"] {
+    background-color: #ff8c00;
+    color: white;
+}
+
+EnvironmentStatusCard InfoBadge[status="checking"] {
+    background-color: #0078d4;
+    color: white;
+}
+
+EnvironmentStatusCard InfoBadge[status="error"] {
+    background-color: #a80000;
+    color: white;
+}
+
+/* Smart Tool Card */
+SmartToolCard {
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 4px 0;
+}
+
+SmartToolCard:hover {
+    background-color: rgba(255, 255, 255, 1.0);
+    border-color: rgba(0, 120, 212, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+SmartToolCard ComboBox {
+    background-color: #ffffff;
+    border: 1px solid #d2d0ce;
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-size: 13px;
+}
+
+SmartToolCard ComboBox:hover {
+    border-color: #0078d4;
+}
+
+SmartToolCard ComboBox:focus {
+    border-color: #0078d4;
+    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+}
+
+/* Primary buttons */
+PrimaryPushButton {
+    background-color: #0078d4;
+    border: 1px solid #106ebe;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: 600;
+    color: white;
+    font-size: 13px;
+}
+
+PrimaryPushButton:hover {
+    background-color: #106ebe;
+    border-color: #005a9e;
+}
+
+PrimaryPushButton:pressed {
+    background-color: #005a9e;
+    border-color: #004578;
+}
+
+PrimaryPushButton:disabled {
+    background-color: #f3f2f1;
+    border-color: #d2d0ce;
+    color: #a19f9d;
+}
+
+/* Secondary buttons */
+PushButton {
+    background-color: #ffffff;
+    border: 1px solid #d2d0ce;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: #323130;
+}
+
+PushButton:hover {
+    background-color: #f3f2f1;
+    border-color: #c8c6c4;
+}
+
+PushButton:pressed {
+    background-color: #edebe9;
+    border-color: #b3b0ad;
+}
+
+/* Progress bars */
+IndeterminateProgressBar {
+    background-color: #f3f2f1;
+    border-radius: 2px;
+}
+
+IndeterminateProgressBar::chunk {
+    background-color: #0078d4;
+    border-radius: 2px;
+}
+
+/* Hyperlink cards */
+HyperlinkCardEnvironment {
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 4px 0;
+}
+
+HyperlinkCardEnvironment:hover {
+    background-color: rgba(255, 255, 255, 1.0);
+    border-color: rgba(0, 120, 212, 0.2);
+}
+
+HyperlinkCardEnvironment HyperlinkButton {
+    color: #0078d4;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+HyperlinkCardEnvironment HyperlinkButton:hover {
+    color: #106ebe;
+    text-decoration: underline;
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+    ToolCategorySection {
+        margin: 4px 0;
+    }
+    
+    EnvironmentStatusCard,
+    SmartToolCard,
+    HyperlinkCardEnvironment {
+        margin: 2px 0;
+        padding: 12px;
+    }
+    
+    QuickActionPanel {
+        padding: 8px 12px;
+    }
+}
+
+/* Animation and transitions */
+EnvironmentStatusCard,
+SmartToolCard,
+HyperlinkCardEnvironment,
+QuickActionPanel {
+    transition-property: background-color, border-color, transform, box-shadow;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+}
+
+/* Icon styling */
+IconWidget {
+    padding: 4px;
+}
+
+/* Separator lines */
+QFrame[frameShape="4"] {
+    color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.1);
+    border: none;
+    height: 1px;
+    margin: 8px 0;
+}
+
+/* Scrollbar styling */
+Environment QScrollBar:vertical {
+    background-color: transparent;
+    width: 8px;
+    border-radius: 4px;
+}
+
+Environment QScrollBar::handle:vertical {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    min-height: 20px;
+}
+
+Environment QScrollBar::handle:vertical:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+Environment QScrollBar::add-line:vertical,
+Environment QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+}
+
+Environment QScrollBar::add-page:vertical,
+Environment QScrollBar::sub-page:vertical {
+    background: none;
+}

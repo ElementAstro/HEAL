@@ -1,3 +1,4 @@
+from typing import Any
 """
 Comprehensive Unit Test Suite for Module Interface Components
 
@@ -24,18 +25,18 @@ import tkinter as tk
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from app.module_interface import ModuleInterface, ModuleState
-from app.components.module.module_validator import ModuleValidator, ValidationLevel, ValidationResult
-from app.components.module.performance_monitor import PerformanceMonitor
-from app.components.module.module_controller import ModuleController
-from app.components.module.module_validation_ui import ModuleValidationUI
-from app.components.module.performance_dashboard_ui import PerformanceDashboardUI
+from src.heal.interfaces.module_interface import ModuleInterface, ModuleState
+from src.heal.components.module.module_validator import ModuleValidator, ValidationLevel, ValidationResult
+from src.heal.components.module.performance_monitor import PerformanceMonitor
+from src.heal.components.module.module_controller import ModuleController
+from src.heal.components.module.module_validation_ui import ModuleValidationUI
+from src.heal.components.module.performance_dashboard_ui import PerformanceDashboardUI
 
 
 class TestModuleInterface(unittest.TestCase):
     """Test cases for ModuleInterface class"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test environment"""
         self.test_dir = tempfile.mkdtemp()
         self.config = {
@@ -45,20 +46,20 @@ class TestModuleInterface(unittest.TestCase):
         }
         self.interface = ModuleInterface(self.config)
     
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test environment"""
         if hasattr(self.interface, 'cleanup'):
             self.interface.cleanup()
         shutil.rmtree(self.test_dir, ignore_errors=True)
     
-    def test_initialization(self):
+    def test_initialization(self) -> None:
         """Test module interface initialization"""
         self.assertIsNotNone(self.interface)
         self.assertEqual(self.interface.state, ModuleState.READY)
         self.assertIsNotNone(self.interface.event_manager)
         self.assertIsNotNone(self.interface.performance_monitor)
     
-    def test_state_management(self):
+    def test_state_management(self) -> None:
         """Test state management functionality"""
         # Test state transitions
         initial_state = self.interface.get_state()
@@ -68,11 +69,11 @@ class TestModuleInterface(unittest.TestCase):
         self.interface._change_state(ModuleState.LOADING)
         self.assertEqual(self.interface.get_state(), ModuleState.LOADING)
     
-    def test_event_handling(self):
+    def test_event_handling(self) -> None:
         """Test event handling system"""
         event_received = {'received': False}
         
-        def test_handler(event_data):
+        def test_handler(event_data: Any) -> None:
             event_received['received'] = True
         
         # Register event handler
@@ -85,13 +86,13 @@ class TestModuleInterface(unittest.TestCase):
         time.sleep(0.1)  # Allow event processing
         self.assertTrue(event_received['received'])
     
-    def test_module_discovery(self):
+    def test_module_discovery(self) -> None:
         """Test module discovery functionality"""
         # Create test module file
         test_module_path = os.path.join(self.test_dir, 'test_module.py')
         with open(test_module_path, 'w') as f:
             f.write("""
-def main():
+def main() -> None:
     return "Test module"
 
 if __name__ == "__main__":
@@ -102,7 +103,7 @@ if __name__ == "__main__":
         modules = self.interface.discover_modules(self.test_dir)
         self.assertIsInstance(modules, list)
     
-    def test_configuration_management(self):
+    def test_configuration_management(self) -> None:
         """Test configuration management"""
         # Test getting configuration
         config = self.interface.get_configuration()
@@ -115,7 +116,7 @@ if __name__ == "__main__":
         updated_config = self.interface.get_configuration()
         self.assertFalse(updated_config['auto_discovery'])
     
-    def test_error_handling(self):
+    def test_error_handling(self) -> None:
         """Test error handling mechanisms"""
         # Test with invalid module path
         result = self.interface.load_module("nonexistent_module.py")
@@ -126,27 +127,27 @@ if __name__ == "__main__":
 class TestModuleValidator(unittest.TestCase):
     """Test cases for ModuleValidator class"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test environment"""
         self.test_dir = tempfile.mkdtemp()
         self.validator = ModuleValidator()
     
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test environment"""
         shutil.rmtree(self.test_dir, ignore_errors=True)
     
-    def test_initialization(self):
+    def test_initialization(self) -> None:
         """Test validator initialization"""
         self.assertIsNotNone(self.validator)
         self.assertIsInstance(self.validator.validation_rules, dict)
     
-    def test_basic_validation(self):
+    def test_basic_validation(self) -> None:
         """Test basic module validation"""
         # Create test module
         test_module = os.path.join(self.test_dir, 'valid_module.py')
         with open(test_module, 'w') as f:
             f.write("""
-def main():
+def main() -> None:
     print("Hello World")
 
 if __name__ == "__main__":
@@ -158,7 +159,7 @@ if __name__ == "__main__":
         self.assertIsInstance(result, ValidationResult)
         self.assertTrue(result.is_valid)
     
-    def test_syntax_validation(self):
+    def test_syntax_validation(self) -> None:
         """Test syntax validation"""
         # Create module with syntax error
         test_module = os.path.join(self.test_dir, 'invalid_syntax.py')
@@ -174,7 +175,7 @@ def main(:  # Syntax error - missing parameter
         self.assertFalse(result.is_valid)
         self.assertTrue(any('syntax' in issue.description.lower() for issue in result.issues))
     
-    def test_security_validation(self):
+    def test_security_validation(self) -> None:
         """Test security validation"""
         # Create module with potential security issue
         test_module = os.path.join(self.test_dir, 'security_risk.py')
@@ -190,7 +191,7 @@ os.system("rm -rf /")  # Dangerous command
         # Should flag security issues
         self.assertTrue(any(issue.severity == 'HIGH' for issue in result.issues))
     
-    def test_metadata_validation(self):
+    def test_metadata_validation(self) -> None:
         """Test metadata validation"""
         # Create module with metadata
         test_module = os.path.join(self.test_dir, 'with_metadata.py')
@@ -202,7 +203,7 @@ Module with metadata
 __version__ = "1.0.0"
 __author__ = "Test Author"
 
-def main():
+def main() -> None:
     print("Hello World")
 """)
         
@@ -210,7 +211,7 @@ def main():
         result = self.validator.validate_module(test_module, ValidationLevel.STANDARD)
         self.assertIsInstance(result, ValidationResult)
     
-    def test_batch_validation(self):
+    def test_batch_validation(self) -> None:
         """Test batch validation functionality"""
         # Create multiple test modules
         modules = []
@@ -218,7 +219,7 @@ def main():
             module_path = os.path.join(self.test_dir, f'module_{i}.py')
             with open(module_path, 'w') as f:
                 f.write(f"""
-def main():
+def main() -> None:
     print("Module {i}")
 """)
             modules.append(module_path)
@@ -232,21 +233,21 @@ def main():
 class TestPerformanceMonitor(unittest.TestCase):
     """Test cases for PerformanceMonitor class"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test environment"""
         self.monitor = PerformanceMonitor()
     
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test environment"""
         if hasattr(self.monitor, 'stop'):
             self.monitor.stop()
     
-    def test_initialization(self):
+    def test_initialization(self) -> None:
         """Test monitor initialization"""
         self.assertIsNotNone(self.monitor)
         self.assertIsInstance(self.monitor.metrics_history, list)
     
-    def test_metrics_collection(self):
+    def test_metrics_collection(self) -> None:
         """Test metrics collection"""
         # Start monitoring
         self.monitor.start()
@@ -259,14 +260,14 @@ class TestPerformanceMonitor(unittest.TestCase):
         self.assertIn('memory_percent', metrics)
         self.assertIn('timestamp', metrics)
     
-    def test_system_info_collection(self):
+    def test_system_info_collection(self) -> None:
         """Test system information collection"""
         system_info = self.monitor.get_system_info()
         self.assertIsInstance(system_info, dict)
         self.assertIn('platform', system_info)
         self.assertIn('cpu_count', system_info)
     
-    def test_alert_system(self):
+    def test_alert_system(self) -> None:
         """Test alert system"""
         # Set low thresholds to trigger alerts
         self.monitor.update_settings({
@@ -282,7 +283,7 @@ class TestPerformanceMonitor(unittest.TestCase):
         alerts = self.monitor.get_active_alerts()
         self.assertIsInstance(alerts, list)
     
-    def test_data_export(self):
+    def test_data_export(self) -> None:
         """Test data export functionality"""
         # Start monitoring to generate some data
         self.monitor.start()
@@ -294,7 +295,7 @@ class TestPerformanceMonitor(unittest.TestCase):
         self.assertIn('metrics_history', data)
         self.assertIn('system_info', data)
     
-    def test_module_tracking(self):
+    def test_module_tracking(self) -> None:
         """Test module performance tracking"""
         # Track a mock module
         self.monitor.track_module_operation('test_module', 'load', 0.5)
@@ -307,29 +308,29 @@ class TestPerformanceMonitor(unittest.TestCase):
 class TestModuleController(unittest.TestCase):
     """Test cases for ModuleController class"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test environment"""
         self.test_dir = tempfile.mkdtemp()
         self.controller = ModuleController(base_path=self.test_dir)
     
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test environment"""
         if hasattr(self.controller, 'cleanup'):
             self.controller.cleanup()
         shutil.rmtree(self.test_dir, ignore_errors=True)
     
-    def test_initialization(self):
+    def test_initialization(self) -> None:
         """Test controller initialization"""
         self.assertIsNotNone(self.controller)
         self.assertEqual(self.controller.base_path, self.test_dir)
     
-    def test_module_management(self):
+    def test_module_management(self) -> None:
         """Test module management operations"""
         # Create test module
         test_module = os.path.join(self.test_dir, 'test_module.py')
         with open(test_module, 'w') as f:
             f.write("""
-def main():
+def main() -> None:
     return "Test module executed"
 
 if __name__ == "__main__":
@@ -344,13 +345,13 @@ if __name__ == "__main__":
         result = self.controller.load_module('test_module.py')
         self.assertIsInstance(result, dict)
     
-    def test_async_operations(self):
+    def test_async_operations(self) -> None:
         """Test asynchronous operations"""
         # Test async module loading
         future = self.controller.load_module_async('nonexistent.py')
         self.assertIsNotNone(future)
     
-    def test_batch_operations(self):
+    def test_batch_operations(self) -> None:
         """Test batch operations"""
         # Create multiple test modules
         modules = []
@@ -358,7 +359,7 @@ if __name__ == "__main__":
             module_path = os.path.join(self.test_dir, f'batch_module_{i}.py')
             with open(module_path, 'w') as f:
                 f.write(f"""
-def main():
+def main() -> None:
     return "Batch module {i}"
 """)
             modules.append(f'batch_module_{i}.py')
@@ -368,7 +369,7 @@ def main():
         self.assertIsInstance(results, list)
         self.assertEqual(len(results), 3)
     
-    def test_configuration_management(self):
+    def test_configuration_management(self) -> None:
         """Test configuration management"""
         # Test getting configuration
         config = self.controller.get_configuration()
@@ -384,7 +385,7 @@ def main():
 class TestUIComponents(unittest.TestCase):
     """Test cases for UI components"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test environment"""
         self.root = tk.Tk()
         self.root.withdraw()  # Hide window during tests
@@ -393,14 +394,14 @@ class TestUIComponents(unittest.TestCase):
         self.mock_validator = Mock(spec=ModuleValidator)
         self.mock_monitor = Mock(spec=PerformanceMonitor)
     
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test environment"""
         try:
             self.root.destroy()
         except:
             pass
     
-    def test_validation_ui_creation(self):
+    def test_validation_ui_creation(self) -> None:
         """Test validation UI component creation"""
         try:
             validation_ui = ModuleValidationUI(self.root, self.mock_validator)
@@ -409,7 +410,7 @@ class TestUIComponents(unittest.TestCase):
         except Exception as e:
             self.fail(f"Failed to create validation UI: {e}")
     
-    def test_performance_dashboard_creation(self):
+    def test_performance_dashboard_creation(self) -> None:
         """Test performance dashboard creation"""
         try:
             dashboard = PerformanceDashboardUI(self.root, self.mock_monitor)
@@ -422,7 +423,7 @@ class TestUIComponents(unittest.TestCase):
 class TestIntegration(unittest.TestCase):
     """Integration tests for all components working together"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up integration test environment"""
         self.test_dir = tempfile.mkdtemp()
         
@@ -430,7 +431,7 @@ class TestIntegration(unittest.TestCase):
         self.test_module = os.path.join(self.test_dir, 'integration_test.py')
         with open(self.test_module, 'w') as f:
             f.write("""
-def main():
+def main() -> None:
     return "Integration test module"
 
 if __name__ == "__main__":
@@ -449,7 +450,7 @@ if __name__ == "__main__":
         }
         self.interface = ModuleInterface(config)
     
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up integration test environment"""
         # Clean up components
         for component in [self.interface, self.monitor, self.controller]:
@@ -460,7 +461,7 @@ if __name__ == "__main__":
         
         shutil.rmtree(self.test_dir, ignore_errors=True)
     
-    def test_full_module_workflow(self):
+    def test_full_module_workflow(self) -> None:
         """Test complete module workflow"""
         # 1. Discover modules
         modules = self.controller.discover_modules()
@@ -480,7 +481,7 @@ if __name__ == "__main__":
         metrics = self.monitor.get_current_metrics()
         self.assertIsInstance(metrics, dict)
     
-    def test_error_propagation(self):
+    def test_error_propagation(self) -> None:
         """Test error handling across components"""
         # Test with invalid module
         invalid_module = os.path.join(self.test_dir, 'invalid.py')
@@ -495,7 +496,7 @@ if __name__ == "__main__":
         load_result = self.interface.load_module('invalid.py')
         self.assertFalse(load_result['success'])
     
-    def test_configuration_consistency(self):
+    def test_configuration_consistency(self) -> None:
         """Test configuration consistency across components"""
         # Update configuration in interface
         new_config = {'monitoring_enabled': False}
@@ -510,7 +511,7 @@ class TestSuite:
     """Main test suite class"""
     
     @staticmethod
-    def create_suite():
+    def create_suite() -> None:
         """Create comprehensive test suite"""
         suite = unittest.TestSuite()
         
@@ -531,7 +532,7 @@ class TestSuite:
         return suite
     
     @staticmethod
-    def run_tests(verbosity=2):
+    def run_tests(verbosity=2: Any) -> None:
         """Run all tests with specified verbosity"""
         suite = TestSuite.create_suite()
         runner = unittest.TextTestRunner(verbosity=verbosity)
@@ -540,7 +541,7 @@ class TestSuite:
         return result
     
     @staticmethod
-    def run_specific_test(test_class_name, test_method=None):
+    def run_specific_test(test_class_name, test_method=None: Any) -> None:
         """Run specific test class or method"""
         # Map test class names to classes
         test_classes = {
@@ -570,7 +571,7 @@ class TestSuite:
         return result
 
 
-def main():
+def main() -> None:
     """Main test execution function"""
     import argparse
     

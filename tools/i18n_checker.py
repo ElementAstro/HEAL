@@ -20,7 +20,7 @@ sys.path.insert(0, str(project_root))
 class I18nChecker:
     """国际化检查器"""
     
-    def __init__(self, project_root: Path):
+    def __init__(self, project_root: Path) -> None:
         self.project_root = project_root
         self.translations_dir = project_root / "src" / "data" / "translations"
         self.app_dir = project_root / "app"
@@ -43,7 +43,7 @@ class I18nChecker:
         self.found_keys: Set[str] = set()
         self.translation_files: Dict[str, Dict[str, str]] = {}
         
-    def load_translation_files(self):
+    def load_translation_files(self) -> None:
         """加载所有翻译文件"""
         print("加载翻译文件...")
         
@@ -67,7 +67,7 @@ class I18nChecker:
                 items.append((new_key, v))
         return dict(items)
         
-    def scan_python_files(self):
+    def scan_python_files(self) -> None:
         """扫描Python文件中的翻译键"""
         print("扫描Python文件...")
         
@@ -134,7 +134,7 @@ class I18nChecker:
                 
         return templates
         
-    def save_missing_translations_template(self, templates: Dict[str, Dict[str, str]]):
+    def save_missing_translations_template(self, templates: Dict[str, Dict[str, str]]) -> None:
         """保存缺失翻译的模板文件"""
         output_dir = self.project_root / "tools" / "i18n_missing"
         output_dir.mkdir(exist_ok=True)
@@ -204,7 +204,7 @@ class I18nChecker:
         
         return "\n".join(report)
         
-    def run_check(self):
+    def run_check(self) -> None:
         """运行完整检查"""
         print("开始国际化检查...")
         print()
@@ -236,7 +236,7 @@ class I18nChecker:
         print(f"\n报告已保存到: {report_file}")
 
 
-def main():
+def main() -> None:
     """主函数"""
     checker = I18nChecker(project_root)
     checker.run_check()

@@ -18,7 +18,21 @@
 
 #### 方法三(开发)
 
-克隆本仓库，从源码构建 GUI，目前运行 build.bat 可一键构建源码(无虚拟环境)
+克隆本仓库，从源码构建 GUI：
+
+```bash
+# 克隆仓库
+git clone https://github.com/ElementAstro/HEAL.git
+cd HEAL
+
+# 设置开发环境
+python scripts/setup_dev.py
+
+# 构建应用
+python scripts/build.py
+# 或使用传统方式
+build.bat
+```
 
 ### 构建
 
@@ -51,6 +65,32 @@
 #### 本地
 
 根据需要可以自行下载文件后放入相应文件夹内
+
+## 项目结构
+
+HEAL 项目采用现代 Python 包结构，遵循 PEP 518/621 标准：
+
+```text
+HEAL/
+├── src/heal/              # 主包
+│   ├── common/            # 共享工具
+│   ├── components/        # UI 组件
+│   ├── interfaces/        # 界面模块
+│   ├── models/            # 数据模型
+│   └── resources/         # 静态资源
+├── tests/                 # 测试套件
+├── docs/                  # 文档
+├── scripts/               # 开发脚本
+├── config/                # 配置文件
+├── main.py               # 入口点
+└── pyproject.toml        # 项目配置
+```
+
+### 开发指南
+
+- **快速参考**: [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md)
+- **迁移指南**: [docs/PACKAGE_STRUCTURE_MIGRATION.md](docs/PACKAGE_STRUCTURE_MIGRATION.md)
+- **重构总结**: [docs/RESTRUCTURING_SUMMARY.md](docs/RESTRUCTURING_SUMMARY.md)
 
 ### 启动
 

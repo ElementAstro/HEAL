@@ -1,3 +1,4 @@
+from typing import Any
 """
 Resource Manager Tests
 测试资源管理器的功能和可靠性
@@ -15,7 +16,7 @@ from PySide6.QtCore import QTimer, QObject
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from app.common.resource_manager import (
+from src.heal.common.resource_manager import (
     ResourceManager, ResourceType, ResourceInfo, 
     register_timer, register_custom_resource, cleanup_on_exit
 )
@@ -24,7 +25,7 @@ from app.common.resource_manager import (
 class TestResourceInfo(unittest.TestCase):
     """测试ResourceInfo类"""
     
-    def test_resource_info_creation(self):
+    def test_resource_info_creation(self) -> None:
         """测试ResourceInfo创建"""
         mock_obj = Mock()
         cleanup_func = Mock()
@@ -47,25 +48,25 @@ class TestResourceInfo(unittest.TestCase):
 class TestResourceManager(unittest.TestCase):
     """测试ResourceManager类"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """测试前设置"""
         # 重置单例实例
         ResourceManager._instance = None
         self.manager = ResourceManager()
         
-    def tearDown(self):
+    def tearDown(self) -> None:
         """测试后清理"""
         # 清理所有资源
         self.manager.cleanup_all()
         ResourceManager._instance = None
     
-    def test_singleton_pattern(self):
+    def test_singleton_pattern(self) -> None:
         """测试单例模式"""
         manager1 = ResourceManager()
         manager2 = ResourceManager()
         self.assertIs(manager1, manager2)
     
-    def test_register_resource(self):
+    def test_register_resource(self) -> None:
         """测试资源注册"""
         mock_obj = Mock()
         cleanup_func = Mock()
@@ -86,7 +87,7 @@ class TestResourceManager(unittest.TestCase):
         self.assertEqual(resource_info.resource_type, ResourceType.CUSTOM)
         self.assertEqual(resource_info.description, "Test description")
     
-    def test_register_duplicate_resource(self):
+    def test_register_duplicate_resource(self) -> None:
         """测试重复注册资源"""
         mock_obj1 = Mock()
         mock_obj2 = Mock()
@@ -109,7 +110,7 @@ class TestResourceManager(unittest.TestCase):
         resource_info = self.manager.resources["duplicate_resource"]
         self.assertEqual(resource_info.cleanup_func, cleanup_func2)
     
-    def test_unregister_resource(self):
+    def test_unregister_resource(self) -> None:
         """测试资源注销"""
         mock_obj = Mock()
         cleanup_func = Mock()
@@ -128,7 +129,7 @@ class TestResourceManager(unittest.TestCase):
         result = self.manager.unregister_resource("nonexistent")
         self.assertFalse(result)
     
-    def test_cleanup_resource(self):
+    def test_cleanup_resource(self) -> None:
         """测试单个资源清理"""
         mock_obj = Mock()
         cleanup_func = Mock()
@@ -153,7 +154,7 @@ class TestResourceManager(unittest.TestCase):
         self.assertTrue(result)
         cleanup_func.assert_not_called()  # 不应该再次调用
     
-    def test_cleanup_resource_with_exception(self):
+    def test_cleanup_resource_with_exception(self) -> None:
         """测试清理资源时发生异常"""
         mock_obj = Mock()
         cleanup_func = Mock(side_effect=Exception("Cleanup failed"))
@@ -168,7 +169,7 @@ class TestResourceManager(unittest.TestCase):
         self.assertFalse(result)
         cleanup_func.assert_called_once()
     
-    def test_cleanup_by_type(self):
+    def test_cleanup_by_type(self) -> None:
         """测试按类型清理资源"""
         # 注册不同类型的资源
         timer_cleanup = Mock()
@@ -194,7 +195,7 @@ class TestResourceManager(unittest.TestCase):
         custom_cleanup2.assert_called_once()
         timer_cleanup.assert_not_called()
     
-    def test_cleanup_all(self):
+    def test_cleanup_all(self) -> None:
         """测试清理所有资源"""
         # 注册多种类型的资源
         timer_cleanup = Mock()
@@ -220,7 +221,7 @@ class TestResourceManager(unittest.TestCase):
         thread_cleanup.assert_called_once()
         custom_cleanup.assert_called_once()
     
-    def test_get_resource_stats(self):
+    def test_get_resource_stats(self) -> None:
         """测试获取资源统计信息"""
         # 注册一些资源
         self.manager.register_resource(
@@ -250,7 +251,7 @@ class TestResourceManager(unittest.TestCase):
         self.assertEqual(stats['type_stats'][ResourceType.CUSTOM]['total'], 2)
         self.assertEqual(stats['type_stats'][ResourceType.CUSTOM]['cleaned'], 1)
     
-    def test_list_resources(self):
+    def test_list_resources(self) -> None:
         """测试列出资源"""
         # 注册一些资源
         self.manager.register_resource(
@@ -270,11 +271,11 @@ class TestResourceManager(unittest.TestCase):
         self.assertEqual(timer_resources[0]['resource_id'], "timer1")
         self.assertEqual(timer_resources[0]['description'], "Timer resource")
     
-    def test_thread_safety(self):
+    def test_thread_safety(self) -> None:
         """测试线程安全性"""
         results = []
         
-        def register_resources(start_id):
+        def register_resources(start_id: Any) -> None:
             for i in range(10):
                 resource_id = f"resource_{start_id}_{i}"
                 result = self.manager.register_resource(
@@ -302,18 +303,18 @@ class TestResourceManager(unittest.TestCase):
 class TestConvenienceFunctions(unittest.TestCase):
     """测试便捷函数"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """测试前设置"""
         ResourceManager._instance = None
         self.manager = ResourceManager()
     
-    def tearDown(self):
+    def tearDown(self) -> None:
         """测试后清理"""
         self.manager.cleanup_all()
         ResourceManager._instance = None
     
     @patch('app.common.resource_manager.QTimer')
-    def test_register_timer(self, mock_timer_class):
+    def test_register_timer(self, mock_timer_class) -> None:
         """测试注册QTimer"""
         mock_timer = Mock()
         mock_timer.isActive.return_value = True
@@ -334,7 +335,7 @@ class TestConvenienceFunctions(unittest.TestCase):
         self.manager.cleanup_resource("test_timer")
         timer.stop.assert_called_once()
     
-    def test_register_custom_resource(self):
+    def test_register_custom_resource(self) -> None:
         """测试注册自定义资源"""
         mock_obj = Mock()
         cleanup_func = Mock()
@@ -351,7 +352,7 @@ class TestConvenienceFunctions(unittest.TestCase):
         self.assertEqual(resource_info.cleanup_func, cleanup_func)
     
     @patch('app.common.resource_manager.resource_manager')
-    def test_cleanup_on_exit(self, mock_manager):
+    def test_cleanup_on_exit(self, mock_manager) -> None:
         """测试退出时清理函数"""
         cleanup_on_exit()
         mock_manager.cleanup_all.assert_called_once()

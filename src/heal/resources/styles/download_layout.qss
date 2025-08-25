@@ -1,0 +1,277 @@
+/* Download Page Layout Styles - Fixed Version */
+
+/* Main Download Interface */
+#downloadScrollArea {
+    background-color: transparent;
+    border: none;
+}
+
+#downloadScrollWidget {
+    background-color: transparent;
+}
+
+#downloadMainSplitter {
+    background-color: transparent;
+}
+
+#downloadMainContent {
+    background-color: transparent;
+}
+
+#downloadSidePanel {
+    background-color: rgba(249, 249, 249, 0.7);
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Header Section Styles */
+#quickDownloadTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #323130;
+    margin-bottom: 8px;
+}
+
+#quickDownloadButtons {
+    background-color: transparent;
+}
+
+QPushButton[objectName^="quickDownloadBtn_"] {
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: 500;
+    min-height: 24px;
+}
+
+QPushButton[objectName^="quickDownloadBtn_"]:hover {
+    background-color: #106ebe;
+}
+
+QPushButton[objectName^="quickDownloadBtn_"]:pressed {
+    background-color: #005a9e;
+}
+
+/* Search Section Styles */
+#mainSearchInput {
+    border: 2px solid #e1dfdd;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    background-color: white;
+}
+
+#mainSearchInput:focus {
+    border-color: #0078d4;
+    outline: none;
+}
+
+#categoryLabel {
+    color: #605e5c;
+    font-weight: 500;
+    margin-right: 8px;
+}
+
+#categoryCombo {
+    border: 2px solid #e1dfdd;
+    border-radius: 6px;
+    padding: 8px 12px;
+    background-color: white;
+    font-size: 14px;
+}
+
+#categoryCombo:focus {
+    border-color: #0078d4;
+}
+
+#searchButton {
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 20px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+#searchButton:hover {
+    background-color: #106ebe;
+}
+
+#searchButton:pressed {
+    background-color: #005a9e;
+}
+
+/* Download Status Indicator */
+#downloadStatusIcon {
+    background-color: transparent;
+    border: none;
+    color: #605e5c;
+}
+
+#downloadStatusLabel {
+    font-weight: 500;
+    color: #323130;
+    font-size: 14px;
+}
+
+#downloadProgressLabel {
+    color: #605e5c;
+    font-size: 12px;
+}
+
+#downloadStatusBadge {
+    background-color: #0078d4;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+#downloadStatusArrow {
+    background-color: transparent;
+    border: none;
+    color: #605e5c;
+}
+
+/* Category Grid Styles */
+#categoryGridTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: #323130;
+    margin-bottom: 4px;
+}
+
+#categoryGridSubtitle {
+    color: #605e5c;
+    font-size: 14px;
+}
+
+#viewAllCategoriesBtn {
+    color: #0078d4;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+#viewAllCategoriesBtn:hover {
+    color: #106ebe;
+    text-decoration: underline;
+}
+
+#categoryGridContainer {
+    background-color: transparent;
+}
+
+/* Individual Category Cards */
+#categoryIcon {
+    background-color: transparent;
+    border: none;
+    color: #0078d4;
+}
+
+#categoryTitle {
+    font-weight: 600;
+    color: #323130;
+    font-size: 14px;
+}
+
+#categoryDescription {
+    color: #605e5c;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+#categoryCount {
+    color: #8a8886;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+#categoryArrow {
+    background-color: transparent;
+    border: none;
+    color: #8a8886;
+}
+
+/* CardWidget Base Styles */
+CardWidget {
+    background-color: white;
+    border: 1px solid #e1dfdd;
+    border-radius: 8px;
+    padding: 0px;
+}
+
+CardWidget:hover {
+    border-color: #c7c6c4;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Traditional Content Styles */
+#downloadTraditionalContent {
+    background-color: transparent;
+}
+
+/* Responsive Design Media Queries Simulation */
+/* Mobile styles (width < 768px) */
+QWidget[responsive-mode="mobile"] #downloadSidePanel {
+    display: none;
+}
+
+QWidget[responsive-mode="mobile"] #quickDownloadButtons {
+    /* Stack buttons vertically on mobile */
+}
+
+/* Tablet styles (768px <= width < 1024px) */
+QWidget[responsive-mode="tablet"] #downloadSidePanel {
+    max-width: 280px;
+    min-width: 250px;
+}
+
+/* Desktop styles (width >= 1024px) */
+QWidget[responsive-mode="desktop"] #downloadSidePanel {
+    max-width: 400px;
+    min-width: 300px;
+}
+
+/* Scrollbar Styles */
+QScrollBar:vertical {
+    background-color: transparent;
+    width: 12px;
+    border-radius: 6px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+}
+
+/* Splitter Styles */
+QSplitter::handle {
+    background-color: #e1dfdd;
+}
+
+QSplitter::handle:horizontal {
+    width: 2px;
+}
+
+QSplitter::handle:vertical {
+    height: 2px;
+}
+
+QSplitter::handle:hover {
+    background-color: #c7c6c4;
+}

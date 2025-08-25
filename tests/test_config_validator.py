@@ -14,7 +14,7 @@ from pathlib import Path
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from app.common.config_validator import (
+from src.heal.common.config_validator import (
     ConfigValidator, ValidationLevel, ValidationSeverity, ValidationResult,
     validate_config_file, validate_all_configs
 )
@@ -23,7 +23,7 @@ from app.common.config_validator import (
 class TestValidationResult(unittest.TestCase):
     """测试ValidationResult类"""
     
-    def test_validation_result_creation(self):
+    def test_validation_result_creation(self) -> None:
         """测试ValidationResult创建"""
         result = ValidationResult(True, [], [], [], [])
         
@@ -35,7 +35,7 @@ class TestValidationResult(unittest.TestCase):
         self.assertEqual(len(result.info), 0)
         self.assertEqual(len(result.fixed_issues), 0)
     
-    def test_add_error(self):
+    def test_add_error(self) -> None:
         """测试添加错误"""
         result = ValidationResult(True, [], [], [], [])
         result.add_error("Test error")
@@ -45,7 +45,7 @@ class TestValidationResult(unittest.TestCase):
         self.assertEqual(len(result.errors), 1)
         self.assertEqual(result.errors[0], "Test error")
     
-    def test_add_warning(self):
+    def test_add_warning(self) -> None:
         """测试添加警告"""
         result = ValidationResult(True, [], [], [], [])
         result.add_warning("Test warning")
@@ -55,7 +55,7 @@ class TestValidationResult(unittest.TestCase):
         self.assertEqual(len(result.warnings), 1)
         self.assertEqual(result.warnings[0], "Test warning")
     
-    def test_add_info_and_fixed(self):
+    def test_add_info_and_fixed(self) -> None:
         """测试添加信息和修复记录"""
         result = ValidationResult(True, [], [], [], [])
         result.add_info("Test info")
@@ -70,12 +70,12 @@ class TestValidationResult(unittest.TestCase):
 class TestConfigValidator(unittest.TestCase):
     """测试ConfigValidator类"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """测试前设置"""
         self.validator = ConfigValidator(ValidationLevel.NORMAL)
         self.temp_dir = tempfile.mkdtemp()
     
-    def tearDown(self):
+    def tearDown(self) -> None:
         """测试后清理"""
         # 清理临时文件
         import shutil
@@ -88,7 +88,7 @@ class TestConfigValidator(unittest.TestCase):
             json.dump(content, f, indent=2, ensure_ascii=False)
         return file_path
     
-    def test_validator_initialization(self):
+    def test_validator_initialization(self) -> None:
         """测试验证器初始化"""
         validator = ConfigValidator(ValidationLevel.STRICT)
         self.assertEqual(validator.validation_level, ValidationLevel.STRICT)
@@ -96,7 +96,7 @@ class TestConfigValidator(unittest.TestCase):
         self.assertIn("auto.json", validator.schemas)
         self.assertIn("config.json", validator.default_values)
     
-    def test_validate_nonexistent_file(self):
+    def test_validate_nonexistent_file(self) -> None:
         """测试验证不存在的文件"""
         nonexistent_file = os.path.join(self.temp_dir, "nonexistent.json")
         result = self.validator.validate_file(nonexistent_file)
@@ -105,7 +105,7 @@ class TestConfigValidator(unittest.TestCase):
         self.assertTrue(result.has_errors)
         self.assertIn("配置文件不存在", result.errors[0])
     
-    def test_validate_nonexistent_file_with_autofix(self):
+    def test_validate_nonexistent_file_with_autofix(self) -> None:
         """测试验证不存在的文件并自动修复"""
         config_file = os.path.join(self.temp_dir, "config.json")
         result = self.validator.validate_file(config_file, auto_fix=True)
@@ -116,7 +116,7 @@ class TestConfigValidator(unittest.TestCase):
         self.assertTrue(len(result.fixed_issues) > 0)
         self.assertIn("创建默认配置文件", result.fixed_issues[0])
     
-    def test_validate_invalid_json(self):
+    def test_validate_invalid_json(self) -> None:
         """测试验证无效JSON文件"""
         invalid_json_file = os.path.join(self.temp_dir, "invalid.json")
         with open(invalid_json_file, 'w') as f:
@@ -128,7 +128,7 @@ class TestConfigValidator(unittest.TestCase):
         self.assertTrue(result.has_errors)
         self.assertIn("JSON格式错误", result.errors[0])
     
-    def test_validate_valid_config_json(self):
+    def test_validate_valid_config_json(self) -> None:
         """测试验证有效的config.json"""
         valid_config = {
             "PASSWORD": "test_password",
@@ -151,7 +151,7 @@ class TestConfigValidator(unittest.TestCase):
         self.assertTrue(result.is_valid)
         self.assertFalse(result.has_errors)
     
-    def test_validate_config_json_missing_fields(self):
+    def test_validate_config_json_missing_fields(self) -> None:
         """测试验证缺少字段的config.json"""
         incomplete_config = {
             "PASSWORD": "test_password",
@@ -165,7 +165,7 @@ class TestConfigValidator(unittest.TestCase):
         # 在NORMAL级别下，模式验证失败应该是警告
         self.assertTrue(result.has_warnings or result.has_errors)
     
-    def test_validate_config_json_with_autofix(self):
+    def test_validate_config_json_with_autofix(self) -> None:
         """测试验证并自动修复config.json"""
         incomplete_config = {
             "PASSWORD": "test_password",
@@ -179,7 +179,7 @@ class TestConfigValidator(unittest.TestCase):
         if result.fixed_issues:
             self.assertTrue(any("添加缺失字段" in fix for fix in result.fixed_issues))
     
-    def test_validate_auto_json(self):
+    def test_validate_auto_json(self) -> None:
         """测试验证auto.json"""
         valid_auto_config = {
             "Style": {
@@ -199,7 +199,7 @@ class TestConfigValidator(unittest.TestCase):
         self.assertTrue(result.is_valid)
         self.assertFalse(result.has_errors)
     
-    def test_custom_validation_rules(self):
+    def test_custom_validation_rules(self) -> None:
         """测试自定义验证规则"""
         # 测试无效端口号
         config_with_invalid_port = {
@@ -218,7 +218,7 @@ class TestConfigValidator(unittest.TestCase):
         port_errors = [error for error in result.errors if "PROXY_PORT" in error]
         self.assertTrue(len(port_errors) > 0)
     
-    def test_security_validation(self):
+    def test_security_validation(self) -> None:
         """测试安全性验证"""
         config_with_default_password = {
             "PASSWORD": "default_password",  # 默认密码
@@ -236,7 +236,7 @@ class TestConfigValidator(unittest.TestCase):
         security_warnings = [warning for warning in result.warnings if "默认密码" in warning]
         self.assertTrue(len(security_warnings) > 0)
     
-    def test_validation_levels(self):
+    def test_validation_levels(self) -> None:
         """测试不同验证级别"""
         incomplete_config = {
             "PASSWORD": "test_password"
@@ -258,7 +258,7 @@ class TestConfigValidator(unittest.TestCase):
     
     @patch('os.path.exists')
     @patch('builtins.open', new_callable=mock_open)
-    def test_validate_all_configs(self, mock_file, mock_exists):
+    def test_validate_all_configs(self, mock_file, mock_exists) -> None:
         """测试批量验证配置文件"""
         # 模拟文件存在
         mock_exists.return_value = True
@@ -277,7 +277,7 @@ class TestConfigValidator(unittest.TestCase):
         for filename in expected_files:
             self.assertIn(filename, results)
     
-    def test_get_validation_summary(self):
+    def test_get_validation_summary(self) -> None:
         """测试获取验证摘要"""
         # 创建一些验证结果
         results = {
@@ -299,16 +299,16 @@ class TestConfigValidator(unittest.TestCase):
 class TestConvenienceFunctions(unittest.TestCase):
     """测试便捷函数"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """测试前设置"""
         self.temp_dir = tempfile.mkdtemp()
     
-    def tearDown(self):
+    def tearDown(self) -> None:
         """测试后清理"""
         import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
     
-    def test_validate_config_file_function(self):
+    def test_validate_config_file_function(self) -> None:
         """测试validate_config_file便捷函数"""
         # 创建临时配置文件
         config_content = {"test": "value"}
@@ -320,7 +320,7 @@ class TestConvenienceFunctions(unittest.TestCase):
         self.assertIsInstance(result, ValidationResult)
     
     @patch('app.common.config_validator.config_validator')
-    def test_validate_all_configs_function(self, mock_validator):
+    def test_validate_all_configs_function(self, mock_validator) -> None:
         """测试validate_all_configs便捷函数"""
         mock_validator.validate_all_configs.return_value = {"test.json": ValidationResult(True, [], [], [], [])}
         

@@ -17,3 +17,4 @@ auto.json
 test/
 modules/
 *.log
+.mypy_cache/

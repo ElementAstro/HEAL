@@ -1,0 +1,10 @@
+audio
+data
+heal
+icon
+image
+logs
+patch
+qss
+translate
+warp

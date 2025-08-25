@@ -1,3 +1,4 @@
+from typing import Any
 """
 Settings Search Functionality Tests
 Comprehensive testing of search engine, UI components, and integration
@@ -9,32 +10,32 @@ from unittest.mock import Mock, patch, MagicMock
 
 # Mock PySide6 components for testing
 class MockQObject:
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         self.parent = parent
 
 class MockSignal:
-    def __init__(self):
-        self.callbacks = []
+    def __init__(self) -> None:
+        self.callbacks: list[Any] = []
     
-    def connect(self, callback):
+    def connect(self, callback) -> None:
         self.callbacks.append(callback)
     
-    def emit(self, *args, **kwargs):
+    def emit(self, *args, **kwargs) -> None:
         for callback in self.callbacks:
             callback(*args, **kwargs)
 
 class MockQTimer:
-    def __init__(self):
+    def __init__(self) -> None:
         self.timeout = MockSignal()
         self.active = False
     
-    def start(self, interval):
+    def start(self, interval) -> None:
         self.active = True
     
-    def stop(self):
+    def stop(self) -> None:
         self.active = False
     
-    def setSingleShot(self, single):
+    def setSingleShot(self, single) -> None:
         pass
 
 # Mock the PySide6 imports
@@ -51,16 +52,16 @@ sys.modules['PySide6.QtCore'].Signal = MockSignal
 sys.modules['PySide6.QtCore'].QTimer = MockQTimer
 
 # Now import our search components
-from app.components.setting.search_engine import (
+from src.heal.components.setting.search_engine import (
     SettingsSearchEngine, SettingItem, SearchResult, SearchType, FilterType, SearchFilter
 )
-from app.components.setting.search_integration import SettingsSearchIntegrator
+from src.heal.components.setting.search_integration import SettingsSearchIntegrator
 
 
 class TestSettingItem(unittest.TestCase):
     """Test SettingItem functionality"""
     
-    def test_setting_item_creation(self):
+    def test_setting_item_creation(self) -> None:
         """Test creating a setting item"""
         item = SettingItem(
             key="test_setting",
@@ -78,7 +79,7 @@ class TestSettingItem(unittest.TestCase):
         self.assertIsInstance(item.keywords, list)
         self.assertGreater(len(item.keywords), 0)
     
-    def test_keyword_generation(self):
+    def test_keyword_generation(self) -> None:
         """Test automatic keyword generation"""
         item = SettingItem(
             key="theme_color",
@@ -100,7 +101,7 @@ class TestSettingItem(unittest.TestCase):
 class TestSearchEngine(unittest.TestCase):
     """Test the search engine functionality"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         self.search_engine = SettingsSearchEngine()
         
         # Add test settings
@@ -142,7 +143,7 @@ class TestSearchEngine(unittest.TestCase):
         for item in self.test_items:
             self.search_engine.add_setting(item)
     
-    def test_add_remove_settings(self):
+    def test_add_remove_settings(self) -> None:
         """Test adding and removing settings"""
         initial_count = len(self.search_engine.items)
         
@@ -163,7 +164,7 @@ class TestSearchEngine(unittest.TestCase):
         self.search_engine.remove_setting("new_setting")
         self.assertEqual(len(self.search_engine.items), initial_count)
     
-    def test_exact_search(self):
+    def test_exact_search(self) -> None:
         """Test exact string matching"""
         results = self.search_engine.search("Theme Color", search_type=SearchType.EXACT)
         
@@ -171,7 +172,7 @@ class TestSearchEngine(unittest.TestCase):
         self.assertEqual(results[0].item.key, "theme_color")
         self.assertEqual(results[0].match_type, SearchType.EXACT)
     
-    def test_fuzzy_search(self):
+    def test_fuzzy_search(self) -> None:
         """Test fuzzy string matching"""
         results = self.search_engine.search("them colr", search_type=SearchType.FUZZY)
         
@@ -180,7 +181,7 @@ class TestSearchEngine(unittest.TestCase):
         theme_result = next((r for r in results if r.item.key == "theme_color"), None)
         self.assertIsNotNone(theme_result)
     
-    def test_keyword_search(self):
+    def test_keyword_search(self) -> None:
         """Test keyword-based search"""
         results = self.search_engine.search("clipboard", search_type=SearchType.KEYWORD)
         
@@ -189,7 +190,7 @@ class TestSearchEngine(unittest.TestCase):
         auto_copy_result = next((r for r in results if r.item.key == "auto_copy"), None)
         self.assertIsNotNone(auto_copy_result)
     
-    def test_category_filter(self):
+    def test_category_filter(self) -> None:
         """Test category filtering"""
         category_filter = SearchFilter(
             filter_type=FilterType.CATEGORY,
@@ -203,7 +204,7 @@ class TestSearchEngine(unittest.TestCase):
         for result in results:
             self.assertEqual(result.item.category, "Appearance")
     
-    def test_type_filter(self):
+    def test_type_filter(self) -> None:
         """Test type filtering"""
         type_filter = SearchFilter(
             filter_type=FilterType.TYPE,
@@ -217,7 +218,7 @@ class TestSearchEngine(unittest.TestCase):
         for result in results:
             self.assertEqual(result.item.setting_type, "switch")
     
-    def test_combined_search_and_filter(self):
+    def test_combined_search_and_filter(self) -> None:
         """Test combining search query with filters"""
         category_filter = SearchFilter(
             filter_type=FilterType.CATEGORY,
@@ -235,7 +236,7 @@ class TestSearchEngine(unittest.TestCase):
         for result in results:
             self.assertEqual(result.item.category, "Appearance")
     
-    def test_search_suggestions(self):
+    def test_search_suggestions(self) -> None:
         """Test search suggestions"""
         suggestions = self.search_engine.get_suggestions("the", limit=5)
         
@@ -245,7 +246,7 @@ class TestSearchEngine(unittest.TestCase):
         # Should include "theme" as a suggestion
         self.assertIn("theme", [s.lower() for s in suggestions])
     
-    def test_filter_options(self):
+    def test_filter_options(self) -> None:
         """Test getting filter options"""
         options = self.search_engine.get_filter_options()
         
@@ -257,7 +258,7 @@ class TestSearchEngine(unittest.TestCase):
         self.assertIn('Behavior', categories)
         self.assertIn('Network', categories)
     
-    def test_search_statistics(self):
+    def test_search_statistics(self) -> None:
         """Test search statistics"""
         stats = self.search_engine.get_statistics()
         
@@ -269,11 +270,11 @@ class TestSearchEngine(unittest.TestCase):
         self.assertEqual(stats['total_items'], len(self.test_items))
         self.assertGreater(stats['total_keywords'], 0)
     
-    def test_real_time_search(self):
+    def test_real_time_search(self) -> None:
         """Test real-time search with debouncing"""
         results_received = []
         
-        def on_search_completed(results):
+        def on_search_completed(results: Any) -> None:
             results_received.append(results)
         
         self.search_engine.search_completed.connect(on_search_completed)
@@ -291,10 +292,10 @@ class TestSearchEngine(unittest.TestCase):
 class TestSearchIntegration(unittest.TestCase):
     """Test search integration functionality"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         self.integrator = SettingsSearchIntegrator()
     
-    def test_custom_setting_registration(self):
+    def test_custom_setting_registration(self) -> None:
         """Test registering custom settings"""
         self.integrator.register_custom_setting(
             key="test_custom",
@@ -316,7 +317,7 @@ class TestSearchIntegration(unittest.TestCase):
         custom_result = next((r for r in results if r.item.key == "test_custom"), None)
         self.assertIsNotNone(custom_result)
     
-    def test_setting_value_update(self):
+    def test_setting_value_update(self) -> None:
         """Test updating setting values"""
         # Register a setting
         self.integrator.register_custom_setting(
@@ -335,7 +336,7 @@ class TestSearchIntegration(unittest.TestCase):
         setting = self.integrator.settings_registry["test_update"]
         self.assertEqual(setting.value, "updated")
     
-    def test_favorite_marking(self):
+    def test_favorite_marking(self) -> None:
         """Test marking settings as favorites"""
         # Register a setting
         self.integrator.register_custom_setting(
@@ -354,7 +355,7 @@ class TestSearchIntegration(unittest.TestCase):
         setting = self.integrator.settings_registry["test_favorite"]
         self.assertTrue(setting.is_favorite)
     
-    def test_search_statistics(self):
+    def test_search_statistics(self) -> None:
         """Test getting search statistics"""
         # Register some settings
         for i in range(5):
@@ -376,7 +377,7 @@ class TestSearchIntegration(unittest.TestCase):
         
         self.assertEqual(stats['registered_settings'], 5)
     
-    def test_export_import_functionality(self):
+    def test_export_import_functionality(self) -> None:
         """Test exporting and importing settings"""
         # Register some settings
         self.integrator.register_custom_setting(
@@ -409,11 +410,11 @@ class TestSearchIntegration(unittest.TestCase):
 class TestSearchPerformance(unittest.TestCase):
     """Test search performance with large datasets"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         self.search_engine = SettingsSearchEngine()
         
         # Create a large number of test settings
-        self.large_dataset = []
+        self.large_dataset: list[Any] = []
         categories = ["Appearance", "Behavior", "Network", "System", "Advanced"]
         types = ["switch", "combo", "text", "button", "color"]
         
@@ -429,7 +430,7 @@ class TestSearchPerformance(unittest.TestCase):
             self.large_dataset.append(item)
             self.search_engine.add_setting(item)
     
-    def test_large_dataset_search_performance(self):
+    def test_large_dataset_search_performance(self) -> None:
         """Test search performance with large dataset"""
         start_time = time.time()
         
@@ -446,7 +447,7 @@ class TestSearchPerformance(unittest.TestCase):
         # Should complete within reasonable time (adjust threshold as needed)
         self.assertLess(search_time, 2.0, f"Search took too long: {search_time:.3f}s")
     
-    def test_index_building_performance(self):
+    def test_index_building_performance(self) -> None:
         """Test index building performance"""
         new_engine = SettingsSearchEngine()
         
@@ -465,7 +466,7 @@ class TestSearchPerformance(unittest.TestCase):
         # Verify index was built correctly
         self.assertEqual(len(new_engine.items), len(self.large_dataset))
     
-    def test_memory_usage(self):
+    def test_memory_usage(self) -> None:
         """Test memory usage with large dataset"""
         import sys
         
@@ -491,7 +492,7 @@ class TestSearchPerformance(unittest.TestCase):
         self.assertLess(memory_increase, 1024 * 1024, "Memory usage too high")  # Less than 1MB
 
 
-def run_search_benchmarks():
+def run_search_benchmarks() -> None:
     """Run search performance benchmarks"""
     print("\n=== Settings Search Benchmarks ===")
     
