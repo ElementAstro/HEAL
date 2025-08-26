@@ -265,7 +265,8 @@ class DevUtils:
             if req_path.exists():
                 try:
                     subprocess.run(
-                        [sys.executable, "-m", "pip", "install", "-r", str(req_path)],
+                        [sys.executable, "-m", "pip",
+                            "install", "-r", str(req_path)],
                         check=True,
                     )
                     print(f"Installed dependencies from {req_file}")
@@ -295,7 +296,8 @@ def main() -> None:
         ],
         help="Command to run",
     )
-    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+    parser.add_argument("--verbose", "-v",
+                        action="store_true", help="Verbose output")
     parser.add_argument(
         "--coverage",
         action="store_true",
@@ -313,7 +315,8 @@ def main() -> None:
     success = True
 
     if args.command == "test":
-        success = dev_utils.run_tests(verbose=args.verbose, coverage=args.coverage)
+        success = dev_utils.run_tests(
+            verbose=args.verbose, coverage=args.coverage)
     elif args.command == "format":
         success = dev_utils.format_code(check_only=args.check_only)
     elif args.command == "sort-imports":

@@ -103,19 +103,24 @@ def update_imports_in_file(file_path: Path) -> bool:
             file_location = str(file_path).replace("\\", "/")
 
             if "/interfaces/" in file_location:
-                content = re.sub(r"\bfrom \.common\.", "from ..common.", content)
-                content = re.sub(r"\bfrom \.models\.", "from ..models.", content)
+                content = re.sub(r"\bfrom \.common\.",
+                                 "from ..common.", content)
+                content = re.sub(r"\bfrom \.models\.",
+                                 "from ..models.", content)
                 content = re.sub(
                     r"\bfrom \.components\.", "from ..components.", content
                 )
             elif "/components/" in file_location:
-                content = re.sub(r"\bfrom \.common\.", "from ..common.", content)
-                content = re.sub(r"\bfrom \.models\.", "from ..models.", content)
+                content = re.sub(r"\bfrom \.common\.",
+                                 "from ..common.", content)
+                content = re.sub(r"\bfrom \.models\.",
+                                 "from ..models.", content)
                 content = re.sub(
                     r"\bfrom \.interfaces\.", "from ..interfaces.", content
                 )
             elif "/models/" in file_location:
-                content = re.sub(r"\bfrom \.common\.", "from ..common.", content)
+                content = re.sub(r"\bfrom \.common\.",
+                                 "from ..common.", content)
                 content = re.sub(
                     r"\bfrom \.components\.", "from ..components.", content
                 )

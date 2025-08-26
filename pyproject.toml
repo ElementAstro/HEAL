@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=61.0", "setuptools-scm>=8.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "heal"
-version = "1.0.0"
+dynamic = ["version"]
 description = "HEAL - Hello ElementAstro Launcher: A comprehensive launcher and management system for astronomical software"
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -175,4 +175,43 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
+]
+
+# Setuptools-scm configuration for automatic versioning
+[tool.setuptools_scm]
+write_to = "src/heal/_version.py"
+version_scheme = "post-release"
+local_scheme = "dirty-tag"
+fallback_version = "0.0.0"
+
+# Cross-platform build configuration
+[tool.setuptools.dynamic]
+version = {attr = "setuptools_scm.get_version"}
+
+# Platform-specific build options
+[tool.pyinstaller]
+name = "HEAL"
+console = false
+windowed = true
+icon = "src/heal/resources/images/icon.ico"
+add_data = [
+    "src/heal/resources:src/heal/resources",
+    "config:config"
+]
+hidden_imports = [
+    "PySide6.QtCore",
+    "PySide6.QtGui",
+    "PySide6.QtWidgets",
+    "qfluentwidgets"
+]
+
+# Build optimization settings
+[tool.build]
+exclude_patterns = [
+    "tests/*",
+    "docs/*",
+    "*.pyc",
+    "__pycache__/*",
+    ".git/*",
+    ".github/*"
 ]

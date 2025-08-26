@@ -10,6 +10,7 @@ This script provides comprehensive quality checks including:
 - Dependency analysis
 """
 
+from src.heal.common.logging_config import get_logger, health_check, log_performance
 import argparse
 import json
 import os
@@ -24,7 +25,6 @@ from typing import Any, Dict, List, Optional
 
 # 添加项目根目录到路径以导入统一日志配置
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from src.heal.common.logging_config import get_logger, health_check, log_performance
 
 # 使用统一日志配置
 logger = get_logger("quality_assurance")
@@ -65,7 +65,8 @@ class PylintChecker(QualityChecker):
 
     def is_available(self) -> bool:
         try:
-            subprocess.run(["pylint", "--version"], capture_output=True, check=True)
+            subprocess.run(["pylint", "--version"],
+                           capture_output=True, check=True)
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
             return False
@@ -120,7 +121,8 @@ class PylintChecker(QualityChecker):
                 for line in result.stderr.split("\n"):
                     if "Your code has been rated at" in line:
                         try:
-                            score_str = line.split("rated at ")[1].split("/")[0].strip()
+                            score_str = line.split("rated at ")[
+                                1].split("/")[0].strip()
                             score = float(score_str)
                         except (IndexError, ValueError):
                             pass
@@ -192,7 +194,8 @@ class Flake8Checker(QualityChecker):
 
     def is_available(self) -> bool:
         try:
-            subprocess.run(["flake8", "--version"], capture_output=True, check=True)
+            subprocess.run(["flake8", "--version"],
+                           capture_output=True, check=True)
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
             return False
@@ -240,7 +243,8 @@ class MypyChecker(QualityChecker):
 
     def is_available(self) -> bool:
         try:
-            subprocess.run(["mypy", "--version"], capture_output=True, check=True)
+            subprocess.run(["mypy", "--version"],
+                           capture_output=True, check=True)
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
             return False
@@ -289,7 +293,8 @@ class SecurityChecker(QualityChecker):
 
     def is_available(self) -> bool:
         try:
-            subprocess.run(["bandit", "--version"], capture_output=True, check=True)
+            subprocess.run(["bandit", "--version"],
+                           capture_output=True, check=True)
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
             return False
@@ -679,9 +684,11 @@ class QualityAssurancePipeline:
         ]
 
         # Filter to available checkers
-        self.checkers = [checker for checker in self.checkers if checker.is_available()]
+        self.checkers = [
+            checker for checker in self.checkers if checker.is_available()]
 
-        logger.info(f"Initialized QA pipeline with {len(self.checkers)} checkers")
+        logger.info(
+            f"Initialized QA pipeline with {len(self.checkers)} checkers")
 
     def run_all_checks(self) -> Dict[str, QualityResult]:
         """Run all quality checks"""
@@ -697,7 +704,8 @@ class QualityAssurancePipeline:
                 results[checker.name] = result
 
                 status = "PASSED" if result.passed else "FAILED"
-                logger.info(f"{checker.name}: {status} ({result.execution_time:.2f}s)")
+                logger.info(
+                    f"{checker.name}: {status} ({result.execution_time:.2f}s)")
 
             except Exception as e:
                 logger.error(f"Error running {checker.name}: {e}")
@@ -746,7 +754,8 @@ class QualityAssurancePipeline:
         report_lines.append(f"Total Checks: {total_checks}")
         report_lines.append(f"Passed: {passed_checks}")
         report_lines.append(f"Failed: {total_checks - passed_checks}")
-        report_lines.append(f"Success Rate: {passed_checks/total_checks*100:.1f}%")
+        report_lines.append(
+            f"Success Rate: {passed_checks/total_checks*100:.1f}%")
         report_lines.append("")
 
         # Overall score
@@ -767,14 +776,16 @@ class QualityAssurancePipeline:
             )
 
             report_lines.append(f"{name}: {status}{score_str}")
-            report_lines.append(f"  Execution Time: {result.execution_time:.2f}s")
+            report_lines.append(
+                f"  Execution Time: {result.execution_time:.2f}s")
 
             if result.issues:
                 report_lines.append(f"  Issues ({len(result.issues)}):")
                 for issue in result.issues[:10]:  # Limit to first 10 issues
                     report_lines.append(f"    - {issue}")
                 if len(result.issues) > 10:
-                    report_lines.append(f"    ... and {len(result.issues) - 10} more")
+                    report_lines.append(
+                        f"    ... and {len(result.issues) - 10} more")
 
             if result.details:
                 report_lines.append(f"  Details: {result.details}")
@@ -785,7 +796,8 @@ class QualityAssurancePipeline:
         report_lines.append("RECOMMENDATIONS")
         report_lines.append("-" * 40)
 
-        failed_checks = [name for name, result in results.items() if not result.passed]
+        failed_checks = [name for name,
+                         result in results.items() if not result.passed]
         if failed_checks:
             report_lines.append("Failed checks that need attention:")
             for check in failed_checks:
@@ -840,7 +852,8 @@ class QualityAssurancePipeline:
 
 def main() -> None:
     """Main entry point for QA pipeline"""
-    parser = argparse.ArgumentParser(description="Automated Quality Assurance Pipeline")
+    parser = argparse.ArgumentParser(
+        description="Automated Quality Assurance Pipeline")
     parser.add_argument("project_path", help="Path to the project to analyze")
     parser.add_argument(
         "--checks",
@@ -859,7 +872,8 @@ def main() -> None:
     )
     parser.add_argument("--output", "-o", help="Output file for report")
     parser.add_argument("--json", help="JSON output file")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+    parser.add_argument("--verbose", "-v",
+                        action="store_true", help="Verbose output")
 
     args = parser.parse_args()
 

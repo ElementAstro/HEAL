@@ -1,0 +1,28 @@
+# HEAL - Hello ElementAstro Launcher
+# Build dependencies for packaging and distribution
+
+# Core build tools
+pyinstaller>=6.0.0
+setuptools>=61.0
+wheel>=0.37.0
+build>=0.10.0
+
+# Cross-platform packaging tools
+nuitka>=2.0.0
+cx-freeze>=6.15.0
+
+# Version management
+setuptools-scm>=8.0.0
+
+# Development and build utilities
+twine>=4.0.0
+check-manifest>=0.49
+
+# Platform-specific packaging (optional, installed conditionally)
+# Windows: pywin32, pywin32-ctypes
+# macOS: dmgbuild, create-dmg  
+# Linux: python-appimage, fpm
+
+# Legacy dependencies (maintain compatibility)
+PySide6==6.4.2
+PySideSix-Frameless-Window>=0.3.1

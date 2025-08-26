@@ -62,7 +62,8 @@ class DevEnvironmentSetup:
         pip_exe = self.get_pip_executable()
 
         # Upgrade pip first
-        subprocess.run([str(pip_exe), "install", "--upgrade", "pip"], check=True)
+        subprocess.run(
+            [str(pip_exe), "install", "--upgrade", "pip"], check=True)
 
         # Install development requirements
         requirements_files = ["requirements.txt", "requirements-dev.txt"]
