@@ -4,6 +4,7 @@ Performance Analyzer - 性能分析工具
 """
 
 import cProfile
+import collections
 import functools
 import gc
 import io
@@ -13,7 +14,7 @@ import time
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, List, Optional, Union
+from typing import Any, Callable, Deque, Dict, Generator, List, Optional, Union
 from contextlib import _GeneratorContextManager
 
 import psutil
@@ -48,6 +49,7 @@ class FunctionProfile:
     max_time: float = 0.0
     min_time: float = float("inf")
     memory_usage: List[float] = field(default_factory=list)
+    execution_times: List[float] = field(default_factory=list)
 
     def add_call(self, execution_time: float, memory_usage: Optional[float] = None) -> None:
         """添加函数调用记录"""
@@ -56,39 +58,50 @@ class FunctionProfile:
         self.avg_time = self.total_time / self.call_count
         self.max_time = max(self.max_time, execution_time)
         self.min_time = min(self.min_time, execution_time)
+        self.execution_times.append(execution_time)
 
         if memory_usage is not None:
             self.memory_usage.append(memory_usage)
 
 
 class PerformanceAnalyzer:
-    """性能分析器"""
+    """性能分析器 - 优化版本"""
 
     def __init__(self) -> None:
         self.logger = logger.bind(component="PerformanceAnalyzer")
 
-        # 性能阈值配置
+        # 优化的性能阈值配置 - 更严格的标准
         self.thresholds = {
-            "function_execution_time": 0.1,  # 100ms
-            "io_operation_time": 0.5,  # 500ms
-            "memory_usage_mb": 100,  # 100MB
-            "cpu_usage_percent": 80,  # 80%
-            "ui_block_time": 0.05,  # 50ms
-            "network_timeout": 5.0,  # 5s
+            "function_execution_time": 0.05,  # 50ms - 更严格
+            "io_operation_time": 0.2,  # 200ms - 更严格
+            "memory_usage_mb": 50,  # 50MB - 更严格
+            "cpu_usage_percent": 70,  # 70% - 更严格
+            "ui_block_time": 0.016,  # 16ms (60fps) - 更严格
+            "network_timeout": 3.0,  # 3s - 更严格
+            "cache_hit_ratio": 0.8,  # 80% - 新增缓存命中率阈值
+            "memory_growth_rate": 10,  # 10MB/min - 新增内存增长率阈值
         }
 
-        # 分析数据
+        # 分析数据 - 优化内存使用
         self.function_profiles: Dict[str, FunctionProfile] = {}
         self.performance_issues: List[PerformanceIssue] = []
-        self.io_operations: List[Dict[str, Any]] = []
-        self.memory_snapshots: List[Dict[str, Any]] = []
+        self.io_operations: Deque[Any] = collections.deque(maxlen=1000)  # 限制大小防止内存泄漏
+        self.memory_snapshots: Deque[Any] = collections.deque(maxlen=100)  # 限制大小
+
+        # 新增性能统计
+        self.cache_stats: Dict[str, Dict[str, int]] = {}
+        self.ui_responsiveness_stats: Dict[str, float] = {}
 
         # 分析状态
         self.is_profiling = False
         self.profiler: Optional[cProfile.Profile] = None
         self.analysis_lock = threading.Lock()
 
-        self.logger.info("性能分析器已初始化")
+        # 优化：添加数据清理定时器
+        self._last_cleanup = time.time()
+        self._cleanup_interval = 300  # 5分钟清理一次
+
+        self.logger.info("性能分析器已初始化（优化版本）")
 
     def start_profiling(self) -> None:
         """开始性能分析"""
@@ -377,8 +390,77 @@ class PerformanceAnalyzer:
             self.performance_issues.clear()
             self.io_operations.clear()
             self.memory_snapshots.clear()
+            self.cache_stats.clear()
+            self.ui_responsiveness_stats.clear()
 
         self.logger.info("性能分析数据已清理")
+
+    def record_cache_stats(self, cache_name: str, hits: int, misses: int) -> None:
+        """记录缓存统计信息"""
+        with self.analysis_lock:
+            if cache_name not in self.cache_stats:
+                self.cache_stats[cache_name] = {"hits": 0, "misses": 0}
+
+            self.cache_stats[cache_name]["hits"] += hits
+            self.cache_stats[cache_name]["misses"] += misses
+
+            # 检查缓存命中率
+            total = self.cache_stats[cache_name]["hits"] + self.cache_stats[cache_name]["misses"]
+            if total > 0:
+                hit_ratio = self.cache_stats[cache_name]["hits"] / total
+                if hit_ratio < self.thresholds["cache_hit_ratio"]:
+                    self._report_performance_issue(
+                        category="cache",
+                        severity="medium",
+                        description=f"缓存命中率过低: {hit_ratio:.2%}",
+                        location=cache_name,
+                        metric_value=hit_ratio,
+                        threshold=self.thresholds["cache_hit_ratio"],
+                        suggestion="检查缓存策略和TTL设置",
+                    )
+
+    def record_ui_responsiveness(self, operation: str, response_time: float) -> None:
+        """记录UI响应时间"""
+        with self.analysis_lock:
+            self.ui_responsiveness_stats[operation] = response_time
+
+            if response_time > self.thresholds["ui_block_time"]:
+                self._report_performance_issue(
+                    category="ui",
+                    severity=self._get_severity(response_time, self.thresholds["ui_block_time"]),
+                    description=f"UI操作响应时间过长: {response_time:.3f}s",
+                    location=operation,
+                    metric_value=response_time,
+                    threshold=self.thresholds["ui_block_time"],
+                    suggestion="将操作移至后台线程或使用异步处理",
+                )
+
+    def cleanup_old_data(self) -> None:
+        """定期清理旧数据以防止内存泄漏"""
+        current_time = time.time()
+
+        # 检查是否需要清理
+        if current_time - self._last_cleanup < self._cleanup_interval:
+            return
+
+        with self.analysis_lock:
+            # 清理旧的性能问题（保留最近1小时）
+            cutoff_time = current_time - 3600
+            self.performance_issues = [
+                issue for issue in self.performance_issues
+                if issue.detected_at > cutoff_time
+            ]
+
+            # 清理函数性能数据中的旧记录
+            for profile in self.function_profiles.values():
+                # 只保留最近的100次调用
+                if len(profile.execution_times) > 100:
+                    profile.execution_times = profile.execution_times[-100:]
+                    profile.memory_usage = profile.memory_usage[-100:]
+
+            self._last_cleanup = current_time
+
+        self.logger.debug("清理了过期的性能数据")
 
 
 # 全局性能分析器实例
@@ -568,6 +650,41 @@ class PerformanceOptimizer:
             order.append("CPU密集操作优化 - 提升计算效率")
 
         return order
+
+    def cleanup_old_data(self) -> None:
+        """清理旧的性能数据以防止内存泄漏"""
+        current_time = time.time()
+        cutoff_time = current_time - 3600  # 保留1小时内的数据
+
+        # 清理旧的性能问题记录
+        self.analyzer.performance_issues = [
+            issue for issue in self.analyzer.performance_issues
+            if issue.detected_at > cutoff_time
+        ]
+
+        # 清理旧的函数性能数据
+        for profile in self.analyzer.function_profiles.values():
+            profile.execution_times = [
+                t for t in profile.execution_times if t > cutoff_time - profile.execution_times[0] if profile.execution_times
+            ]
+            profile.memory_usage = [
+                m for m in profile.memory_usage if len(profile.execution_times) == len(profile.memory_usage)
+            ]
+
+        self.logger.debug("清理了过期的性能数据")
+
+    def get_performance_summary(self) -> Dict[str, Any]:
+        """获取性能摘要信息"""
+        return {
+            "total_functions_monitored": len(self.analyzer.function_profiles),
+            "total_performance_issues": len(self.analyzer.performance_issues),
+            "io_operations_count": len(self.analyzer.io_operations),
+            "memory_snapshots_count": len(self.analyzer.memory_snapshots),
+            "cache_stats": self.analyzer.cache_stats,
+            "ui_responsiveness": self.analyzer.ui_responsiveness_stats,
+            "current_memory_usage": psutil.Process().memory_info().rss / 1024 / 1024,
+            "cpu_usage": psutil.cpu_percent(),
+        }
 
 
 # 全局优化器实例

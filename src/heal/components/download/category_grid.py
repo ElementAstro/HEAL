@@ -35,7 +35,7 @@ class CategoryCard(CardWidget):
 
     category_selected = Signal(str, str)  # category_id, category_title
 
-    def __init__(self, category_data: Dict[str, Any], parent=None) -> None:
+    def __init__(self, category_data: Dict[str, Any], parent: Any = None) -> None:
         super().__init__(parent)
         self.category_data = category_data
         self.logger = get_logger("category_card", module="CategoryCard")
@@ -108,7 +108,7 @@ class CategoryCard(CardWidget):
 
         # Note: CardWidget automatically manages its layout, no need to call setLayout()
 
-    def _resolve_icon(self, icon_name: str) -> None:
+    def _resolve_icon(self, icon_name: str) -> Any:
         """Resolve icon from name"""
         if icon_name.startswith("FIF."):
             return getattr(FluentIcon, icon_name[4:], FluentIcon.FOLDER)
@@ -121,7 +121,7 @@ class CategoryCard(CardWidget):
                 return FluentIcon.FOLDER
         return FluentIcon.FOLDER
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event: Any) -> None:
         """Handle mouse click"""
         if event.button() == Qt.MouseButton.LeftButton:
             category_id = self.category_data.get("id", "")
@@ -130,7 +130,7 @@ class CategoryCard(CardWidget):
             self.logger.info(f"分类选择: {category_title} ({category_id})")
         super().mousePressEvent(event)
 
-    def enterEvent(self, event) -> None:
+    def enterEvent(self, event: Any) -> None:
         """Handle mouse enter for hover effect"""
         self.setStyleSheet(
             """
@@ -142,7 +142,7 @@ class CategoryCard(CardWidget):
         )
         super().enterEvent(event)
 
-    def leaveEvent(self, event) -> None:
+    def leaveEvent(self, event: Any) -> None:
         """Handle mouse leave"""
         self.setStyleSheet("")
         super().leaveEvent(event)
@@ -350,7 +350,8 @@ class CategoryGridWidget(CardWidget):
         """Get category data by ID"""
         for category in self.categories:
             if category.get("id") == category_id:
-                return category
+                # Cast Any to Dict[str, Any] to satisfy type checker
+                return category  # type: ignore[no-any-return]
         return None
 
     def highlight_category(self, category_id: str) -> None:

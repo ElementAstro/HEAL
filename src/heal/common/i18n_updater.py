@@ -8,7 +8,7 @@ try:
     from weakref import WeakSet
 except ImportError:
     # Fallback implementation for older Python versions
-    class WeakSet:
+    class WeakSet:  # type: ignore[no-redef]
         def __init__(self) -> None:
             self._items: Set[Any] = set()
         def add(self, item: Any) -> None:
@@ -135,7 +135,7 @@ class I18nMixin:
         pass
 
 
-def create_i18n_aware_widget(widget_class: Any) -> None:
+def create_i18n_aware_widget(widget_class: Any) -> Any:
     """创建支持国际化的Widget类装饰器"""
 
     class I18nAwareWidget(widget_class, I18nMixin):
@@ -150,12 +150,12 @@ def create_i18n_aware_widget(widget_class: Any) -> None:
 
 
 # 便捷装饰器
-def i18n_aware(cls: Any) -> None:
+def i18n_aware(cls: Any) -> Any:
     """类装饰器，使类支持国际化"""
     return create_i18n_aware_widget(cls)
 
 
-def auto_i18n_update(func: Any) -> None:
+def auto_i18n_update(func: Any) -> Any:
     """方法装饰器，自动触发国际化更新"""
 
     def wrapper(*args: Any, **kwargs: Any) -> Any:

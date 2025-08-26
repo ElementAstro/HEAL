@@ -50,7 +50,7 @@ class ServerManager:
 
         return buttons
 
-    def _get_server_icon(self, details: Dict[str, Any]) -> None:
+    def _get_server_icon(self, details: Dict[str, Any]) -> Any:
         """获取服务器图标"""
         icon = FluentIcon.TAG
         # 修复：合并if语句
@@ -67,7 +67,7 @@ class ServerManager:
             "ICON" in details and details["ICON"]
         ):  # 处理只有 ICON 没有 ICON_TYPE 的情况
             icon = details["ICON"]
-        return icon
+        return icon  # type: ignore[no-any-return]
 
     def get_selected_servers(self) -> List[TogglePushButton]:
         """获取选中的服务器按钮"""

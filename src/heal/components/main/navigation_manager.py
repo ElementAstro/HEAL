@@ -31,7 +31,7 @@ class MainNavigationManager(QObject):
     reload_requested = Signal()
     shutdown_requested = Signal()
 
-    def __init__(self, main_window) -> None:
+    def __init__(self, main_window: Any) -> None:
         super().__init__(main_window)
         self.main_window = main_window
         self.logger = get_logger(
@@ -173,6 +173,6 @@ class MainNavigationManager(QObject):
         """处理关机请求"""
         self.shutdown_requested.emit()
 
-    def get_interface(self, interface_key: str) -> None:
+    def get_interface(self, interface_key: str) -> Any:
         """获取指定界面"""
         return self.interfaces.get(interface_key)

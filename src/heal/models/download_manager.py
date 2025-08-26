@@ -256,8 +256,10 @@ class DownloadWorker(QThread):
         )
 
         last_progress_update_time = time.time()
+        buffer = bytearray()
+        buffer_size = item.chunk_size * 10  # 缓冲10个chunk以减少I/O操作
 
-        with open(item.file_path, mode) as f:
+        with open(item.file_path, mode, buffering=buffer_size) as f:
             for chunk in response.iter_content(chunk_size=item.chunk_size):
                 if self.cancelled:
                     logger.debug(
@@ -266,8 +268,14 @@ class DownloadWorker(QThread):
                     return
 
                 if chunk:
-                    f.write(chunk)
-                item.downloaded_size += len(chunk)
+                    buffer.extend(chunk)
+                    item.downloaded_size += len(chunk)
+
+                    # 当缓冲区满时或者是最后一个chunk时写入文件
+                    if len(buffer) >= buffer_size:
+                        f.write(buffer)
+                        f.flush()  # 确保数据写入磁盘
+                        buffer.clear()
 
                 current_time = time.time()
                 if current_time - last_progress_update_time >= 0.5:
@@ -297,6 +305,12 @@ class DownloadWorker(QThread):
                         item.id, item.downloaded_size, item.file_size, item.speed
                     )
                     last_progress_update_time = current_time
+
+            # 写入剩余的缓冲区数据
+            if buffer:
+                f.write(buffer)
+                f.flush()
+                buffer.clear()
 
         if not self.cancelled:  # Final progress update
             self.progress_updated.emit(

@@ -48,7 +48,7 @@ from qfluentwidgets import (
 )
 
 from .module_bulk_operations import BulkOperationType, ModuleBulkOperations
-from .module_error_handler import ErrorCategory, ErrorSeverity, ModuleErrorHandler
+from .module_error_handler import ErrorCategory, ErrorContext, ErrorSeverity, ModuleErrorHandler
 from .module_notification_system import ModuleNotificationSystem, NotificationType
 
 # Import our new systems
@@ -680,7 +680,7 @@ class ModManager(ScrollArea):
         if widget:
             name_label = widget.findChild(TitleLabel)
             if name_label:
-                return name_label.text()
+                return str(name_label.text())
         return None
 
     def delete_mod(self, mod_name: str) -> None:
@@ -764,12 +764,15 @@ class ModManager(ScrollArea):
             try:
                 with open(package_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    return data
+                    return Dict[str, Any](data)
             except Exception as e:
                 self.error_handler.handle_error(
                     exception=e,
                     category=ErrorCategory.FILESYSTEM,
-                    context={"module_path": mod_path, "operation": "load_details"},
+                    context=ErrorContext(
+                        file_path=mod_path,
+                        operation="load_details"
+                    ),
                 )
                 self.notification_system.show_error(
                     "加载失败", f"加载模组详情时发生错误: {e}"
@@ -888,7 +891,10 @@ class ModManager(ScrollArea):
             self.error_handler.handle_error(
                 exception=e,
                 category=ErrorCategory.SYSTEM,
-                context={"module_name": module_name, "operation": "start_workflow"},
+                context=ErrorContext(
+                    module_name=module_name,
+                    operation="start_workflow"
+                ),
             )
 
     # Bulk operation methods
@@ -988,9 +994,9 @@ class ModManager(ScrollArea):
         action_type: str,
         affected_modules: List[str],
         additional_data: Optional[Dict[str, Any]] = None,
-    ):
+    ) -> None:
         """Save current state for undo functionality"""
-        state = {
+        state: Dict[str, Any] = {
             "action_type": action_type,
             "affected_modules": affected_modules,
             "timestamp": time.time(),
@@ -1054,7 +1060,10 @@ class ModManager(ScrollArea):
             self.error_handler.handle_error(
                 exception=e,
                 category=ErrorCategory.SYSTEM,
-                context={"operation": "undo", "action_type": state["action_type"]},
+                context=ErrorContext(
+                    operation="undo",
+                    additional_data={"action_type": state["action_type"]}
+                ),
             )
 
         # Update UI
@@ -1093,7 +1102,10 @@ class ModManager(ScrollArea):
             self.error_handler.handle_error(
                 exception=e,
                 category=ErrorCategory.SYSTEM,
-                context={"operation": "redo", "action_type": state["action_type"]},
+                context=ErrorContext(
+                    operation="redo",
+                    additional_data={"action_type": state["action_type"]}
+                ),
             )
 
         # Update UI
@@ -1121,7 +1133,10 @@ class ModManager(ScrollArea):
             self.error_handler.handle_error(
                 exception=e,
                 category=ErrorCategory.FILESYSTEM,
-                context={"module_name": module_name, "operation": "bulk_enable"},
+                context=ErrorContext(
+                    module_name=module_name,
+                    operation="bulk_enable"
+                ),
             )
         return False
 
@@ -1145,7 +1160,10 @@ class ModManager(ScrollArea):
             self.error_handler.handle_error(
                 exception=e,
                 category=ErrorCategory.FILESYSTEM,
-                context={"module_name": module_name, "operation": "bulk_disable"},
+                context=ErrorContext(
+                    module_name=module_name,
+                    operation="bulk_disable"
+                ),
             )
         return False
 
@@ -1158,12 +1176,16 @@ class ModManager(ScrollArea):
         """Handle bulk delete operation for a single module"""
         try:
             if module_name in self.mods:
-                return self.delete_mod(module_name)
+                self.delete_mod(module_name)
+                return True
         except Exception as e:
             self.error_handler.handle_error(
                 exception=e,
                 category=ErrorCategory.FILESYSTEM,
-                context={"module_name": module_name, "operation": "bulk_delete"},
+                context=ErrorContext(
+                    module_name=module_name,
+                    operation="bulk_delete"
+                ),
             )
         return False
 
@@ -1183,7 +1205,10 @@ class ModManager(ScrollArea):
             self.error_handler.handle_error(
                 exception=e,
                 category=ErrorCategory.VALIDATION,
-                context={"module_name": module_name, "operation": "bulk_validate"},
+                context=ErrorContext(
+                    module_name=module_name,
+                    operation="bulk_validate"
+                ),
             )
         return False
 
@@ -1215,7 +1240,7 @@ class ModManager(ScrollArea):
 
     def _on_bulk_operation_progress(
         self, operation_id: str, progress_data: Dict[str, Any]
-    ):
+    ) -> None:
         """Handle bulk operation progress updates"""
         if (
             hasattr(self, "current_bulk_operation")

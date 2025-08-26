@@ -25,7 +25,7 @@ class ModuleMetricsManager:
             self.module_metrics[module_name] = ModuleMetrics()
         return self.module_metrics[module_name]
 
-    def update_metrics(self, module_name: str, **kwargs) -> bool:
+    def update_metrics(self, module_name: str, **kwargs: Any) -> bool:
         """更新模块指标"""
         try:
             if module_name not in self.module_metrics:
@@ -82,7 +82,7 @@ class ModuleMetricsManager:
 
     def update_resource_usage(
         self, module_name: str, cpu_usage: float = 0.0, memory_usage: float = 0.0
-    ):
+    ) -> None:
         """更新资源使用情况"""
         self.update_metrics(module_name, cpu_usage=cpu_usage, memory_usage=memory_usage)
 

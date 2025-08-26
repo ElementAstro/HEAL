@@ -3,7 +3,7 @@
 提供实时进程状态显示、控制和监控功能
 """
 
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QFont
@@ -52,7 +52,7 @@ class ProcessStatusCard(CardWidget):
     stop_requested = Signal(str)  # process_name
     log_requested = Signal(str)  # process_name
 
-    def __init__(self, process_info: ProcessInfo, parent=None) -> None:
+    def __init__(self, process_info: ProcessInfo, parent: Any = None) -> None:
         super().__init__(parent)
         self.process_info = process_info
         logger.debug(f"创建进程状态卡片: {process_info.name}")
@@ -134,7 +134,7 @@ class ProcessStatusCard(CardWidget):
             ProcessStatus.RUNNING: "运行中",
             ProcessStatus.STOPPING: "停止中",
             ProcessStatus.CRASHED: "已崩溃",
-            ProcessStatus.UNKNOWN: "未知",
+            ProcessStatus.ERROR: "错误",
         }.get(process_info.status, "未知")
 
         status_color = {
@@ -143,7 +143,7 @@ class ProcessStatusCard(CardWidget):
             ProcessStatus.RUNNING: "#00AA00",
             ProcessStatus.STOPPING: "#FFA500",
             ProcessStatus.CRASHED: "#FF0000",
-            ProcessStatus.UNKNOWN: "#666666",
+            ProcessStatus.ERROR: "#FF0000",
         }.get(process_info.status, "#666666")
 
         self.status_label.setText(status_text)
@@ -158,7 +158,7 @@ class ProcessStatusCard(CardWidget):
         if process_info.start_time:
             import time
 
-            uptime = time.time() - process_info.start_time.timestamp()
+            uptime = time.time() - process_info.start_time
             hours = int(uptime // 3600)
             minutes = int((uptime % 3600) // 60)
             self.uptime_label.setText(f"运行时间: {hours:02d}:{minutes:02d}")
@@ -193,7 +193,7 @@ class ProcessMonitorWidget(QWidget):
     process_stopped = Signal(str)
     process_restarted = Signal(str)
 
-    def __init__(self, process_manager: ProcessManager, parent=None) -> None:
+    def __init__(self, process_manager: ProcessManager, parent: Any = None) -> None:
         super().__init__(parent)
         self.process_manager = process_manager
         self.process_cards: Dict[str, ProcessStatusCard] = {}

@@ -38,7 +38,7 @@ class FeaturedDownloadCard(CardWidget):
     download_requested = Signal(str, str, str)  # name, url, category
     favorite_toggled = Signal(str, bool)  # name, is_favorited
 
-    def __init__(self, item_data: Dict[str, Any], parent=None) -> None:
+    def __init__(self, item_data: Dict[str, Any], parent: Any = None) -> None:
         super().__init__(parent)
         self.item_data = item_data
         self.is_favorited = False
@@ -146,7 +146,7 @@ class FeaturedDownloadCard(CardWidget):
         # Set the layout to the CardWidget
         self.setLayout(layout)
 
-    def _resolve_icon(self, icon_name: str) -> None:
+    def _resolve_icon(self, icon_name: str) -> Any:
         """Resolve icon from name"""
         if icon_name.startswith("FIF."):
             return getattr(FluentIcon, icon_name[4:], FluentIcon.DOWNLOAD)
@@ -201,7 +201,7 @@ class FeaturedDownloadsSection(CardWidget):
     favorite_toggled = Signal(str, bool)  # name, is_favorited
     view_all_requested = Signal()  # User wants to see all downloads
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = get_logger(
             "featured_downloads_section", module="FeaturedDownloadsSection"

@@ -84,17 +84,17 @@ class HomeLayoutManager:
     def create_compact_banner(self) -> CompactBannerWidget:
         """创建紧凑横幅组件"""
         self.compact_banner = CompactBannerWidget(self.parent)
-        return self.compact_banner
+        return self.compact_banner  # type: ignore[no-any-return]
 
     def create_status_overview(self) -> StatusOverviewWidget:
         """创建状态概览组件"""
         self.status_overview = StatusOverviewWidget(self.parent)
-        return self.status_overview
+        return self.status_overview  # type: ignore[no-any-return]
 
     def create_quick_action_bar(self) -> QuickActionBar:
         """创建快速操作栏"""
         self.quick_action_bar = QuickActionBar(self.parent)
-        return self.quick_action_bar
+        return self.quick_action_bar  # type: ignore[no-any-return]
 
     def create_server_status_cards(
         self, server_configs: Dict[str, Any]

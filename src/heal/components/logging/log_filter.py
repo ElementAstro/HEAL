@@ -301,7 +301,7 @@ class LogFilter(CardWidget):
             check.setChecked(False)
         self._update_level_filter()
 
-    def _set_quick_time(self, **kwargs) -> None:
+    def _set_quick_time(self, **kwargs: Any) -> None:
         """设置快速时间范围"""
         end_time = QDateTime.currentDateTime()
         start_time = end_time.addSecs(-timedelta(**kwargs).total_seconds())

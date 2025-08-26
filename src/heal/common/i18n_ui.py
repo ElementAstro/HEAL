@@ -37,10 +37,10 @@ class I18nWidget(QObject):
         translation_manager.language_changed.connect(self.on_language_changed)
 
     def register_element(
-        self, element: QWidget, key: str, property_name: str = "text", **kwargs
-    ):
+        self, element: QWidget, key: str, property_name: str = "text", **kwargs: Any
+    ) -> None:
         """注册需要国际化的UI元素"""
-        element_id = id(element)
+        element_id = str(id(element))
         self.i18n_elements[element_id] = {
             "element": element,
             "key": key,
@@ -52,14 +52,14 @@ class I18nWidget(QObject):
         self._apply_translation(element_id)
 
     def register_text(
-        self, element: Union[QLabel, QPushButton, PushButton], key: str, **kwargs
-    ):
+        self, element: Union[QLabel, QPushButton, PushButton], key: str, **kwargs: Any
+    ) -> None:
         """注册文本元素（标签、按钮等）"""
         self.register_element(element, key, "setText", **kwargs)
 
     def register_placeholder(
-        self, element: Union[QLineEdit, LineEdit, TextEdit], key: str, **kwargs
-    ):
+        self, element: Union[QLineEdit, LineEdit, TextEdit], key: str, **kwargs: Any
+    ) -> None:
         """注册占位符文本"""
         self.register_element(element, key, "setPlaceholderText", **kwargs)
 
@@ -105,7 +105,7 @@ class I18nHelper:
         return I18nWidget(widget)
 
     @staticmethod
-    def create_translated_button(key: str, icon=None, **kwargs) -> PushButton:
+    def create_translated_button(key: str, icon: Any = None, **kwargs: Any) -> PushButton:
         """创建已翻译的按钮"""
         text = tr(key, **kwargs)
         if icon:
@@ -114,7 +114,7 @@ class I18nHelper:
 
     @staticmethod
     def create_translated_primary_button(
-        key: str, icon=None, **kwargs
+        key: str, icon: Any = None, **kwargs: Any
     ) -> PrimaryPushButton:
         """创建已翻译的主要按钮"""
         text = tr(key, **kwargs)
@@ -123,7 +123,7 @@ class I18nHelper:
         return PrimaryPushButton(text)
 
     @staticmethod
-    def create_translated_label(key: str, label_type: str = "body", **kwargs) -> QLabel:
+    def create_translated_label(key: str, label_type: str = "body", **kwargs: Any) -> QLabel:
         """创建已翻译的标签"""
         text = tr(key, **kwargs)
 
@@ -138,7 +138,7 @@ class I18nHelper:
         return label_class(text)
 
     @staticmethod
-    def create_translated_line_edit(placeholder_key: str, **kwargs) -> LineEdit:
+    def create_translated_line_edit(placeholder_key: str, **kwargs: Any) -> LineEdit:
         """创建已翻译占位符的输入框"""
         line_edit = LineEdit()
         placeholder_text = tr(placeholder_key, **kwargs)
@@ -152,7 +152,7 @@ def setup_component_i18n(widget: QWidget) -> I18nWidget:
 
 
 def tr_button(
-    key: str, icon=None, primary: bool = False, **kwargs
+    key: str, icon: Any = None, primary: bool = False, **kwargs: Any
 ) -> Union[PushButton, PrimaryPushButton]:
     """创建翻译按钮的便捷函数"""
     if primary:
@@ -160,12 +160,12 @@ def tr_button(
     return I18nHelper.create_translated_button(key, icon, **kwargs)
 
 
-def tr_label(key: str, label_type: str = "body", **kwargs) -> QLabel:
+def tr_label(key: str, label_type: str = "body", **kwargs: Any) -> QLabel:
     """创建翻译标签的便捷函数"""
     return I18nHelper.create_translated_label(key, label_type, **kwargs)
 
 
-def tr_line_edit(placeholder_key: str, **kwargs) -> LineEdit:
+def tr_line_edit(placeholder_key: str, **kwargs: Any) -> LineEdit:
     """创建翻译输入框的便捷函数"""
     return I18nHelper.create_translated_line_edit(placeholder_key, **kwargs)
 

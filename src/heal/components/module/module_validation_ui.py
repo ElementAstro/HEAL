@@ -234,7 +234,7 @@ class ModuleValidator:
 class ValidationIssueWidget(CardWidget):
     """验证问题显示组件"""
 
-    def __init__(self, issue: ValidationIssue, parent=None) -> None:
+    def __init__(self, issue: ValidationIssue, parent: Any = None) -> None:
         super().__init__(parent)
         self.issue = issue
         self._setup_ui()
@@ -307,7 +307,7 @@ class ValidationIssueWidget(CardWidget):
 class ValidationReportWidget(QScrollArea):
     """验证报告显示组件"""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.setWidgetResizable(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -499,7 +499,7 @@ class ValidationReportWidget(QScrollArea):
 
     def _populate_metadata_tree(
         self, tree: QTreeWidget, data: Any, parent: Optional[QTreeWidgetItem] = None
-    ):
+    ) -> None:
         """填充元数据树"""
         if isinstance(data, dict):
             for key, value in data.items():
@@ -533,7 +533,7 @@ class ModuleValidationUI(QWidget):
     # 信号
     validation_requested = Signal(str, str)  # module_path, validation_level
 
-    def __init__(self, validator: Optional[ModuleValidator] = None, parent=None) -> None:
+    def __init__(self, validator: Optional[ModuleValidator] = None, parent: Any = None) -> None:
         super().__init__(parent)
         self.validator = validator or ModuleValidator()
         self.current_validation_report: Optional[ModuleValidationReport] = None

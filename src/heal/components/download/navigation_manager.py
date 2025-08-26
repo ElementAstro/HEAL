@@ -31,7 +31,7 @@ class DownloadNavigationManager(QObject):
         self.stacked_widget: QStackedWidget | None = None
         self.section_widgets: List[SettingCardGroup] = []
 
-    def init_navigation_components(self, pivot_class) -> tuple:
+    def init_navigation_components(self, pivot_class: Any) -> tuple:
         """初始化导航组件"""
         self.pivot = pivot_class(self.parent_widget)
         self.stacked_widget = QStackedWidget(self.parent_widget)
@@ -42,7 +42,7 @@ class DownloadNavigationManager(QObject):
         self,
         section_widgets: List[SettingCardGroup],
         sections_data: List[Dict[str, Any]],
-    ):
+    ) -> None:
         """设置所有部分"""
         self.section_widgets = section_widgets
 
@@ -62,8 +62,8 @@ class DownloadNavigationManager(QObject):
             )
 
     def add_sub_interface(
-        self, widget: QWidget, object_name: str, text: str, icon=None
-    ):
+        self, widget: QWidget, object_name: str, text: str, icon: Any = None
+    ) -> None:
         """添加子界面"""
         widget.setObjectName(object_name)
         if self.stacked_widget:
@@ -122,7 +122,7 @@ class DownloadNavigationManager(QObject):
     def get_current_index(self) -> int:
         """获取当前索引"""
         if self.stacked_widget:
-            return self.stacked_widget.currentIndex()
+            return int(self.stacked_widget.currentIndex())
         return -1
 
     def get_current_widget(self) -> QWidget:
@@ -132,8 +132,8 @@ class DownloadNavigationManager(QObject):
         return None
 
     def setup_layout(
-        self, vbox_layout: QVBoxLayout, refresh_button, search_components: tuple
-    ):
+        self, vbox_layout: QVBoxLayout, refresh_button: Any, search_components: tuple
+    ) -> None:
         """设置布局"""
         search_box, search_button, toggle_search_button, combo_box = search_components
 

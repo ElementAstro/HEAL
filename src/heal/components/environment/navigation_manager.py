@@ -117,5 +117,5 @@ class EnvironmentNavigationManager(QObject):
     def get_current_index(self) -> int:
         """获取当前索引"""
         if self.stacked_widget:
-            return self.stacked_widget.currentIndex()
+            return int(self.stacked_widget.currentIndex())
         return -1

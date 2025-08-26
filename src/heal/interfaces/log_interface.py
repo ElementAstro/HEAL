@@ -4,7 +4,7 @@
 提供完整的日志查看、过滤、导出和管理功能
 """
 
-from typing import Optional
+from typing import Any, Optional
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QVBoxLayout, QWidget
@@ -113,13 +113,13 @@ class LogManagement(ScrollArea):
         if hasattr(self, "log_interface") and self.log_interface:
             self.log_interface.show_network_log(request_type)
 
-    def get_log_panel(self) -> None:
+    def get_log_panel(self) -> Any:
         """获取日志面板实例"""
         if hasattr(self, "log_interface") and self.log_interface:
             return self.log_interface.get_log_panel()
         return None
 
-    def get_integration_manager(self) -> None:
+    def get_integration_manager(self) -> Any:
         """获取集成管理器实例"""
         if hasattr(self, "log_interface") and self.log_interface:
             return self.log_interface.get_integration_manager()

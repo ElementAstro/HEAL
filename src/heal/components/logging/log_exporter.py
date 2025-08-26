@@ -404,7 +404,7 @@ class LogExporter(CardWidget):
             "json": "JSON文件 (*.json)",
         }
 
-        file_filter = format_map.get(self.export_config["format"], "所有文件 (*.*)")
+        file_filter = format_map.get(str(self.export_config["format"]), "所有文件 (*.*)")
 
         file_path, _ = QFileDialog.getSaveFileName(
             self, "选择导出文件", "", file_filter

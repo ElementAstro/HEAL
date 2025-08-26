@@ -93,7 +93,7 @@ class ToastNotification(QFrame):
     dismissed = Signal(str)  # notification_id
     action_clicked = Signal(str, str)  # notification_id, action_id
 
-    def __init__(self, notification: Notification, parent=None) -> None:
+    def __init__(self, notification: Notification, parent: Optional[Any] = None) -> None:
         super().__init__(parent)
         self.notification = notification
         self.setup_ui()
@@ -261,7 +261,7 @@ class ModuleNotificationSystem(QObject):
     notification_read = Signal(str)  # notification_id
     action_executed = Signal(str, str)  # notification_id, action_id
 
-    def __init__(self, parent_widget: QWidget, parent=None) -> None:
+    def __init__(self, parent_widget: QWidget, parent: Optional[Any] = None) -> None:
         super().__init__(parent)
         self.logger = logger.bind(component="ModuleNotificationSystem")
         self.parent_widget = parent_widget
@@ -298,7 +298,7 @@ class ModuleNotificationSystem(QObject):
         self.action_handlers[action_id] = handler
         self.logger.debug(f"Registered action handler: {action_id}")
 
-    def show_info(self, title: str, message: str, **kwargs) -> str:
+    def show_info(self, title: str, message: str, **kwargs: Any) -> str:
         """Show info notification"""
         return self.add_notification(
             title=title,
@@ -307,7 +307,7 @@ class ModuleNotificationSystem(QObject):
             **kwargs,
         )
 
-    def show_success(self, title: str, message: str, **kwargs) -> str:
+    def show_success(self, title: str, message: str, **kwargs: Any) -> str:
         """Show success notification"""
         return self.add_notification(
             title=title,
@@ -316,7 +316,7 @@ class ModuleNotificationSystem(QObject):
             **kwargs,
         )
 
-    def show_warning(self, title: str, message: str, **kwargs) -> str:
+    def show_warning(self, title: str, message: str, **kwargs: Any) -> str:
         """Show warning notification"""
         return self.add_notification(
             title=title,
@@ -325,7 +325,7 @@ class ModuleNotificationSystem(QObject):
             **kwargs,
         )
 
-    def show_error(self, title: str, message: str, **kwargs) -> str:
+    def show_error(self, title: str, message: str, **kwargs: Any) -> str:
         """Show error notification"""
         return self.add_notification(
             title=title,
@@ -336,7 +336,7 @@ class ModuleNotificationSystem(QObject):
         )
 
     def show_progress(
-        self, title: str, message: str, progress: float = 0, **kwargs
+        self, title: str, message: str, progress: float = 0, **kwargs: Any
     ) -> str:
         """Show progress notification"""
         return self.add_notification(
@@ -358,7 +358,7 @@ class ModuleNotificationSystem(QObject):
         module_name: Optional[str] = None,
         category: Optional[str] = None,
         actions: Optional[List[NotificationAction]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> str:
         """Add a new notification"""
 
@@ -397,7 +397,7 @@ class ModuleNotificationSystem(QObject):
 
     def update_progress(
         self, notification_id: str, progress: float, message: Optional[str] = None
-    ):
+    ) -> None:
         """Update progress notification"""
         if notification_id not in self.notifications:
             return

@@ -207,7 +207,7 @@ class DownloadHandler(QObject):
         """执行下载"""
         x = MessageDownload(self.parent_widget)
         x.show()
-        x.start_download(types, command, file_path, "")
+        x.start_download(types, command, file_path, False)
 
         if x.exec():
             self._show_success_message()

@@ -14,6 +14,9 @@ Modules:
     i18n: Internationalization and localization support
     cache_manager: Intelligent caching system for performance
     performance_analyzer: Application performance monitoring
+    memory_optimizer: Memory optimization and object pooling
+    workflow_optimizer: Complex workflow optimization
+    optimization_validator: Performance validation and testing
     signal_bus: Global signal communication system
     ui_utils: Common UI utilities and helpers
 
@@ -49,11 +52,14 @@ from .i18n_updater import I18nUpdater
 # Utilities
 from .json_utils import JsonUtils
 from .logging_config import get_logger, setup_logging
+from .memory_optimizer import MemoryOptimizer, create_object_pool, optimize_memory
+from .optimization_validator import OptimizationValidator, benchmark_function, validate_optimization
 from .performance_analyzer import PerformanceAnalyzer
 from .resource_manager import cleanup_on_exit, resource_manager
 from .signal_bus import signalBus
 from .signal_utils import SignalManager, SignalConnection, ConnectionType
-from .ui_utils import UIComponentManager
+from .ui_utils import UIComponentManager, create_responsive_operation, batch_ui_update
+from .workflow_optimizer import WorkflowOptimizer, create_workflow, execute_workflow
 
 __all__: list[str] = [
     # Core infrastructure
@@ -75,8 +81,20 @@ __all__: list[str] = [
     "JsonUtils",
     "AsyncIOUtils",
     "CacheManager",
+    "MemoryOptimizer",
+    "OptimizationValidator",
     "PerformanceAnalyzer",
+    "WorkflowOptimizer",
     "signalBus",
     "SignalUtils",
     "UIUtils",
+    # Optimization functions
+    "create_object_pool",
+    "optimize_memory",
+    "benchmark_function",
+    "validate_optimization",
+    "create_workflow",
+    "execute_workflow",
+    "create_responsive_operation",
+    "batch_ui_update",
 ]

@@ -28,7 +28,7 @@ class ModuleOperationHandler(QObject):
         event_manager: ModuleEventManager,
         config_manager: ModuleConfigManager,
         metrics_manager: ModuleMetricsManager,
-        parent=None,
+        parent: Any = None,
     ) -> None:
         super().__init__(parent)
 
@@ -49,7 +49,7 @@ class ModuleOperationHandler(QObject):
         self.module_states: Dict[str, ModuleState] = {}
         self._state_lock = threading.Lock()  # 状态操作锁
 
-    def handle_operation(self, operation: str, module_name: str, **kwargs) -> None:
+    def handle_operation(self, operation: str, module_name: str, **kwargs: Any) -> None:
         """处理模块操作请求 - 线程安全版本"""
         try:
             self.logger.info(f"处理操作请求: {operation} for {module_name}")
@@ -176,7 +176,7 @@ class ModuleOperationHandler(QObject):
             self.event_manager.emit_module_error(module_name, str(e))
             return False
 
-    def _unload_module(self, module_name: str, **kwargs) -> bool:
+    def _unload_module(self, module_name: str, **kwargs: Any) -> bool:
         """卸载模块"""
         try:
             # 检查模块状态
@@ -203,7 +203,7 @@ class ModuleOperationHandler(QObject):
             self.event_manager.emit_module_error(module_name, str(e))
             return False
 
-    def _reload_module(self, module_name: str, **kwargs) -> bool:
+    def _reload_module(self, module_name: str, **kwargs: Any) -> bool:
         """重新加载模块"""
         try:
             # 先卸载再加载
@@ -215,7 +215,7 @@ class ModuleOperationHandler(QObject):
             self.logger.error(f"重新加载模块 {module_name} 失败: {e}")
             return False
 
-    def _validate_module(self, module_name: str, **kwargs) -> bool:
+    def _validate_module(self, module_name: str, **kwargs: Any) -> bool:
         """验证模块"""
         try:
             # 获取配置

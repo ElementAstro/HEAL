@@ -5,7 +5,7 @@ Handles MongoDB operations and management
 
 import subprocess
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtWidgets import QWidget
@@ -65,7 +65,7 @@ class EnvironmentDatabaseManager(QObject):
         else:
             self._show_database_not_found_error()
 
-    def _show_database_not_found_error(self) -> None:
+    def _show_database_not_found_error(self) -> Any:
         """显示数据库未找到错误"""
         file_error = InfoBar(
             icon=InfoBarIcon.ERROR,

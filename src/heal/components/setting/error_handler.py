@@ -75,7 +75,7 @@ class SettingsValidator:
 
     def register_validation_rule(
         self, setting_key: str, validator: Callable[[Any], bool]
-    ):
+    ) -> None:
         """Register a validation rule for a setting"""
         self.validation_rules[setting_key] = validator
         self.logger.debug(f"Registered validation rule for: {setting_key}")
@@ -87,7 +87,7 @@ class SettingsValidator:
             return True  # No validation rule, assume valid
 
         try:
-            return validator(value)
+            return bool(validator(value))
         except Exception as e:
             self.logger.error(f"Validation error for {setting_key}: {e}")
             return False
@@ -162,10 +162,11 @@ class SettingsBackupManager:
                 backup_file = Path(backup_path)
             else:
                 # Find latest backup
-                backup_file = self._find_latest_backup(source_path.stem)
-                if not backup_file:
+                backup_file_result = self._find_latest_backup(source_path.stem)
+                if not backup_file_result:
                     self.logger.warning(f"No backup found for {file_path}")
                     return False
+                backup_file = backup_file_result
 
             if not backup_file.exists():
                 self.logger.error(f"Backup file not found: {backup_file}")
@@ -219,7 +220,7 @@ class SettingsErrorHandler(QObject):
     recovery_attempted = Signal(str, str)  # error_id, action
     recovery_completed = Signal(str, bool)  # error_id, success
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = get_logger(
             "settings_error_handler", module="SettingsErrorHandler"
@@ -272,7 +273,7 @@ class SettingsErrorHandler(QObject):
         self,
         operation: str,
         error: Exception,
-        context: Dict[str, Any] = None,
+        context: Optional[Dict[str, Any]] = None,
         severity: ErrorSeverity = ErrorSeverity.MEDIUM,
     ) -> Optional[Any]:
         """Handle an error with automatic recovery"""
@@ -453,13 +454,13 @@ class SettingsErrorHandler(QObject):
 def settings_error_handler(
     operation: str,
     severity: ErrorSeverity = ErrorSeverity.MEDIUM,
-    context: Dict[str, Any] = None,
-):
+    context: Optional[Dict[str, Any]] = None,
+) -> Any:
     """Decorator for automatic error handling in settings operations"""
 
-    def decorator(func: Any) -> None:
+    def decorator(func: Any) -> Any:
         @wraps(func)
-        def wrapper(*args, **kwargs: Any) -> None:
+        def wrapper(*args, **kwargs: Any) -> Any:
             try:
                 return func(*args, **kwargs)
             except Exception as e:

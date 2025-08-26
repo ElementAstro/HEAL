@@ -119,7 +119,7 @@ class PerformanceMonitor:
     def get_module_details(self, module_name: str) -> Dict[str, Any]:
         """获取模块详细信息"""
         if module_name in self.modules_data:
-            details = self.modules_data[module_name].copy()
+            details: Dict[str, Any] = self.modules_data[module_name].copy()
             details.update(
                 {
                     "uptime": f"{details.get('uptime', 0):.1f} seconds",
@@ -196,7 +196,7 @@ class PerformanceMonitor:
 class PerformanceChartWidget:
     """Real-time chart widget for performance metrics"""
 
-    def __init__(self, parent, title: str, ylabel: str, max_points: int = 50) -> None:
+    def __init__(self, parent: Any, title: str, ylabel: str, max_points: int = 50) -> None:
         self.parent = parent
         self.title = title
         self.ylabel = ylabel
@@ -274,7 +274,7 @@ class PerformanceChartWidget:
 class MetricsDisplayWidget:
     """Widget for displaying current metrics values"""
 
-    def __init__(self, parent) -> None:
+    def __init__(self, parent: Any) -> None:
         self.parent = parent
         self.frame = ttk.LabelFrame(parent, text="Current Metrics", padding=10)
         self.frame.pack(fill=tk.X, padx=5, pady=5)
@@ -330,7 +330,7 @@ class MetricsDisplayWidget:
 class AlertsWidget:
     """Widget for displaying performance alerts"""
 
-    def __init__(self, parent) -> None:
+    def __init__(self, parent: Any) -> None:
         self.parent = parent
         self.frame = ttk.LabelFrame(parent, text="Performance Alerts", padding=10)
         self.frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
@@ -391,7 +391,7 @@ class AlertsWidget:
 class PerformanceDashboardUI:
     """Main Performance Dashboard UI Component"""
 
-    def __init__(self, parent, performance_monitor: PerformanceMonitor) -> None:
+    def __init__(self, parent: Any, performance_monitor: PerformanceMonitor) -> None:
         self.parent = parent
         self.performance_monitor = performance_monitor
         self.update_thread: Any = None
@@ -607,29 +607,70 @@ class PerformanceDashboardUI:
                 time.sleep(1.0)
 
     def update_ui(self) -> None:
-        """Update UI with queued data"""
+        """Update UI with queued data - 优化批处理"""
         try:
-            # Process all queued updates
-            while not self.update_queue.empty():
-                update = self.update_queue.get_nowait()
+            # 批量处理更新以提高性能
+            updates_to_process = []
+            batch_size = 10  # 每次处理10个更新
+
+            # 收集待处理的更新
+            for _ in range(batch_size):
+                try:
+                    update = self.update_queue.get_nowait()
+                    updates_to_process.append(update)
+                except queue.Empty:
+                    break
+
+            # 按类型分组处理更新
+            metrics_updates = []
+            system_info_updates = []
+            alert_updates = []
+
+            for update in updates_to_process:
                 update_type = update["type"]
                 data = update["data"]
 
                 if update_type == "metrics":
-                    self.update_metrics_display(data)
+                    metrics_updates.append(data)
                 elif update_type == "system_info":
-                    self.update_system_info(data)
+                    system_info_updates.append(data)
                 elif update_type == "alert":
-                    self.alerts_widget.add_alert(data)
+                    alert_updates.append(data)
+
+            # 批量更新UI
+            if metrics_updates:
+                self._batch_update_metrics(metrics_updates)
+            if system_info_updates:
+                self._batch_update_system_info(system_info_updates)
+            if alert_updates:
+                self._batch_update_alerts(alert_updates)
 
             # Schedule next update
             self.parent.after(500, self.update_ui)
 
-        except queue.Empty:
-            self.parent.after(500, self.update_ui)
         except Exception as e:
             logger.error(f"Error updating UI: {e}")
             self.parent.after(1000, self.update_ui)
+
+    def _batch_update_metrics(self, metrics_list: List[Any]) -> None:
+        """批量更新指标显示"""
+        # 只使用最新的指标数据
+        if metrics_list:
+            latest_metrics = metrics_list[-1]
+            self.update_metrics_display(latest_metrics)
+
+    def _batch_update_system_info(self, system_info_list: List[Any]) -> None:
+        """批量更新系统信息"""
+        # 只使用最新的系统信息
+        if system_info_list:
+            latest_info = system_info_list[-1]
+            self.update_system_info(latest_info)
+
+    def _batch_update_alerts(self, alert_list: List[Any]) -> None:
+        """批量更新警报"""
+        # 处理所有警报，但限制数量
+        for alert in alert_list[-5:]:  # 只显示最近5个警报
+            self.alerts_widget.add_alert(alert)
 
     def update_metrics_display(self, metrics: Dict[str, Any]) -> None:
         """Update metrics display and charts"""
@@ -699,7 +740,7 @@ class PerformanceDashboardUI:
         except Exception as e:
             logger.error(f"Error updating modules tree: {e}")
 
-    def on_module_select(self, _) -> None:
+    def on_module_select(self, _: Any) -> None:
         """Handle module selection in tree"""
         try:
             selection = self.modules_tree.selection()
@@ -805,7 +846,7 @@ class PerformanceDashboardUI:
 
 
 def create_performance_dashboard(
-    parent, performance_monitor: PerformanceMonitor
+    parent: Any, performance_monitor: PerformanceMonitor
 ) -> PerformanceDashboardUI:
     """Create and return a performance dashboard UI component"""
     return PerformanceDashboardUI(parent, performance_monitor)

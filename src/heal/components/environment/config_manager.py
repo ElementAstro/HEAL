@@ -33,7 +33,7 @@ class EnvironmentConfigManager(QObject):
 
     def load_download_config(self) -> List[SettingCard]:
         """加载下载配置 - 使用统一JSON工具"""
-        cards = []
+        cards: List[SettingCard] = []
 
         # 使用统一的JSON加载工具
         result = JsonUtils.load_json_file(

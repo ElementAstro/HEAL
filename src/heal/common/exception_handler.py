@@ -566,7 +566,7 @@ def safe_execute(func: Callable[..., Any], *args: Any, default_return: Any = Non
 
 
 # 常用异常处理装饰器
-def network_exception_handler(func: Any) -> None:
+def network_exception_handler(func: Any) -> Any:
     return exception_handler(
         exc_type=ExceptionType.NETWORK_ERROR,
         severity=ExceptionSeverity.MEDIUM,
@@ -576,7 +576,7 @@ def network_exception_handler(func: Any) -> None:
     )(func)
 
 
-def file_exception_handler(func: Any) -> None:
+def file_exception_handler(func: Any) -> Any:
     return exception_handler(
         exc_type=ExceptionType.FILE_ERROR,
         severity=ExceptionSeverity.MEDIUM,
@@ -585,7 +585,7 @@ def file_exception_handler(func: Any) -> None:
     )(func)
 
 
-def process_exception_handler(func: Any) -> None:
+def process_exception_handler(func: Any) -> Any:
     return exception_handler(
         exc_type=ExceptionType.PROCESS_ERROR,
         severity=ExceptionSeverity.HIGH,
@@ -594,7 +594,7 @@ def process_exception_handler(func: Any) -> None:
     )(func)
 
 
-def download_exception_handler(func: Any) -> None:
+def download_exception_handler(func: Any) -> Any:
     return exception_handler(
         exc_type=ExceptionType.DOWNLOAD_ERROR,
         severity=ExceptionSeverity.MEDIUM,

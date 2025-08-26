@@ -19,3 +19,4 @@ modules/
 *.log
 .mypy_cache/
 logs/
+venv/

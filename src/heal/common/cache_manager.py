@@ -90,15 +90,18 @@ class LRUCache:
 
             if entry is None:
                 self.stats.misses += 1
+                self._record_cache_stats()
                 return None
 
             if entry.is_expired():
                 self._remove_entry(key)
                 self.stats.misses += 1
+                self._record_cache_stats()
                 return None
 
             entry.touch()
             self.stats.hits += 1
+            self._record_cache_stats()
             return entry.value
 
     @profile_performance(threshold=0.001)
@@ -166,6 +169,13 @@ class LRUCache:
             if expired_keys:
                 self.logger.debug(f"清理了 {len(expired_keys)} 个过期缓存条目")
 
+                # 记录内存优化统计
+                try:
+                    from .memory_optimizer import global_memory_optimizer
+                    global_memory_optimizer.monitor.get_memory_stats()
+                except ImportError:
+                    pass
+
             return len(expired_keys)
 
     def _remove_entry(self, key: str) -> None:
@@ -177,15 +187,23 @@ class LRUCache:
             self.stats.evictions += 1
 
     def _ensure_capacity(self, new_size: int) -> None:
-        """确保有足够的容量"""
+        """确保有足够的容量 - 优化版本"""
         # 检查数量限制
         while len(self.cache) >= self.max_size:
-            self._evict_lru()
+            if not self._evict_lru():
+                break
 
         # 检查内存限制
         while (self.stats.size_bytes + new_size) > self.max_memory_bytes:
             if not self._evict_lru():
-                break  # 无法释放更多空间
+                # 如果无法释放更多空间，尝试强制垃圾回收
+                import gc
+                collected = gc.collect()
+                self.logger.debug(f"强制垃圾回收释放了 {collected} 个对象")
+
+                # 再次尝试释放空间
+                if not self._evict_lru():
+                    break  # 无法释放更多空间
 
     def _evict_lru(self) -> bool:
         """驱逐最近最少使用的条目"""
@@ -202,6 +220,23 @@ class LRUCache:
         """获取缓存统计"""
         with self.lock:
             return self.stats.to_dict()
+
+    def _record_cache_stats(self) -> None:
+        """记录缓存统计到性能分析器"""
+        try:
+            # 导入性能分析器（避免循环导入）
+            from .performance_analyzer import global_performance_analyzer
+
+            # 记录缓存统计
+            cache_name = f"{self.__class__.__name__}_{id(self)}"
+            global_performance_analyzer.record_cache_stats(
+                cache_name,
+                self.stats.hits,
+                self.stats.misses
+            )
+        except ImportError:
+            # 如果性能分析器不可用，静默忽略
+            pass
 
 
 class FileCache(LRUCache):
@@ -240,6 +275,42 @@ class FileCache(LRUCache):
 
         except Exception as e:
             self.logger.error(f"读取文件失败 {file_path}: {e}")
+            return None
+
+    async def get_file_content_async(
+        self, file_path: Union[str, Path], encoding: str = "utf-8"
+    ) -> Optional[str]:
+        """异步获取文件内容（带缓存）"""
+        file_path = Path(file_path)
+
+        # 生成缓存键（包含文件路径和修改时间）
+        try:
+            mtime = file_path.stat().st_mtime
+            cache_key = f"file:{file_path}:{mtime}:{encoding}"
+        except OSError:
+            return None
+
+        # 尝试从缓存获取
+        content = self.get(cache_key)
+        if content is not None:
+            return str(content)
+
+        # 异步读取文件并缓存
+        try:
+            from .async_io_utils import global_async_file_manager
+            result = await global_async_file_manager.read_file_async(file_path, encoding)
+
+            if result.success and result.data is not None:
+                content = str(result.data)
+                # 缓存文件内容（1小时TTL）
+                self.put(cache_key, content, ttl=3600)
+                return content
+            else:
+                self.logger.error(f"异步读取文件失败 {file_path}: {result.error}")
+                return None
+
+        except Exception as e:
+            self.logger.error(f"异步读取文件失败 {file_path}: {e}")
             return None
 
 

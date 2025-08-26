@@ -240,7 +240,7 @@ class TouchFriendlyMixin:
     def make_touch_friendly(self) -> None:
         """Apply touch-friendly modifications"""
         # Increase minimum sizes for touch targets
-        if hasattr(self, "setMinimumSize"):
+        if hasattr(self, "setMinimumSize") and hasattr(self, "minimumSize"):
             current_size = self.minimumSize()
             touch_size = QSize(
                 max(current_size.width(), 44),  # 44px minimum for touch
@@ -249,7 +249,7 @@ class TouchFriendlyMixin:
             self.setMinimumSize(touch_size)
 
         # Add touch-friendly styling
-        if hasattr(self, "setStyleSheet"):
+        if hasattr(self, "setStyleSheet") and hasattr(self, "styleSheet"):
             current_style = self.styleSheet()
             touch_style = """
                 /* Touch-friendly padding and margins */

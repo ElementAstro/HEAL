@@ -3,6 +3,7 @@ UI Utilities - 统一UI组件初始化和管理工具
 消除项目中UI初始化的重复代码
 """
 
+import time
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from PySide6.QtCore import QObject, Qt, QTimer, Signal
@@ -55,8 +56,26 @@ class UIComponentManager(QObject):
 
         self.logger.debug("UI组件管理器已初始化")
 
+    def create_responsive_operation(
+        self,
+        operation_name: str,
+        operation_func: Callable,
+        progress_callback: Optional[Callable] = None,
+        completion_callback: Optional[Callable] = None,
+        error_callback: Optional[Callable] = None
+    ) -> 'ResponsiveOperation':
+        """创建响应式操作，防止UI阻塞"""
+        return ResponsiveOperation(
+            operation_name,
+            operation_func,
+            progress_callback,
+            completion_callback,
+            error_callback,
+            parent=self
+        )
+
     def create_layout(
-        self, layout_type: str, name: str, parent: Optional[QWidget] = None, **kwargs
+        self, layout_type: str, name: str, parent: Optional[QWidget] = None, **kwargs: Any
     ) -> object:
         """
         创建布局
@@ -448,3 +467,257 @@ def create_standard_splitter(
         orientation=orientation,
         stretch_factors=stretch_factors,
     )
+
+
+class ResponsiveOperation(QObject):
+    """响应式操作类 - 防止UI阻塞的操作包装器"""
+
+    # 信号
+    progress_updated = Signal(int)  # progress percentage
+    operation_completed = Signal(object)  # result
+    operation_failed = Signal(str)  # error message
+
+    def __init__(
+        self,
+        operation_name: str,
+        operation_func: Callable,
+        progress_callback: Optional[Callable] = None,
+        completion_callback: Optional[Callable] = None,
+        error_callback: Optional[Callable] = None,
+        parent: Optional[QObject] = None
+    ) -> None:
+        super().__init__(parent)
+        self.operation_name = operation_name
+        self.operation_func = operation_func
+        self.progress_callback = progress_callback
+        self.completion_callback = completion_callback
+        self.error_callback = error_callback
+        self.logger = logger.bind(component="ResponsiveOperation")
+
+        # 连接信号
+        if progress_callback:
+            self.progress_updated.connect(progress_callback)
+        if completion_callback:
+            self.operation_completed.connect(completion_callback)
+        if error_callback:
+            self.operation_failed.connect(error_callback)
+
+    def execute_async(self, *args: Any, **kwargs: Any) -> None:
+        """异步执行操作"""
+        from .performance_analyzer import global_performance_analyzer
+
+        # 记录UI响应时间
+        start_time = time.time()
+
+        def run_operation() -> None:
+            try:
+                result = self.operation_func(*args, **kwargs)
+                self.operation_completed.emit(result)
+
+                # 记录操作完成时间
+                execution_time = time.time() - start_time
+                global_performance_analyzer.record_ui_responsiveness(
+                    self.operation_name, execution_time
+                )
+
+            except Exception as e:
+                error_msg = f"操作失败: {e}"
+                self.logger.error(error_msg)
+                self.operation_failed.emit(error_msg)
+
+        # 使用QTimer延迟执行，保持UI响应
+        QTimer.singleShot(0, run_operation)
+
+    def execute_in_thread(self, *args: Any, **kwargs: Any) -> None:
+        """在后台线程中执行操作"""
+        from PySide6.QtCore import QThread
+
+        class WorkerThread(QThread):
+            def __init__(self, operation: Any, args: Any, kwargs: Any) -> None:
+                super().__init__()
+                self.operation = operation
+                self.args = args
+                self.kwargs = kwargs
+
+            def run(self) -> None:
+                try:
+                    result = self.operation.operation_func(*self.args, **self.kwargs)
+                    self.operation.operation_completed.emit(result)
+                except Exception as e:
+                    error_msg = f"后台操作失败: {e}"
+                    self.operation.logger.error(error_msg)
+                    self.operation.operation_failed.emit(error_msg)
+
+        worker = WorkerThread(self, args, kwargs)
+        worker.start()
+
+
+class UIBatchProcessor(QObject):
+    """UI批处理器 - 批量处理UI更新以提高性能"""
+
+    batch_processed = Signal(int)  # processed count
+
+    def __init__(self, batch_size: int = 50, delay_ms: int = 100, parent: Optional[QObject] = None) -> None:
+        super().__init__(parent)
+        self.batch_size = batch_size
+        self.delay_ms = delay_ms
+        self.pending_operations: List[Callable] = []
+        self.timer = QTimer()
+        self.timer.timeout.connect(self._process_batch)
+        self.timer.setSingleShot(True)
+        self.logger = logger.bind(component="UIBatchProcessor")
+
+    def add_operation(self, operation: Callable) -> None:
+        """添加操作到批处理队列"""
+        self.pending_operations.append(operation)
+
+        # 如果达到批处理大小或者定时器未启动，开始处理
+        if len(self.pending_operations) >= self.batch_size or not self.timer.isActive():
+            self.timer.start(self.delay_ms)
+
+    def _process_batch(self) -> None:
+        """处理批量操作"""
+        if not self.pending_operations:
+            return
+
+        processed_count = 0
+        operations_to_process = self.pending_operations[:self.batch_size]
+        self.pending_operations = self.pending_operations[self.batch_size:]
+
+        for operation in operations_to_process:
+            try:
+                operation()
+                processed_count += 1
+
+                # 每处理几个操作就让UI响应一下
+                if processed_count % 10 == 0:
+                    from PySide6.QtWidgets import QApplication
+                    QApplication.processEvents()
+
+            except Exception as e:
+                self.logger.error(f"批处理操作失败: {e}")
+
+        self.batch_processed.emit(processed_count)
+
+        # 如果还有待处理的操作，继续处理
+        if self.pending_operations:
+            self.timer.start(self.delay_ms)
+
+    def flush(self) -> None:
+        """立即处理所有待处理的操作"""
+        if self.timer.isActive():
+            self.timer.stop()
+        self._process_batch()
+
+
+# 全局UI优化实例
+global_ui_batch_processor = UIBatchProcessor()
+
+# 创建常用UI对象的对象池
+# Declare variables with proper types
+timer_pool: Optional[Any] = None
+label_pool: Optional[Any] = None
+button_pool: Optional[Any] = None
+
+try:
+    from .memory_optimizer import create_object_pool
+
+    # QTimer对象池
+    def create_timer() -> QTimer:
+        timer = QTimer()
+        timer.setSingleShot(True)
+        return timer
+
+    timer_pool = create_object_pool("ui_timers", create_timer, max_size=50)
+
+    # QLabel对象池
+    def create_label() -> QLabel:
+        return QLabel()
+
+    label_pool = create_object_pool("ui_labels", create_label, max_size=100)
+
+    # QPushButton对象池
+    def create_button() -> QPushButton:
+        return QPushButton()
+
+    button_pool = create_object_pool("ui_buttons", create_button, max_size=50)
+
+except ImportError:
+    # Variables already declared above
+    pass
+
+
+def batch_ui_update(operation: Callable) -> None:
+    """将UI更新操作添加到批处理队列"""
+    global_ui_batch_processor.add_operation(operation)
+
+
+def create_responsive_operation(
+    operation_name: str,
+    operation_func: Callable,
+    progress_callback: Optional[Callable] = None,
+    completion_callback: Optional[Callable] = None,
+    error_callback: Optional[Callable] = None
+) -> ResponsiveOperation:
+    """创建响应式操作的便捷函数"""
+    return ResponsiveOperation(
+        operation_name,
+        operation_func,
+        progress_callback,
+        completion_callback,
+        error_callback
+    )
+
+
+def get_pooled_timer() -> QTimer:
+    """从对象池获取QTimer"""
+    if timer_pool:
+        return timer_pool.acquire()
+    else:
+        timer = QTimer()
+        timer.setSingleShot(True)
+        return timer
+
+
+def return_pooled_timer(timer: QTimer) -> None:
+    """将QTimer返回到对象池"""
+    if timer_pool:
+        # 重置定时器状态
+        timer.stop()
+        timer.timeout.disconnect()
+        timer_pool.release(timer)
+
+
+def get_pooled_label() -> QLabel:
+    """从对象池获取QLabel"""
+    if label_pool:
+        return label_pool.acquire()
+    else:
+        return QLabel()
+
+
+def return_pooled_label(label: QLabel) -> None:
+    """将QLabel返回到对象池"""
+    if label_pool:
+        # 重置标签状态
+        label.clear()
+        label.setParent(None)
+        label_pool.release(label)
+
+
+def get_pooled_button() -> QPushButton:
+    """从对象池获取QPushButton"""
+    if button_pool:
+        return button_pool.acquire()
+    else:
+        return QPushButton()
+
+
+def return_pooled_button(button: QPushButton) -> None:
+    """将QPushButton返回到对象池"""
+    if button_pool:
+        # 重置按钮状态
+        button.setText("")
+        button.setParent(None)
+        button.clicked.disconnect()
+        button_pool.release(button)

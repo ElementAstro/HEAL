@@ -488,9 +488,9 @@ class DownloadManagerWidget(QWidget):
             self.status_label.setText(f"下载 {download_id} 已取消")
             # Card removal and InfoBar will be handled by on_download_cancelled via status change
             if download_id in self.download_cards:  # Ensure card still exists
-                self.download_cards[download_id].update_progress(
-                    self.download_manager.get_download_info(download_id)
-                )
+                download_info = self.download_manager.get_download_info(download_id)
+                if download_info:
+                    self.download_cards[download_id].update_progress(download_info)
 
         else:
             self.status_label.setText(f"取消下载 {download_id} 失败")

@@ -46,29 +46,32 @@ class Main(MSFluentWindow):
         self.init_application()
 
     def init_application(self) -> None:
-        """初始化应用程序"""
-        # 1. 初始化主题
-        self.theme_manager.init_theme()
+        """初始化应用程序 - 使用工作流优化"""
+        from src.heal.common.workflow_optimizer import create_workflow
 
-        # 2. 初始化主窗口
-        self.window_manager.init_main_window()
+        # 创建应用初始化工作流
+        workflow = create_workflow("main_app_initialization")
 
-        # 3. 初始化导航
-        self.navigation_manager.init_navigation()
+        # 添加初始化步骤
+        workflow.add_step("init_theme", self.theme_manager.init_theme)
+        workflow.add_step("init_window", self.window_manager.init_main_window, ["init_theme"])
+        workflow.add_step("init_navigation", self.navigation_manager.init_navigation, ["init_window"])
+        workflow.add_step("check_fonts", self.font_manager.handle_font_check, optional=True)
+        workflow.add_step("finish_splash", self.window_manager.finish_splash, ["init_navigation"])
+        workflow.add_step("connect_signals", self.connect_signals, ["init_navigation"])
+        workflow.add_step("initial_setup", self.handle_initial_setup, ["connect_signals"], optional=True)
 
-        # 4. 检查字体
-        self.font_manager.handle_font_check()
-
-        # 5. 完成启动画面
-        self.window_manager.finish_splash()
-
-        # 6. 连接信号
-        self.connect_signals()
-
-        # 7. 处理登录或音频
-        self.handle_initial_setup()
-
-        logger.info("应用程序初始化完成")
+        # 执行工作流
+        try:
+            result = workflow.execute()
+            if result["success"]:
+                logger.info(f"应用程序初始化完成，耗时 {result['total_time']:.2f}s")
+            else:
+                logger.warning(f"应用程序初始化部分失败: {result['failed_steps']}")
+        except Exception as e:
+            logger.error(f"应用程序初始化失败: {e}")
+            # 回退到传统初始化方式
+            self._fallback_initialization()
 
     def connect_signals(self) -> None:
         """连接所有信号"""
@@ -93,6 +96,22 @@ class Main(MSFluentWindow):
         )
 
         logger.debug("信号连接完成")
+
+    def _fallback_initialization(self) -> None:
+        """回退初始化方式"""
+        logger.info("使用传统初始化方式")
+        try:
+            self.theme_manager.init_theme()
+            self.window_manager.init_main_window()
+            self.navigation_manager.init_navigation()
+            self.font_manager.handle_font_check()
+            self.window_manager.finish_splash()
+            self.connect_signals()
+            self.handle_initial_setup()
+            logger.info("传统初始化完成")
+        except Exception as e:
+            logger.critical(f"传统初始化也失败: {e}")
+            raise
 
     def handle_initial_setup(self) -> None:
         """处理初始设置"""

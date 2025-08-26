@@ -11,7 +11,7 @@ from .config import Info, cfg
 
 
 class SubDownloadCMD(QDialog):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self._parent_widget = parent  # 避免与parent()方法冲突
 
@@ -34,7 +34,7 @@ class SubDownloadCMD(QDialog):
         self.viewLayout.addWidget(self.commandOutput)
         self.viewLayout.setContentsMargins(0, 0, 0, 0)
 
-    def handleDownloadStarted(self, name) -> None:
+    def handleDownloadStarted(self, name: Any) -> None:
         types, command, file_path = handleDownloadGenerate(name)
         if not os.path.exists(file_path):
             self.show()
@@ -50,10 +50,10 @@ class SubDownloadCMD(QDialog):
             Info(self._parent_widget, "E", 3000, self.tr("该目录已存在文件！"))
             subprocess.Popen("start " + file_path, shell=True)
 
-    def handleTextUpdate(self, text) -> None:
+    def handleTextUpdate(self, text: Any) -> None:
         self.commandOutput.appendPlainText(text)
 
-    def handleDownloadFinished(self, returncode, file_path) -> None:
+    def handleDownloadFinished(self, returncode: Any, file_path: Any) -> None:
         if returncode == 0:
             Info(self._parent_widget, "S", 2000, self.tr("下载成功！"))
             self.success = True
@@ -98,7 +98,7 @@ class CommandRunner(QThread):
     command_updated = Signal(str)
     download_finished = Signal(int, str)
 
-    def __init__(self, types, command, check) -> None:
+    def __init__(self, types: Any, command: Any, check: Any) -> None:
         super().__init__()
         self.types = types
         self.command = command
@@ -132,15 +132,15 @@ class CommandRunner(QThread):
 
 def __handleUrlGenerate(
     types: Any, repo_url: Any, mirror_url: Any, repo_branch: Any | None = None, mirror_branch: Any | None = None, is_add: bool = False
-) -> None:
+) -> str:
     if types == "url":
         file = os.path.join("temp", repo_url.split("/")[-1])
         url_cfg = f"curl -o {file} -L "
         if cfg.chinaStatus.value:
-            return url_cfg + mirror_url
+            return str(url_cfg) + str(mirror_url)
         elif cfg.proxyStatus.value:
             url_cfg = f"curl -x http://127.0.0.1:7890 -o {file} -L "
-        return url_cfg + repo_url
+        return str(url_cfg) + str(repo_url)
     elif types == "git":
         git_cfg = "git config --global core.longpaths true && git clone --progress "
         if not is_add:
@@ -158,7 +158,7 @@ def __handleUrlGenerate(
     return ""
 
 
-def handleDownloadGenerate(name: Any) -> None:
+def handleDownloadGenerate(name: Any) -> tuple[str, str, str]:
     types = ""
     command = ""
     file_path = ""

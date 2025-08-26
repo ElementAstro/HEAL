@@ -59,7 +59,7 @@ class JsonUtils:
             if not file_path.exists():
                 if create_if_missing and default_content is not None:
                     # 创建默认文件
-                    JsonUtils.save_json_file(file_path, default_content, encoding)  # type: ignore
+                    JsonUtils.save_json_file(file_path, default_content, encoding)
                     result.data = default_content
                     result.success = True
                     result.warnings.append(f"文件不存在，已创建默认文件: {file_path}")
@@ -75,11 +75,23 @@ class JsonUtils:
                 logger.error(result.error)
                 return result
 
-            # 读取文件 - 监控IO性能
+            # 读取文件 - 监控IO性能，优先使用缓存
             content: str
             with profile_io(f"json_read_{file_path.name}"):
-                with open(file_path, "r", encoding=encoding) as f:
-                    content = f.read().strip()
+                # 尝试从文件缓存获取内容
+                from .cache_manager import global_cache_manager, FileCache
+                file_cache = global_cache_manager.get_cache("file")
+                if file_cache and isinstance(file_cache, FileCache):
+                    cached_content = file_cache.get_file_content(file_path, encoding)
+                    if cached_content is not None:
+                        content = cached_content.strip()
+                        logger.debug(f"从缓存读取JSON文件: {file_path}")
+                    else:
+                        with open(file_path, "r", encoding=encoding) as f:
+                            content = f.read().strip()
+                else:
+                    with open(file_path, "r", encoding=encoding) as f:
+                        content = f.read().strip()
 
             # 检查空文件
             if not content:
@@ -140,9 +152,19 @@ class JsonUtils:
             if create_dirs:
                 file_path.parent.mkdir(parents=True, exist_ok=True)
 
-            # 保存文件
-            with open(file_path, "w", encoding=encoding) as f:
-                json.dump(data, f, indent=indent, ensure_ascii=ensure_ascii)
+            # 保存文件 - 使用性能监控
+            with profile_io(f"json_write_{file_path.name}"):
+                with open(file_path, "w", encoding=encoding) as f:
+                    json.dump(data, f, indent=indent, ensure_ascii=ensure_ascii)
+
+                # 清除相关的文件缓存
+                from .cache_manager import global_cache_manager
+                file_cache = global_cache_manager.get_cache("file")
+                if file_cache:
+                    # 清除可能存在的缓存条目
+                    mtime = file_path.stat().st_mtime
+                    cache_key = f"file:{file_path}:{mtime}:{encoding}"
+                    file_cache.remove(cache_key)
 
             logger.debug(f"成功保存JSON文件: {file_path}")
             return True
@@ -171,7 +193,7 @@ class JsonUtils:
         Returns:
             Any: 键对应的值或默认值
         """
-        result = JsonUtils.load_json_file(file_path, encoding)  # type: ignore
+        result = JsonUtils.load_json_file(file_path, encoding)
 
         if not result.success or result.data is None:
             logger.warning(f"无法从 {file_path} 获取键 {key}，使用默认值")
@@ -196,7 +218,7 @@ class JsonUtils:
             bool: 是否更新成功
         """
         # 加载现有数据
-        result = JsonUtils.load_json_file(  # type: ignore
+        result = JsonUtils.load_json_file(
             file_path, encoding, create_if_missing=True, default_content={}
         )
 
@@ -230,13 +252,13 @@ class JsonUtils:
             bool: 是否合并成功
         """
         # 加载源文件
-        source_result = JsonUtils.load_json_file(source_path, encoding)  # type: ignore
+        source_result = JsonUtils.load_json_file(source_path, encoding)
         if not source_result.success or source_result.data is None:
             logger.error(f"无法加载源文件: {source_path}")
             return False
 
         # 加载目标文件
-        target_result = JsonUtils.load_json_file(  # type: ignore
+        target_result = JsonUtils.load_json_file(
             target_path, encoding, create_if_missing=True, default_content={}
         )
         if not target_result.success or target_result.data is None:
@@ -361,7 +383,7 @@ def get_json(file_path: Union[str, Path], key: str) -> Any:
                 logger.warning(f"  警告: {warning}")
 
         # 使用新的JSON工具加载文件
-        result = JsonUtils.load_json_file(file_path)  # type: ignore
+        result = JsonUtils.load_json_file(file_path)
 
         if not result.success or result.data is None:
             raise Exception(result.error or "Failed to load JSON file")
@@ -374,3 +396,93 @@ def get_json(file_path: Union[str, Path], key: str) -> Any:
     except Exception as e:
         logger.error(f"加载配置文件失败 {file_path}: {e}")
         raise
+
+
+class AsyncJsonUtils:
+    """异步JSON工具类 - 提供高性能的异步JSON操作"""
+
+    @staticmethod
+    async def load_json_file_async(
+        file_path: Union[str, Path],
+        default_content: Optional[Dict[str, Any]] = None,
+        encoding: str = "utf-8"
+    ) -> JsonLoadResult:
+        """异步加载JSON文件"""
+        from .async_io_utils import global_async_file_manager
+
+        result = JsonLoadResult(success=False)
+        file_path = Path(file_path)
+
+        try:
+            # 使用异步文件管理器读取
+            async_result = await global_async_file_manager.read_json_async(file_path)
+
+            if async_result.success:
+                result.data = async_result.data
+                result.success = True
+                logger.debug(f"异步加载JSON文件成功: {file_path}")
+            else:
+                if not file_path.exists() and default_content is not None:
+                    # 异步创建默认文件
+                    save_result = await global_async_file_manager.write_json_async(file_path, default_content)
+                    if save_result.success:
+                        result.data = default_content
+                        result.success = True
+                        result.warnings.append(f"文件不存在，已创建默认文件: {file_path}")
+                    else:
+                        result.error = f"创建默认文件失败: {save_result.error}"
+                else:
+                    result.error = async_result.error or f"文件不存在: {file_path}"
+
+        except Exception as e:
+            result.error = f"异步加载JSON文件时发生错误: {e}"
+            logger.error(f"异步加载JSON文件失败 {file_path}: {e}")
+
+        return result
+
+    @staticmethod
+    async def save_json_file_async(
+        file_path: Union[str, Path],
+        data: Dict[str, Any],
+        encoding: str = "utf-8",
+        indent: int = 2,
+        create_dirs: bool = True,
+    ) -> bool:
+        """异步保存JSON文件"""
+        from .async_io_utils import global_async_file_manager
+
+        try:
+            file_path = Path(file_path)
+
+            # 创建目录
+            if create_dirs:
+                file_path.parent.mkdir(parents=True, exist_ok=True)
+
+            # 使用异步文件管理器保存
+            result = await global_async_file_manager.write_json_async(file_path, data)
+
+            if result.success:
+                logger.debug(f"异步保存JSON文件成功: {file_path}")
+                return True
+            else:
+                logger.error(f"异步保存JSON文件失败 {file_path}: {result.error}")
+                return False
+
+        except Exception as e:
+            logger.error(f"异步保存JSON文件失败 {file_path}: {e}")
+            return False
+
+
+# 异步便捷函数
+async def load_config_json_async(
+    file_path: Union[str, Path], default_config: Optional[Dict[str, Any]] = None
+) -> JsonLoadResult:
+    """异步加载配置JSON文件的便捷函数"""
+    return await AsyncJsonUtils.load_json_file_async(
+        file_path, default_content=default_config or {}
+    )
+
+
+async def save_config_json_async(file_path: Union[str, Path], config: Dict[str, Any]) -> bool:
+    """异步保存配置JSON文件的便捷函数"""
+    return await AsyncJsonUtils.save_json_file_async(file_path, config)

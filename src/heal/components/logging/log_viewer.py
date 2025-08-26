@@ -380,7 +380,7 @@ class LogViewer(CardWidget):
                 text_widget.clear()
                 self._load_initial_content(name, path, text_widget)
 
-    def closeEvent(self, event) -> None:
+    def closeEvent(self, event: Any) -> None:
         """关闭事件"""
         if hasattr(self, "watcher"):
             self.watcher.stop()

@@ -85,6 +85,6 @@ class WindowManager(QObject):
             self.main_window.show()
             self.logger.debug("窗口已显示")
 
-    def get_splash_screen(self) -> None:
+    def get_splash_screen(self) -> Any:
         """获取启动画面"""
         return self.splash_screen

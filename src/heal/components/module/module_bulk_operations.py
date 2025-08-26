@@ -126,7 +126,7 @@ class BulkOperationWorker(QThread):
     )  # operation_id, module_name, success, message
 
     def __init__(
-        self, operation: BulkOperation, operation_handler: Callable, parent=None
+        self, operation: BulkOperation, operation_handler: Callable, parent: Any = None
     ) -> None:
         super().__init__(parent)
         self.operation = operation
@@ -204,18 +204,19 @@ class BulkOperationWorker(QThread):
                             result.message,
                         )
 
-                        self.progress_updated.emit(
-                            self.operation.operation_id,
-                            {
-                                "completed": self.operation.progress.completed_modules,
-                                "total": self.operation.progress.total_modules,
-                                "successful": self.operation.progress.successful_modules,
-                                "failed": self.operation.progress.failed_modules,
-                                "progress": self.operation.progress.overall_progress,
-                                "current_module": module_name,
-                                "estimated_remaining": self.operation.progress.estimated_time_remaining,
-                            },
-                        )
+                        if self.operation.progress:
+                            self.progress_updated.emit(
+                                self.operation.operation_id,
+                                {
+                                    "completed": self.operation.progress.completed_modules,
+                                    "total": self.operation.progress.total_modules,
+                                    "successful": self.operation.progress.successful_modules,
+                                    "failed": self.operation.progress.failed_modules,
+                                    "progress": self.operation.progress.overall_progress,
+                                    "current_module": module_name,
+                                    "estimated_remaining": self.operation.progress.estimated_time_remaining,
+                                },
+                            )
 
                     except Exception as e:
                         logger.error(f"Error processing module {module_name}: {e}")
@@ -301,7 +302,7 @@ class ModuleBulkOperations(QObject):
         self,
         error_handler: ModuleErrorHandler,
         notification_system: ModuleNotificationSystem,
-        parent=None,
+        parent: Any = None,
     ) -> None:
         super().__init__(parent)
         self.logger = logger.bind(component="ModuleBulkOperations")
@@ -322,7 +323,7 @@ class ModuleBulkOperations(QObject):
 
     def register_operation_handler(
         self, operation_type: BulkOperationType, handler: Callable
-    ):
+    ) -> None:
         """Register handler for bulk operation type"""
         self.operation_handlers[operation_type] = handler
         self.logger.debug(f"Registered handler for operation: {operation_type.value}")
@@ -421,7 +422,7 @@ class ModuleBulkOperations(QObject):
 
         # Update notification
         operation = self.active_operations.get(operation_id)
-        if operation and operation.notification_id:
+        if operation and operation.notification_id and operation.progress:
             self.notification_system.update_progress(
                 operation.notification_id,
                 operation.progress.overall_progress,
@@ -511,7 +512,7 @@ class ModuleBulkOperations(QObject):
 
     def _on_module_completed(
         self, operation_id: str, module_name: str, success: bool, message: str
-    ):
+    ) -> None:
         """Handle individual module completion"""
         self.module_operation_completed.emit(
             operation_id, module_name, success, message
@@ -541,7 +542,7 @@ class ModuleBulkOperations(QObject):
             return
 
         # Update notification
-        if operation.notification_id:
+        if operation.notification_id and operation.progress:
             if success:
                 success_count = operation.progress.successful_modules
                 total_count = operation.progress.total_modules
@@ -568,9 +569,10 @@ class ModuleBulkOperations(QObject):
             else:
                 # Show error notification
                 self.notification_system.dismiss_notification(operation.notification_id)
+                failed_modules = operation.progress.failed_modules if operation.progress else 0
                 self.notification_system.show_error(
                     title=f"Bulk {operation.operation_type.value.title()} Failed",
-                    message=f"Operation failed on {operation.progress.failed_modules} modules",
+                    message=f"Operation failed on {failed_modules} modules",
                     module_name="bulk_operation",
                     category="bulk_operation",
                 )

@@ -186,7 +186,7 @@ class MessageDownload(MessageBoxBase):
         self.viewLayout.addWidget(self.commandOutput)
         self.buttonLayout.addWidget(self.progressBar)
 
-    def start_download(self, types: str, command: str, file_path: str, build_jar: bool) -> None:
+    def start_download(self, types: str, command: str, file_path: str, build_jar: Any) -> None:
         self.runner = CommandRunner(types, command, file_path, build_jar)
         self.runner.output_updated.connect(self.update_output)
         self.runner.download_finished.connect(self.download_finished)
@@ -212,7 +212,7 @@ class CommandRunner(QThread):
     output_updated = Signal(str)
     download_finished = Signal(bool, str)
 
-    def __init__(self, types: str, command: str, check: str, build_jar: bool) -> None:
+    def __init__(self, types: str, command: str, check: str, build_jar: Any) -> None:
         super().__init__()
         self.types = types
         self.command = command

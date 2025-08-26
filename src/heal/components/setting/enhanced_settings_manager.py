@@ -5,6 +5,7 @@ Integrates caching, lazy loading, and error handling
 
 import json
 import sys
+import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
@@ -61,6 +62,10 @@ class EnhancedSettingsManager(QObject):
         # Cache for expensive operations
         self._interface_cache: Dict[str, SettingCardGroup] = {}
 
+        # 优化：添加操作去重缓存
+        self._operation_cache: Dict[str, Any] = {}
+        self._last_cache_cleanup = time.time()
+
         # Register lazy loading for complex settings
         self._register_lazy_settings()
 
@@ -78,7 +83,7 @@ class EnhancedSettingsManager(QObject):
             "update_checker", lambda: self._initialize_update_checker()
         )
 
-    def _initialize_update_checker(self) -> None:
+    def _initialize_update_checker(self) -> Any:
         """Initialize update checker lazily"""
         try:
             # Perform expensive update check initialization
@@ -86,6 +91,47 @@ class EnhancedSettingsManager(QObject):
         except Exception as e:
             self.logger.error(f"Failed to initialize update checker: {e}")
             return None
+
+    def _get_cached_operation(self, operation_key: str, operation_func: Any, *args: Any, **kwargs: Any) -> Any:
+        """获取缓存的操作结果，避免重复计算"""
+        current_time = time.time()
+
+        # 定期清理缓存
+        if current_time - self._last_cache_cleanup > 300:  # 5分钟清理一次
+            self._cleanup_operation_cache()
+            self._last_cache_cleanup = current_time
+
+        # 检查缓存
+        if operation_key in self._operation_cache:
+            cached_result, timestamp = self._operation_cache[operation_key]
+            # 缓存有效期1分钟
+            if current_time - timestamp < 60:
+                self.logger.debug(f"使用缓存结果: {operation_key}")
+                return cached_result
+
+        # 执行操作并缓存结果
+        try:
+            result = operation_func(*args, **kwargs)
+            self._operation_cache[operation_key] = (result, current_time)
+            return result
+        except Exception as e:
+            self.logger.error(f"操作 {operation_key} 执行失败: {e}")
+            return None
+
+    def _cleanup_operation_cache(self) -> None:
+        """清理过期的操作缓存"""
+        current_time = time.time()
+        expired_keys = []
+
+        for key, (result, timestamp) in self._operation_cache.items():
+            if current_time - timestamp > 300:  # 5分钟过期
+                expired_keys.append(key)
+
+        for key in expired_keys:
+            del self._operation_cache[key]
+
+        if expired_keys:
+            self.logger.debug(f"清理了 {len(expired_keys)} 个过期缓存")
 
     @performance_optimized
     def create_appearance_interface(self) -> SettingCardGroup:
@@ -407,7 +453,7 @@ class EnhancedSettingsManager(QObject):
             self.logger.error(f"Error restarting application: {e}")
             self.error_occurred.emit("restart_application", str(e))
 
-    def handle_choice_changed(self, status, title_true, title_false) -> None:
+    def handle_choice_changed(self, status: Any, title_true: Any, title_false: Any) -> None:
         """Handle toggle setting changes with error handling."""
         try:
             if status:

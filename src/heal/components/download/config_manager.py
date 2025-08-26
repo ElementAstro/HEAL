@@ -105,7 +105,8 @@ class DownloadConfigManager(QObject):
 
     def get_sections(self) -> List[Dict[str, Any]]:
         """获取所有部分"""
-        return self.interface_data.get("sections", [])
+        sections = self.interface_data.get("sections", [])
+        return List[Dict[str, Any]](sections)
 
     def get_section(self, index: int) -> Dict[str, Any]:
         """获取指定索引的部分"""
@@ -124,7 +125,7 @@ class DownloadConfigManager(QObject):
     def reload_configuration(self) -> bool:
         """重新加载配置"""
         self.logger.info("重新加载下载配置")
-        return self.load_configuration()
+        return bool(self.load_configuration())
 
     def get_interface_data(self) -> Dict[str, Any]:
         """获取完整的接口数据"""

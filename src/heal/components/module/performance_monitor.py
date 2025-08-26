@@ -84,7 +84,7 @@ class PerformanceMetric:
         """获取平均值"""
         if not self.values:
             return None
-        return sum(v.value for v in self.values) / len(self.values)
+        return float(sum(v.value for v in self.values)) / len(self.values)
 
     @property
     def max_value(self) -> Optional[float]:
@@ -189,10 +189,19 @@ class PerformanceMonitor(QObject):
         # 线程安全锁
         self._metrics_lock = threading.RLock()
 
-        # 内存管理配置
-        self.max_memory_usage_mb = 100  # 最大内存使用量(MB)
-        self.cleanup_threshold_mb = 80  # 清理阈值(MB)
+        # 内存管理配置 - 优化版本
+        self.max_memory_usage_mb = 50  # 最大内存使用量(MB) - 更严格
+        self.cleanup_threshold_mb = 40  # 清理阈值(MB) - 更严格
         self.last_memory_check = time.time()
+
+        # 集成内存优化器
+        try:
+            from src.heal.common.memory_optimizer import global_memory_optimizer
+            self.memory_optimizer: Optional[Any] = global_memory_optimizer
+            # 注册性能监控器的优化策略
+            self.memory_optimizer.register_optimization_strategy(self._optimize_performance_data)
+        except ImportError:
+            self.memory_optimizer = None
 
         # 定时器
         self.timer = QTimer()
@@ -262,7 +271,7 @@ class PerformanceMonitor(QObject):
 
     def register_metric(
         self, name: str, metric_type: MetricType, description: str, unit: str
-    ):
+    ) -> None:
         """注册性能指标"""
         self.metrics[name] = PerformanceMetric(
             name=name, type=metric_type, description=description, unit=unit
@@ -275,14 +284,14 @@ class PerformanceMonitor(QObject):
         condition: Callable[[float], bool],
         message: str,
         severity: str = "warning",
-    ):
+    ) -> None:
         """添加性能告警"""
         self.alerts[name] = PerformanceAlert(name, condition, message, severity)
         self.logger.debug(f"添加性能告警: {name}")
 
     def record_metric(
         self, name: str, value: float, tags: Optional[Dict[str, str]] = None
-    ):
+    ) -> None:
         """记录性能指标 - 线程安全版本"""
         with self._metrics_lock:
             if name in self.metrics:
@@ -534,6 +543,30 @@ class PerformanceMonitor(QObject):
         except Exception as e:
             self.logger.error(f"执行激进清理时发生错误: {e}")
 
+    def _optimize_performance_data(self) -> None:
+        """优化性能数据存储"""
+        try:
+            with self._metrics_lock:
+                # 优化指标数据
+                for metric in self.metrics.values():
+                    # 如果数据点过多，只保留最近的数据
+                    if len(metric.values) > 500:
+                        # 保留最近500个数据点
+                        metric.values = deque(list(metric.values)[-500:], maxlen=1000)
+
+                    # 清理过期数据
+                    metric._cleanup_old_data()
+
+                # 如果内存优化器可用，跟踪对象
+                if self.memory_optimizer:
+                    for metric in self.metrics.values():
+                        self.memory_optimizer.monitor.track_object(metric)
+
+            self.logger.debug("性能数据优化完成")
+
+        except Exception as e:
+            self.logger.error(f"优化性能数据失败: {e}")
+
     def configure_memory_limits(self, max_memory_mb: int, cleanup_threshold_mb: int) -> None:
         """配置内存限制"""
         self.max_memory_usage_mb = max_memory_mb
@@ -566,7 +599,7 @@ class ModulePerformanceTracker:
         self.monitor = monitor
         self.module_stats: Dict[str, Dict[str, Any]] = {}
 
-    def track_module_load(self, module_name: str) -> None:
+    def track_module_load(self, module_name: str) -> Any:
         """跟踪模块加载"""
         if module_name not in self.module_stats:
             self.module_stats[module_name] = {
@@ -580,7 +613,7 @@ class ModulePerformanceTracker:
         start_time = time.time()
 
         class LoadContext:
-            def __enter__(self) -> None:
+            def __enter__(self) -> "LoadContext":
                 return self
 
             def __exit__(self, exc_type, exc_val, exc_tb) -> None:

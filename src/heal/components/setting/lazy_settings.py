@@ -6,7 +6,8 @@ Provides lazy initialization for expensive settings operations
 import asyncio
 import threading
 import time
-from concurrent.futures import Future, ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
+import asyncio
 from dataclasses import dataclass
 from functools import wraps
 from typing import Any, Callable, Dict, Generic, Optional, TypeVar
@@ -74,15 +75,17 @@ class LazySettingProxy(Generic[T]):
         self._value: Optional[T] = None
         self._loaded = False
         self._loading = False
-        self._load_future: Optional[Future] = None
+        self._load_future: Optional[asyncio.Future[T]] = None
         self.logger = get_logger("lazy_setting_proxy", module="LazySettingProxy")
 
     @property
-    def value(self) -> T:
+    def value(self) -> Optional[T]:
         """Get the value, loading if necessary"""
         if not self._loaded and not self._loading:
             self._load_sync()
-        return self._value if self._value is not None else self.fallback_value
+        if self._value is not None:
+            return self._value
+        return self.fallback_value
 
     def _load_sync(self) -> None:
         """Load the setting synchronously"""
@@ -107,7 +110,11 @@ class LazySettingProxy(Generic[T]):
     async def load_async(self) -> T:
         """Load the setting asynchronously"""
         if self._loaded:
-            return self._value
+            if self._value is not None:
+                return self._value
+            if self.fallback_value is not None:
+                return self.fallback_value
+            raise ValueError(f"No value available for {self.setting_key}")
 
         if self._load_future is None:
             loop = asyncio.get_event_loop()
@@ -119,7 +126,9 @@ class LazySettingProxy(Generic[T]):
             return self._value
         except Exception as e:
             self.logger.error(f"Failed to async load {self.setting_key}: {e}")
-            return self.fallback_value
+            if self.fallback_value is not None:
+                return self.fallback_value
+            raise ValueError(f"No fallback value available for {self.setting_key}")
 
     def is_loaded(self) -> bool:
         """Check if the setting is loaded"""
@@ -129,8 +138,8 @@ class LazySettingProxy(Generic[T]):
         """Force reload the setting"""
         self._loaded = False
         self._loading = False
-        self._load_future: Any = None
-        self._value: Any = None
+        self._load_future = None
+        self._value = None
 
 
 class LazySettingsManager(QObject):
@@ -140,7 +149,7 @@ class LazySettingsManager(QObject):
     loading_started = Signal(str)  # setting_key
     loading_failed = Signal(str, str)  # setting_key, error
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.proxies: Dict[str, LazySettingProxy] = {}
         self.workers: Dict[str, LazyLoadWorker] = {}
@@ -357,9 +366,9 @@ def get_lazy_manager() -> LazySettingsManager:
 def lazy_setting(setting_key: str, fallback_value: Any | None = None):
     """Decorator for lazy setting access"""
 
-    def decorator(func: Any) -> None:
+    def decorator(func: Any) -> Any:
         @wraps(func)
-        def wrapper(*args, **kwargs: Any) -> None:
+        def wrapper(*args, **kwargs: Any) -> Any:
             manager = get_lazy_manager()
             value = manager.get_setting(setting_key)
             if value is not None:
@@ -377,12 +386,12 @@ def lazy_setting(setting_key: str, fallback_value: Any | None = None):
 
 # Usage examples:
 @lazy_setting("config_editor")
-def get_config_editor() -> None:
+def get_config_editor() -> Any:
     """Get config editor with lazy loading"""
     return JsonEditor()
 
 
 @lazy_setting("update_checker", fallback_value=lambda: None)
-def get_update_checker() -> None:
+def get_update_checker() -> Any:
     """Get update checker with lazy loading"""
     return check_update

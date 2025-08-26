@@ -207,14 +207,14 @@ class NginxConfigurator(QFrame):
         pass
 
     def add_route(self) -> None:
-        path, ok1 = CustomInputDialog.get_text(self, "添加路由", "路径（如 /api）:")
-        if not ok1 or not path.strip():
+        path_dialog = CustomInputDialog("添加路由", "路径（如 /api）:", self)
+        path = path_dialog.get_text()
+        if not path or not path.strip():
             return
 
-        target, ok2 = CustomInputDialog.get_text(
-            self, "添加路由", "目标地址（如 http://127.0.0.1:5000）:"
-        )
-        if not ok2 or not target.strip():
+        target_dialog = CustomInputDialog("添加路由", "目标地址（如 http://127.0.0.1:5000）:", self)
+        target = target_dialog.get_text()
+        if not target or not target.strip():
             return
 
         route = Route(path=path.strip(), target=target.strip())
@@ -238,16 +238,22 @@ class NginxConfigurator(QFrame):
             logger.info(f"删除路由: {removed}")
 
     def add_upstream(self) -> None:
-        server, ok1 = CustomInputDialog.get_text(
-            self, "添加节点", "服务器地址（如 127.0.0.1:8000）:"
-        )
-        if not ok1 or not server.strip():
+        server_dialog = CustomInputDialog("添加节点", "服务器地址（如 127.0.0.1:8000）:", self)
+        server = server_dialog.get_text()
+        if not server or not server.strip():
             return
 
-        weight, ok2 = CustomInputDialog.getInt(
-            self, "添加节点", "权重 (1-100):", 1, 1, 100
-        )
-        if not ok2:
+        # For weight, we'll use a simple input dialog and convert to int
+        weight_dialog = CustomInputDialog("添加节点", "权重 (1-100):", self)
+        weight_str = weight_dialog.get_text()
+        if not weight_str:
+            return
+
+        try:
+            weight = int(weight_str)
+            if not (1 <= weight <= 100):
+                return
+        except ValueError:
             return
 
         upstream = Upstream(server=server.strip(), weight=weight)
@@ -440,7 +446,7 @@ http {{
     def stop_log_monitor(self) -> None:
         if self.monitor_process:
             self.monitor_process.terminate()
-            self.monitor_process: Any = None
+            self.monitor_process = None
             logger.info("停止日志监控")
 
 

@@ -133,6 +133,12 @@ strict_equality = true
 module = [
     "PySide6.*",
     "qfluentwidgets.*",
+    "matplotlib.*",
+    "numpy.*",
+    "aiohttp.*",
+    "loguru.*",
+    "pytest.*",
+    "jsonschema.*",
 ]
 ignore_missing_imports = true
 

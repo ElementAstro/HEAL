@@ -1,5 +1,6 @@
 import json
 import sys
+from typing import Any
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QStackedWidget, QVBoxLayout, QWidget
@@ -23,7 +24,7 @@ class Setting(ScrollArea, SearchEnabledSettingsInterface):
 
     Nav = Pivot
 
-    def __init__(self, text: str, parent=None) -> None:
+    def __init__(self, text: str, parent: Any = None) -> None:
         super().__init__(parent=parent)
         self.parent_widget = parent  # 重命名避免与QWidget.parent()冲突
         self.setObjectName(text)
@@ -98,7 +99,7 @@ class Setting(ScrollArea, SearchEnabledSettingsInterface):
         self.search_integrator.search_mode_changed.connect(self.on_search_mode_changed)
         self.search_integrator.setting_found.connect(self.on_setting_found)
 
-    def addSubInterface(self, widget: QWidget, objectName: str, text: str, icon=None) -> None:
+    def addSubInterface(self, widget: QWidget, objectName: str, text: str, icon: Any = None) -> None:
         """Legacy method for compatibility."""
         self.layout_manager.add_sub_interface(
             self.pivot, self.stackedWidget, widget, objectName, text, icon
@@ -140,7 +141,7 @@ class Setting(ScrollArea, SearchEnabledSettingsInterface):
         except Exception as e:
             logger.error(f"Error handling search mode change: {e}")
 
-    def on_setting_found(self, setting_key: str, widget) -> None:
+    def on_setting_found(self, setting_key: str, widget: Any) -> None:
         """Handle setting found from search"""
         try:
             # Exit search mode
@@ -171,7 +172,7 @@ class Setting(ScrollArea, SearchEnabledSettingsInterface):
         except Exception as e:
             logger.error(f"Error navigating to setting: {e}")
 
-    def _widget_in_interface(self, widget, interface) -> bool:
+    def _widget_in_interface(self, widget: Any, interface: Any) -> bool:
         """Check if a widget is in the given interface"""
         try:
             # Check if widget is a child of the interface
@@ -184,7 +185,7 @@ class Setting(ScrollArea, SearchEnabledSettingsInterface):
         except Exception:
             return False
 
-    def _scroll_to_widget(self, widget) -> None:
+    def _scroll_to_widget(self, widget: Any) -> None:
         """Scroll to make the widget visible"""
         try:
             # Ensure the widget is visible in the scroll area
@@ -192,7 +193,7 @@ class Setting(ScrollArea, SearchEnabledSettingsInterface):
         except Exception as e:
             logger.debug(f"Could not scroll to widget: {e}")
 
-    def get_search_statistics(self) -> None:
+    def get_search_statistics(self) -> Any:
         """Get search statistics for debugging"""
         return self.search_integrator.get_search_statistics()
 

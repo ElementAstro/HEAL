@@ -95,7 +95,7 @@ class ModuleErrorHandler(QObject):
     error_resolved = Signal(str)  # error_id
     recovery_action_executed = Signal(str, str)  # error_id, action_id
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = logger.bind(component="ModuleErrorHandler")
 

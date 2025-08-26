@@ -3,7 +3,7 @@ Launcher Navigation Manager
 Handles navigation and interface management for launcher interface
 """
 
-from typing import Optional
+from typing import Any, Optional
 
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QStackedWidget, QWidget
@@ -40,8 +40,8 @@ class LauncherNavigationManager(QObject):
         self.logger.debug("导航组件已设置")
 
     def add_sub_interface(
-        self, widget: QWidget, object_name: str, text: str, icon=None
-    ):
+        self, widget: QWidget, object_name: str, text: str, icon: Any = None
+    ) -> None:
         """添加子界面"""
         if not self.pivot or not self.stacked_widget:
             self.logger.error("导航组件未初始化")

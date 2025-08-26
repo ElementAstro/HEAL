@@ -154,7 +154,7 @@ class SettingsPerformanceManager(QObject):
     cache_stats_updated = Signal(dict)  # cache statistics
     error_occurred = Signal(str, str)  # operation, error_message
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.cache = SettingsCache()
         self.lazy_loader = LazyLoader()
@@ -232,7 +232,7 @@ class SettingsPerformanceManager(QObject):
             data[key] = value
 
             # Save data
-            success = JsonUtils.save_json_file(file_path, data)
+            success = bool(JsonUtils.save_json_file(file_path, data))
             if success:
                 self.setting_saved.emit(f"{file_path}:{key}", True)
                 self.logger.debug(f"Saved setting {key} to {file_path}")
@@ -356,11 +356,11 @@ def get_performance_manager() -> SettingsPerformanceManager:
     return _performance_manager
 
 
-def performance_optimized(func: Any) -> None:
+def performance_optimized(func: Any) -> Any:
     """Decorator to add performance optimization to setting operations"""
 
     @wraps(func)
-    def wrapper(*args, **kwargs: Any) -> None:
+    def wrapper(*args, **kwargs: Any) -> Any:
         start_time = time.time()
         try:
             result = func(*args, **kwargs)

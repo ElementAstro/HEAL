@@ -10,6 +10,7 @@ from qfluentwidgets import FluentIcon, PrimaryPushButton, TogglePushButton
 from src.heal.common.exception_handler import ExceptionHandler
 from src.heal.common.logging_config import get_logger, log_performance, with_correlation_id
 from src.heal.common.resource_manager import register_timer
+from src.heal.common.ui_utils import create_responsive_operation, batch_ui_update
 from src.heal.components.home import (
     CompactBannerWidget,
     CustomFlipItemDelegate,
@@ -33,7 +34,7 @@ logger = get_logger(__name__)
 
 
 class Home(QWidget):
-    def __init__(self, text: str, parent=None) -> None:
+    def __init__(self, text: str, parent: Any = None) -> None:
         super().__init__(parent=parent)
         self.setObjectName(text)
         self._parent_widget = parent
@@ -81,12 +82,12 @@ class Home(QWidget):
     def _init_optimized_widgets(self) -> None:
         """Initialize widgets for optimized layout"""
         # Create new optimized components
-        self.compact_banner = self.layout_manager.create_compact_banner()
-        self.status_overview = self.layout_manager.create_status_overview()
-        self.quick_action_bar = self.layout_manager.create_quick_action_bar()
+        self.compact_banner: Any = self.layout_manager.create_compact_banner()
+        self.status_overview: Any = self.layout_manager.create_status_overview()
+        self.quick_action_bar: Any = self.layout_manager.create_quick_action_bar()
 
         # Create server status cards instead of buttons
-        self.server_status_cards = self.layout_manager.create_server_status_cards(
+        self.server_status_cards: list[Any] = self.layout_manager.create_server_status_cards(
             cfg.SERVER
         )
 
@@ -114,10 +115,14 @@ class Home(QWidget):
         self.toolbar = self.layout_manager.create_toolbar()
 
         # Set new components to None for legacy mode
-        self.compact_banner: Any = None
-        self.status_overview: Any = None
-        self.quick_action_bar: Any = None
-        self.server_status_cards: list[Any] = []
+        if not hasattr(self, 'compact_banner'):
+            self.compact_banner: Any = None
+        if not hasattr(self, 'status_overview'):
+            self.status_overview: Any = None
+        if not hasattr(self, 'quick_action_bar'):
+            self.quick_action_bar: Any = None
+        if not hasattr(self, 'server_status_cards'):
+            self.server_status_cards: list[Any] = []
 
     def initLayout(self) -> None:
         # Use appropriate layout based on configuration
@@ -197,32 +202,53 @@ class Home(QWidget):
 
     @log_performance("server_launch")
     def handleServerLaunch(self) -> None:
-        """修复：降低认知复杂度，分解为更小的函数"""
-        with with_correlation_id() as cid:
-            logger.info("开始批量启动服务器")
-            selected_servers = self.server_manager.get_selected_servers()
-            launched_servers_this_run = []
+        """修复：降低认知复杂度，分解为更小的函数 - 使用响应式操作"""
+        def launch_servers_operation() -> list[str]:
+            """服务器启动操作"""
+            with with_correlation_id() as cid:
+                logger.info("开始批量启动服务器")
+                selected_servers = self.server_manager.get_selected_servers()
+                launched_servers_this_run = []
 
-            logger.debug(f"选中的服务器数量: {len(selected_servers)}")
+                logger.debug(f"选中的服务器数量: {len(selected_servers)}")
 
-            for server_button in selected_servers:
-                if self.server_manager.should_launch_server(server_button):
-                    server_name = server_button.objectName()
-                    logger.info(f"启动服务器: {server_name}")
-                    success = self.server_manager.launch_single_server(server_button)
-                    if success:
-                        launched_servers_this_run.append(server_name)
-                        logger.info(f"服务器 {server_name} 启动成功")
-                    else:
-                        logger.error(f"服务器 {server_name} 启动失败")
+                for server_button in selected_servers:
+                    if self.server_manager.should_launch_server(server_button):
+                        server_name = server_button.objectName()
+                        logger.info(f"启动服务器: {server_name}")
+                        success = self.server_manager.launch_single_server(server_button)
+                        if success:
+                            launched_servers_this_run.append(server_name)
+                            logger.info(f"服务器 {server_name} 启动成功")
+                        else:
+                            logger.error(f"服务器 {server_name} 启动失败")
 
-            if launched_servers_this_run:
+                return launched_servers_this_run
+
+        def on_launch_completed(launched_servers: list[str]) -> None:
+            """启动完成回调"""
+            if launched_servers:
                 logger.info(
-                    f"成功启动 {len(launched_servers_this_run)} 个服务器: {launched_servers_this_run}"
+                    f"成功启动 {len(launched_servers)} 个服务器: {launched_servers}"
                 )
-                self._update_ui_after_launch(launched_servers_this_run)
+                self._update_ui_after_launch(launched_servers)
             else:
                 logger.warning("没有服务器被启动")
+
+        def on_launch_failed(error_msg: str) -> None:
+            """启动失败回调"""
+            logger.error(f"服务器启动失败: {error_msg}")
+
+        # 创建响应式操作
+        operation = create_responsive_operation(
+            "server_launch",
+            launch_servers_operation,
+            completion_callback=on_launch_completed,
+            error_callback=on_launch_failed
+        )
+
+        # 在后台线程执行以避免UI阻塞
+        operation.execute_in_thread()
 
     def _get_selected_servers(self) -> List[TogglePushButton]:
         """获取选中的服务器按钮"""
@@ -293,13 +319,24 @@ class Home(QWidget):
         server.setChecked(False)
 
     def _update_ui_after_launch(self, launched_servers: List[str]) -> None:
-        """启动后更新UI"""
-        Info(
-            self, "S", 1000, self.tr(f"服务端 {', '.join(launched_servers)} 启动中...")
-        )
-        self.button_toggle.setText(self.tr(STOP_ALL_TEXT))
-        self.button_toggle.setIcon(FluentIcon.CLOSE)
-        self.toolbar.setVisible(True)
+        """启动后更新UI - 使用批处理优化"""
+        # 使用批处理更新UI以提高性能
+        def update_info() -> None:
+            Info(
+                self, "S", 1000, self.tr(f"服务端 {', '.join(launched_servers)} 启动中...")
+            )
+
+        def update_button():
+            self.button_toggle.setText(self.tr(STOP_ALL_TEXT))
+            self.button_toggle.setIcon(FluentIcon.CLOSE)
+
+        def update_toolbar():
+            self.toolbar.setVisible(True)
+
+        # 批量处理UI更新
+        batch_ui_update(update_info)
+        batch_ui_update(update_button)
+        batch_ui_update(update_toolbar)
 
     @log_performance("stop_all_servers")
     def handleStopAllServers(self) -> None:

@@ -258,7 +258,7 @@ class LoggingConfig:
 
     def add_module_logger(self, module_name: str, level: str = "DEBUG") -> int:
         """为特定模块添加专用日志处理器"""
-        handler = logger.add(
+        handler: int = logger.add(
             self.log_dir / f"{module_name}.log",
             rotation="2 MB",
             retention="14 days",

@@ -5,6 +5,7 @@ Resource Manager - 统一资源管理和清理
 
 import atexit
 import threading
+import time
 import weakref
 from typing import Any, Callable, Dict, List, Optional
 
@@ -294,6 +295,55 @@ class ResourceManager(QObject):
         except Exception as e:
             self.logger.error(f"列出资源失败: {e}")
             return []
+
+    def optimize_cleanup(self) -> Dict[str, Any]:
+        """优化资源清理过程"""
+        start_time = time.time()
+        cleanup_stats = {
+            "cleaned_count": 0,
+            "failed_count": 0,
+            "execution_time": 0.0,
+            "memory_freed": 0.0,
+        }
+
+        try:
+            # 记录清理前的内存使用
+            import psutil
+            process = psutil.Process()
+            memory_before = process.memory_info().rss / 1024 / 1024  # MB
+
+            with self._instance_lock:
+                # 批量清理已失效的弱引用
+                dead_resources = []
+                for resource_id, info in self.resources.items():
+                    if hasattr(info.resource_obj, "__call__"):
+                        try:
+                            obj = info.resource_obj()
+                            if obj is None:
+                                dead_resources.append(resource_id)
+                        except:
+                            dead_resources.append(resource_id)
+
+                # 移除失效资源
+                for resource_id in dead_resources:
+                    try:
+                        del self.resources[resource_id]
+                        cleanup_stats["cleaned_count"] += 1
+                    except:
+                        cleanup_stats["failed_count"] += 1
+
+            # 记录清理后的内存使用
+            memory_after = process.memory_info().rss / 1024 / 1024  # MB
+            cleanup_stats["memory_freed"] = memory_before - memory_after
+            cleanup_stats["execution_time"] = time.time() - start_time
+
+            self.logger.info(f"资源清理完成: {cleanup_stats}")
+            return cleanup_stats
+
+        except Exception as e:
+            self.logger.error(f"优化清理失败: {e}")
+            cleanup_stats["execution_time"] = time.time() - start_time
+            return cleanup_stats
 
 
 # 全局资源管理器实例

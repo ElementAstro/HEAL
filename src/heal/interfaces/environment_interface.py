@@ -212,7 +212,7 @@ class Environment(ScrollArea):
         if status_card:
             status_card.update_status(tool_info)
 
-    def find_or_create_status_card(self, tool_name: str, tool_info) -> None:
+    def find_or_create_status_card(self, tool_name: str, tool_info) -> Any:
         """查找或创建状态卡片"""
         # 在状态区域查找现有卡片
         if hasattr(self.status_section, "findChild"):
