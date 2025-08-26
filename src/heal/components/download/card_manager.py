@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QWidget
 from qfluentwidgets import FluentIcon as FIF
 from qfluentwidgets import HyperlinkCard, PrimaryPushSettingCard
 
-from src.icon.astro import AstroIcon
+from src.heal.resources.icons.astro import AstroIcon
 
 from src.heal.common.exception_handler import ExceptionType, exception_handler
 from src.heal.common.i18n import t

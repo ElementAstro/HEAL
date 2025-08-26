@@ -6,7 +6,7 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QButtonGroup, QWidget
 from qfluentwidgets import FluentIcon, TogglePushButton, setCustomStyleSheet
 
-from src.icon.astro import AstroIcon
+from src.heal.resources.icons.astro import AstroIcon
 
 from src.heal.common.exception_handler import ExceptionHandler
 from src.heal.models.config import cfg

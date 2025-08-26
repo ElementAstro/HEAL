@@ -153,7 +153,7 @@ class FeaturedDownloadCard(CardWidget):
         elif icon_name.startswith("Astro."):
             # Import AstroIcon if available
             try:
-                from src.icon.astro import AstroIcon
+                from src.heal.resources.icons.astro import AstroIcon
 
                 return getattr(AstroIcon, icon_name[6:], FluentIcon.DOWNLOAD)
             except ImportError:

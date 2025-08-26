@@ -114,7 +114,7 @@ class CategoryCard(CardWidget):
             return getattr(FluentIcon, icon_name[4:], FluentIcon.FOLDER)
         elif icon_name.startswith("Astro."):
             try:
-                from src.icon.astro import AstroIcon
+                from src.heal.resources.icons.astro import AstroIcon
 
                 return getattr(AstroIcon, icon_name[6:], FluentIcon.FOLDER)
             except ImportError:
