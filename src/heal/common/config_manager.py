@@ -160,6 +160,22 @@ class ConfigManager:
                 "username": None,
                 "preferences": {},
                 "custom_settings": {},
+                "onboarding": {
+                    "is_first_time": True,
+                    "completed_steps": [],
+                    "last_login": None,
+                    "app_launches": 0,
+                    "onboarding_version": "1.0.0",
+                    "user_level": "beginner",  # beginner, intermediate, advanced
+                    "preferred_features": [],
+                    "skipped_tutorials": [],
+                    "help_preferences": {
+                        "show_tips": True,
+                        "show_tooltips": True,
+                        "show_contextual_help": True,
+                        "tutorial_speed": "normal"  # slow, normal, fast
+                    }
+                },
             },
         }
 

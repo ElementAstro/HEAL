@@ -226,5 +226,76 @@
     "version_releases": "版本发布",
     "feedback_discussion": "反馈交流"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "欢迎使用 HEAL",
+      "subtitle": "让我们开始使用元素天体启动器",
+      "message": "欢迎使用 HEAL！",
+      "description": "HEAL 是一个强大的天文软件启动器和管理系统。此向导将帮助您设置应用程序并了解其功能。",
+      "features_title": "您可以使用 HEAL 做什么：",
+      "feature_1": "• 管理和启动天文软件",
+      "feature_2": "• 监控服务器状态和性能",
+      "feature_3": "• 下载和安装模块",
+      "feature_4": "• 配置开发环境",
+      "feature_5": "• 访问强大的工具和实用程序"
+    },
+    "user_level": {
+      "title": "告诉我们关于您的信息",
+      "subtitle": "这有助于我们定制您的体验",
+      "question": "您的经验水平如何？",
+      "beginner": "初学者 - 天文软件新手",
+      "intermediate": "中级 - 对类似工具有一些经验",
+      "advanced": "高级 - 经验丰富的用户，需要最少的指导",
+      "what_this_means": "这意味着什么：",
+      "beginner_desc": "• 更详细的解释和提示\n• 分步教程\n• 有用的工具提示和指导",
+      "intermediate_desc": "• 平衡的指导和自由度\n• 可选教程\n• 需要时的上下文帮助",
+      "advanced_desc": "• 最少的指导和提示\n• 快速访问高级功能\n• 简化的界面"
+    },
+    "preferences": {
+      "title": "定制您的体验",
+      "subtitle": "配置 HEAL 的行为方式",
+      "help_title": "帮助和指导",
+      "show_tips": "显示有用的提示",
+      "show_tooltips": "悬停时显示工具提示",
+      "contextual_help": "显示上下文帮助",
+      "tutorial_speed": "教程速度",
+      "speed_slow": "慢速 - 慢慢来",
+      "speed_normal": "正常 - 平衡的节奏",
+      "speed_fast": "快速 - 快速概览"
+    },
+    "completion": {
+      "title": "您已准备就绪！",
+      "subtitle": "HEAL 已准备好使用",
+      "message": "欢迎使用 HEAL！",
+      "description": "您的设置已完成。现在您可以开始使用 HEAL 来管理您的天文软件和服务器。",
+      "next_steps": "接下来做什么？",
+      "step_1": "• 探索主页仪表板",
+      "step_2": "• 配置您的第一个服务器",
+      "step_3": "• 从商店下载模块",
+      "step_4": "• 查看工具部分"
+    },
+    "wizard": {
+      "title": "欢迎使用 HEAL",
+      "next": "下一步",
+      "back": "上一步",
+      "finish": "开始使用",
+      "cancel": "跳过"
+    }
+  },
+  "tips": {
+    "server_management_basics": "右键点击服务器卡片可访问重启和设置等高级选项",
+    "quick_actions_bar": "使用底部操作栏可快速操作所有服务器",
+    "context_menus": "通过右键菜单访问服务器文件夹和日志",
+    "keyboard_shortcuts_basic": "使用 Ctrl+R 刷新，Ctrl+S 全部启动，Ctrl+T 全部停止",
+    "keyboard_shortcuts_advanced": "尝试 Ctrl+Shift+L 查看日志，Ctrl+Alt+S 打开设置，F5 强制刷新",
+    "module_development": "使用工具中的脚手架生成器快速创建新模块",
+    "environment_configuration": "配置您的开发环境以获得最佳性能",
+    "batch_operations": "选择多个服务器并使用批量操作提高效率",
+    "log_monitoring": "实时监控日志以快速识别和解决问题",
+    "interface_customization": "在设置中自定义界面主题和布局",
+    "theme_selection": "从多个主题中选择以个性化您的体验",
+    "connection_issues": "如果服务器无法连接，请检查您的网络连接和代理设置",
+    "performance_optimization": "关闭未使用的应用程序并检查系统资源以获得更好的性能"
+  },
   "ready": "就绪"
 }

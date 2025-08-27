@@ -226,5 +226,277 @@
     "version_releases": "Version Releases",
     "feedback_discussion": "Feedback & Discussion"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to HEAL",
+      "subtitle": "Let's get you started with Hello ElementAstro Launcher",
+      "message": "Welcome to HEAL!",
+      "description": "HEAL is a powerful launcher and management system for astronomical software. This wizard will help you set up the application and learn about its features.",
+      "features_title": "What you can do with HEAL:",
+      "feature_1": "• Manage and launch astronomical software",
+      "feature_2": "• Monitor server status and performance",
+      "feature_3": "• Download and install modules",
+      "feature_4": "• Configure development environments",
+      "feature_5": "• Access powerful tools and utilities"
+    },
+    "user_level": {
+      "title": "Tell us about yourself",
+      "subtitle": "This helps us customize your experience",
+      "question": "What's your experience level?",
+      "beginner": "Beginner - New to astronomical software",
+      "intermediate": "Intermediate - Some experience with similar tools",
+      "advanced": "Advanced - Experienced user, minimal guidance needed",
+      "what_this_means": "What this means:",
+      "beginner_desc": "• More detailed explanations and tips\n• Step-by-step tutorials\n• Helpful tooltips and guidance",
+      "intermediate_desc": "• Balanced guidance and freedom\n• Optional tutorials\n• Contextual help when needed",
+      "advanced_desc": "• Minimal guidance and tips\n• Quick access to advanced features\n• Streamlined interface"
+    },
+    "preferences": {
+      "title": "Customize your experience",
+      "subtitle": "Configure how HEAL behaves",
+      "help_title": "Help & Guidance",
+      "show_tips": "Show helpful tips",
+      "show_tooltips": "Show tooltips on hover",
+      "contextual_help": "Show contextual help",
+      "tutorial_speed": "Tutorial Speed",
+      "speed_slow": "Slow - Take your time",
+      "speed_normal": "Normal - Balanced pace",
+      "speed_fast": "Fast - Quick overview"
+    },
+    "completion": {
+      "title": "You're all set!",
+      "subtitle": "HEAL is ready to use",
+      "message": "Welcome to HEAL!",
+      "description": "Your setup is complete. You can now start using HEAL to manage your astronomical software and servers.",
+      "next_steps": "What's next?",
+      "step_1": "• Explore the home dashboard",
+      "step_2": "• Configure your first server",
+      "step_3": "• Download modules from the store",
+      "step_4": "• Check out the tools section"
+    },
+    "wizard": {
+      "title": "Welcome to HEAL",
+      "next": "Next",
+      "back": "Back",
+      "finish": "Get Started",
+      "cancel": "Skip"
+    }
+  },
+  "tips": {
+    "server_management_basics": "Right-click on server cards for advanced options like restart and settings",
+    "quick_actions_bar": "Use the action bar at the bottom for quick operations on all servers",
+    "context_menus": "Access server folders and logs through the context menu",
+    "keyboard_shortcuts_basic": "Use Ctrl+R to refresh, Ctrl+S to start all, Ctrl+T to stop all",
+    "keyboard_shortcuts_advanced": "Try Ctrl+Shift+L for logs, Ctrl+Alt+S for settings, and F5 for force refresh",
+    "module_development": "Use the scaffold generator in Tools to quickly create new modules",
+    "environment_configuration": "Configure your development environment for optimal performance",
+    "batch_operations": "Select multiple servers and use batch operations for efficiency",
+    "log_monitoring": "Monitor logs in real-time to quickly identify and resolve issues",
+    "interface_customization": "Customize the interface theme and layout in Settings",
+    "theme_selection": "Choose from multiple themes to personalize your experience",
+    "connection_issues": "Check your network connection and proxy settings if servers won't connect",
+    "performance_optimization": "Close unused applications and check system resources for better performance"
+  },
+  "help": {
+    "tip_title": "💡 Tip",
+    "info_title": "ℹ️ Help",
+    "home_server_cards": "These cards show the status of your configured servers. Click to start/stop, right-click for more options.",
+    "home_quick_actions": "Use these buttons to quickly start all servers, stop all servers, or refresh the status.",
+    "home_status_overview": "This overview shows real-time information about all your servers and system status.",
+    "launcher_server_config": "Configure your server settings here. Make sure to set the correct paths and parameters.",
+    "download_module_store": "Browse and download modules to extend HEAL's functionality. Check compatibility before installing.",
+    "environment_setup": "Configure your development environment for optimal performance and compatibility.",
+    "tools_scaffold": "Use the scaffold generator to quickly create new modules with proper structure and templates.",
+    "settings_customization": "Customize HEAL's appearance and behavior to match your preferences.",
+    "connection_error_help": "Connection failed. Check your network settings, firewall, and server configuration.",
+    "performance_help": "Performance issues detected. Try closing unused applications or check system resources."
+  },
+  "tutorials": {
+    "feature_tour": {
+      "title": "Feature Tour",
+      "description": "A quick tour of HEAL's main features and interface",
+      "welcome": {
+        "title": "Welcome to HEAL",
+        "content": "Let's take a quick tour of the main features and learn how to use HEAL effectively."
+      },
+      "home": {
+        "title": "Home Dashboard",
+        "content": "This is your main dashboard where you can see all server status and perform quick actions."
+      },
+      "servers": {
+        "title": "Server Management",
+        "content": "These cards represent your servers. Click to start/stop, right-click for advanced options."
+      },
+      "actions": {
+        "title": "Quick Actions",
+        "content": "Use these buttons for batch operations like starting all servers or refreshing status."
+      }
+    },
+    "server_setup": {
+      "title": "First Server Setup",
+      "description": "Learn how to configure and launch your first server",
+      "navigate": {
+        "title": "Navigate to Launcher",
+        "content": "Click on the Launcher tab to access server configuration options."
+      },
+      "config": {
+        "title": "Server Configuration",
+        "content": "Configure your server settings including paths, ports, and startup parameters."
+      }
+    },
+    "customization": {
+      "title": "Interface Customization",
+      "description": "Personalize HEAL's appearance and behavior",
+      "settings": {
+        "title": "Open Settings",
+        "content": "Click on the Settings tab to access customization options."
+      },
+      "theme": {
+        "title": "Theme Selection",
+        "content": "Choose from different themes to personalize your HEAL experience."
+      }
+    },
+    "advanced": {
+      "title": "Advanced Features",
+      "description": "Explore HEAL's advanced tools and capabilities",
+      "tools": {
+        "title": "Tools Overview",
+        "content": "The Tools section contains powerful utilities for development and system management."
+      },
+      "modules": {
+        "title": "Module Development",
+        "content": "Use the scaffold generator to create custom modules and extend HEAL's functionality."
+      }
+    },
+    "workflow": {
+      "title": "Interactive Workflow Tutorial",
+      "description": "Learn complete workflows with hands-on practice",
+      "intro": {
+        "title": "Workflow Introduction",
+        "content": "This tutorial will guide you through complete workflows in HEAL with interactive steps."
+      },
+      "lifecycle": {
+        "title": "Server Lifecycle Management",
+        "content": "Learn to start, monitor, and manage server lifecycles. Please start a server to continue."
+      },
+      "monitoring": {
+        "title": "Log Monitoring",
+        "content": "View and analyze server logs for troubleshooting. Click on logs to continue."
+      },
+      "batch": {
+        "title": "Batch Operations",
+        "content": "Use batch operations to manage multiple servers efficiently. Try a batch operation."
+      }
+    },
+    "module_dev": {
+      "title": "Module Development Tutorial",
+      "description": "Learn to create and test custom modules",
+      "scaffold": {
+        "title": "Module Scaffolding",
+        "content": "Use the scaffold tool to generate module templates and structure."
+      },
+      "create": {
+        "title": "Create Module",
+        "content": "Create your first custom module using the scaffold generator."
+      },
+      "test": {
+        "title": "Test Module",
+        "content": "Test your module to ensure it works correctly before deployment."
+      }
+    },
+    "hints": {
+      "start_server": "Click on a server card and select 'Start' from the menu",
+      "view_logs": "Right-click on a server and select 'View Logs'",
+      "use_batch_operation": "Use the quick action buttons at the bottom to perform batch operations",
+      "create_module": "Fill out the module creation form and click 'Generate'",
+      "test_module": "Click the 'Test' button to validate your module"
+    }
+  },
+  "recommendations": {
+    "setup_first_server": {
+      "title": "Set Up Your First Server",
+      "description": "Get started by configuring and launching your first server in the Launcher section."
+    },
+    "explore_modules": {
+      "title": "Explore Available Modules",
+      "description": "Discover new modules in the Download section to extend HEAL's functionality."
+    },
+    "optimize_performance": {
+      "title": "Optimize Performance",
+      "description": "Your system performance could be improved. Check the performance settings."
+    },
+    "configure_proxy": {
+      "title": "Configure Proxy Settings",
+      "description": "Connection issues detected. Consider configuring proxy settings for better connectivity."
+    },
+    "setup_environment": {
+      "title": "Set Up Development Environment",
+      "description": "Configure your development environment for optimal module development."
+    },
+    "batch_server_management": {
+      "title": "Use Batch Operations",
+      "description": "Manage multiple servers more efficiently with batch operations."
+    },
+    "create_custom_module": {
+      "title": "Create Custom Module",
+      "description": "Ready to create your own modules? Use the scaffold tool to get started."
+    },
+    "check_logs": {
+      "title": "Check Server Logs",
+      "description": "Issues detected. Check the server logs for detailed error information."
+    },
+    "update_configuration": {
+      "title": "Update Configuration",
+      "description": "Your configuration may need updates. Review your settings."
+    }
+  },
+  "features": {
+    "discovery_title": "🎉 New Feature",
+    "server_context_menu": {
+      "name": "Server Context Menu",
+      "description": "Right-click on server cards to access advanced options like restart, settings, and logs."
+    },
+    "quick_actions_bar": {
+      "name": "Quick Actions Bar",
+      "description": "Use the action bar at the bottom for batch operations on multiple servers."
+    },
+    "status_monitoring": {
+      "name": "Real-time Status Monitoring",
+      "description": "Monitor server status and performance in real-time with the status overview."
+    },
+    "batch_operations": {
+      "name": "Batch Operations",
+      "description": "Perform operations on multiple servers simultaneously for improved efficiency."
+    },
+    "log_monitoring": {
+      "name": "Log Monitoring",
+      "description": "Monitor server logs in real-time to quickly identify and resolve issues."
+    },
+    "module_store": {
+      "name": "Module Store",
+      "description": "Browse and download modules to extend HEAL's functionality."
+    },
+    "module_development": {
+      "name": "Module Development",
+      "description": "Create custom modules using the scaffold generator and development tools."
+    },
+    "environment_configuration": {
+      "name": "Environment Configuration",
+      "description": "Configure development environments for optimal performance and compatibility."
+    },
+    "custom_commands": {
+      "name": "Custom Commands",
+      "description": "Create and use custom commands for advanced automation and workflows."
+    },
+    "api_integration": {
+      "name": "API Integration",
+      "description": "Integrate with external APIs and services for enhanced functionality."
+    }
+  },
+  "docs": {
+    "contextual_help": "📖 Help",
+    "help_available": "📖 Help Available",
+    "open_full": "Open Full Documentation"
+  },
   "ready": "Ready"
 }

@@ -26,10 +26,13 @@ class CompactBannerWidget(QFrame):
     # Signals
     banner_clicked = Signal()
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, parent: QWidget | None = None, smart_tip_system: Optional[Any] = None) -> None:
         super().__init__(parent)
         self.current_tip_index = 0
-        self.tips_list = [
+        self.smart_tip_system = smart_tip_system
+
+        # Fallback tips if smart tip system is not available
+        self.fallback_tips = [
             tr("home.tip_server_management"),
             tr("home.tip_quick_actions"),
             tr("home.tip_status_monitoring"),
@@ -37,12 +40,16 @@ class CompactBannerWidget(QFrame):
             tr("home.tip_keyboard_shortcuts"),
         ]
 
+        self.current_tip_content = ""
+        self.is_smart_tip = False
+
         self.logger = get_logger(
             "compact_banner", module="CompactBannerWidget")
 
         self._init_ui()
         self._setup_styles()
         self._setup_tip_rotation()
+        self._connect_smart_tip_system()
 
     def _init_ui(self) -> None:
         """Initialize the user interface."""
@@ -168,28 +175,60 @@ class CompactBannerWidget(QFrame):
         """Setup automatic tip rotation timer."""
         self.tip_timer = QTimer(self)
         self.tip_timer.timeout.connect(self._rotate_tip)
-        self.tip_timer.start(8000)  # Change tip every 8 seconds
+
+        # Only start rotation if smart tip system is not available
+        if not self.smart_tip_system:
+            self.tip_timer.start(8000)  # Change tip every 8 seconds
 
         # Time update timer
         self.time_timer = QTimer(self)
         self.time_timer.timeout.connect(self._update_time)
         self.time_timer.start(1000)  # Update time every second
 
+    def _connect_smart_tip_system(self) -> None:
+        """Connect to smart tip system if available"""
+        if self.smart_tip_system:
+            self.smart_tip_system.tip_requested.connect(self._handle_smart_tip)
+            self.logger.info("Connected to smart tip system")
+        else:
+            self.logger.debug("No smart tip system available, using fallback tips")
+
     def _rotate_tip(self) -> None:
         """Rotate to the next tip."""
-        if self.tips_list:
+        if self.smart_tip_system:
+            # Smart tip system handles rotation
+            return
+
+        if self.fallback_tips:
             self.current_tip_index = (
-                self.current_tip_index + 1) % len(self.tips_list)
+                self.current_tip_index + 1) % len(self.fallback_tips)
             self._update_tip_display()
+
+    def _handle_smart_tip(self, tip_content: str) -> None:
+        """Handle tip from smart tip system"""
+        self.current_tip_content = tip_content
+        self.is_smart_tip = True
+        self._update_tip_display()
+        self.logger.debug(f"Received smart tip: {tip_content[:50]}...")
 
     def _update_tip_display(self) -> None:
         """Update the tip display with current tip."""
-        if self.tips_list and self.current_tip_index < len(self.tips_list):
-            tip = self.tips_list[self.current_tip_index]
-            self.tip_content.setText(tip)
+        tip_text = ""
 
+        if self.is_smart_tip and self.current_tip_content:
+            # Use smart tip content
+            tip_text = self.current_tip_content
+        elif self.fallback_tips and self.current_tip_index < len(self.fallback_tips):
+            # Use fallback tip
+            tip_text = self.fallback_tips[self.current_tip_index]
+
+        if tip_text:
+            self.tip_content.setText(tip_text)
             # Add fade effect for tip changes
             self._fade_tip_content()
+
+        # Reset smart tip flag after displaying
+        self.is_smart_tip = False
 
     def _fade_tip_content(self) -> None:
         """Add a subtle fade effect when changing tips."""

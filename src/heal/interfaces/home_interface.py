@@ -1,6 +1,6 @@
 import os
 import random
-from typing import List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QAction
@@ -46,6 +46,11 @@ class Home(QWidget):
         self.layout_manager = HomeLayoutManager(self)
         self.dialog_manager = DialogManager(self)
 
+        # Initialize onboarding integration
+        self.onboarding_manager: Optional[Any] = None
+        self.smart_tip_system: Optional[Any] = None
+        self.contextual_help: Optional[Any] = None
+
         # Initialize ProcessManager and ExceptionHandler
         self.process_manager = self.server_manager.process_manager
         self.exception_handler = self.server_manager.exception_handler
@@ -70,6 +75,9 @@ class Home(QWidget):
         if self.layout_manager.use_optimized_layout:
             self._update_optimized_status_displays()
 
+        # Initialize onboarding integration after UI is ready
+        self._init_onboarding_integration()
+
     def initWidgets(self) -> None:
         # Check if we should use optimized layout
         if self.layout_manager.use_optimized_layout:
@@ -83,7 +91,7 @@ class Home(QWidget):
     def _init_optimized_widgets(self) -> None:
         """Initialize widgets for optimized layout"""
         # Create new optimized components
-        self.compact_banner: Any = self.layout_manager.create_compact_banner()
+        self.compact_banner: Any = self.layout_manager.create_compact_banner(self.smart_tip_system)
         self.status_overview: Any = self.layout_manager.create_status_overview()
         self.quick_action_bar: Any = self.layout_manager.create_quick_action_bar()
 
@@ -614,3 +622,99 @@ class Home(QWidget):
         """Handle banner click event"""
         logger.info("Banner clicked")
         # This could show additional information or perform some action
+
+        # Track banner interaction
+        self._track_user_action("banner_clicked")
+
+    def _init_onboarding_integration(self) -> None:
+        """初始化用户引导集成"""
+        try:
+            # 尝试从主窗口获取引导管理器
+            main_window = self._parent_widget
+            if hasattr(main_window, 'onboarding_manager') and main_window.onboarding_manager:
+                self.onboarding_manager = main_window.onboarding_manager
+
+                # 获取智能提示系统
+                if hasattr(self.onboarding_manager, '_ensure_smart_tip_system'):
+                    self.smart_tip_system = self.onboarding_manager._ensure_smart_tip_system()
+
+                # 获取上下文帮助系统
+                if hasattr(self.onboarding_manager, '_ensure_contextual_help'):
+                    self.contextual_help = self.onboarding_manager._ensure_contextual_help()
+
+                # 设置上下文为主页
+                if self.smart_tip_system:
+                    from src.heal.components.onboarding.smart_tip_system import TipContext
+                    self.smart_tip_system.set_context(TipContext.HOME)
+                    self.smart_tip_system.start_rotation()
+
+                # 注册上下文帮助
+                if self.contextual_help:
+                    self._register_contextual_help()
+
+                # 跟踪页面访问
+                if self.onboarding_manager:
+                    self.onboarding_manager.track_user_action("visited_home_page")
+
+                logger.info("用户引导集成已初始化")
+            else:
+                logger.debug("未找到引导管理器，跳过引导集成")
+
+        except Exception as e:
+            logger.error(f"初始化用户引导集成失败: {e}")
+
+    def _register_contextual_help(self) -> None:
+        """注册上下文帮助"""
+        if not self.contextual_help:
+            return
+
+        try:
+            # 注册服务器卡片区域的帮助
+            if hasattr(self, 'server_status_cards') and self.server_status_cards:
+                help_ids = ["home_server_cards", "home_status_overview"]
+                for card in self.server_status_cards:
+                    self.contextual_help.register_widget_help(card, help_ids)
+
+            # 注册快速操作栏的帮助
+            if hasattr(self, 'quick_action_bar') and self.quick_action_bar:
+                self.contextual_help.register_widget_help(
+                    self.quick_action_bar, ["home_quick_actions"]
+                )
+
+            # 注册状态概览的帮助
+            if hasattr(self, 'status_overview') and self.status_overview:
+                self.contextual_help.register_widget_help(
+                    self.status_overview, ["home_status_overview"]
+                )
+
+            logger.debug("上下文帮助已注册")
+
+        except Exception as e:
+            logger.error(f"注册上下文帮助失败: {e}")
+
+    def showEvent(self, event: Any) -> None:
+        """处理界面显示事件"""
+        super().showEvent(event)
+
+        # 当界面显示时，显示上下文帮助
+        if self.contextual_help:
+            self.contextual_help.show_contextual_help("home")
+
+        # 跟踪用户操作
+        if self.onboarding_manager:
+            self.onboarding_manager.track_user_action("viewed_home_interface")
+
+    def _track_user_action(self, action: str, context: Optional[Dict[str, Any]] = None) -> None:
+        """跟踪用户操作"""
+        try:
+            if self.onboarding_manager:
+                self.onboarding_manager.track_user_action(action, context)
+
+            if self.smart_tip_system:
+                self.smart_tip_system.track_action(action)
+
+            if self.contextual_help:
+                self.contextual_help.track_action(action)
+
+        except Exception as e:
+            logger.error(f"跟踪用户操作失败: {e}")

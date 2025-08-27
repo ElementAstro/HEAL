@@ -84,9 +84,9 @@ class HomeLayoutManager:
         toolbar.setVisible(False)
         return toolbar
 
-    def create_compact_banner(self) -> CompactBannerWidget:
+    def create_compact_banner(self, smart_tip_system: Optional[Any] = None) -> CompactBannerWidget:
         """创建紧凑横幅组件"""
-        self.compact_banner = CompactBannerWidget(self.parent)
+        self.compact_banner = CompactBannerWidget(self.parent, smart_tip_system)
         return self.compact_banner  # type: ignore[no-any-return]
 
     def create_status_overview(self) -> StatusOverviewWidget:

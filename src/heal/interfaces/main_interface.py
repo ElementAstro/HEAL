@@ -39,6 +39,9 @@ class Main(MSFluentWindow):
         self.font_manager = FontManager(self)
         self.update_manager = UpdateManager(self)
 
+        # 初始化用户引导系统
+        self.onboarding_manager: Optional[Any] = None
+
         # Initialize tray_icon as None initially
         self.tray_icon: Any = None
 
@@ -66,6 +69,8 @@ class Main(MSFluentWindow):
                           "init_navigation"])
         workflow.add_step("initial_setup", self.handle_initial_setup, [
                           "connect_signals"], optional=True)
+        workflow.add_step("init_onboarding", self.init_onboarding_system, [
+                          "initial_setup"], optional=True)
 
         # 执行工作流
         try:
@@ -114,6 +119,7 @@ class Main(MSFluentWindow):
             self.window_manager.finish_splash()
             self.connect_signals()
             self.handle_initial_setup()
+            self.init_onboarding_system()
             logger.info("传统初始化完成")
         except Exception as e:
             logger.critical(f"传统初始化也失败: {e}")
@@ -131,6 +137,44 @@ class Main(MSFluentWindow):
         """处理登录成功"""
         if cfg.useAudio.value:
             self.audio_manager.play_audio("success")
+
+    def init_onboarding_system(self) -> None:
+        """初始化用户引导系统"""
+        try:
+            from src.heal.components.onboarding import OnboardingManager
+
+            self.onboarding_manager = OnboardingManager(self)
+
+            # 连接引导系统信号
+            self.onboarding_manager.welcome_wizard_requested.connect(self._show_welcome_wizard)
+            self.onboarding_manager.tutorial_requested.connect(self._start_tutorial)
+            self.onboarding_manager.onboarding_completed.connect(self._handle_onboarding_completed)
+
+            logger.info("用户引导系统已初始化")
+
+        except Exception as e:
+            logger.error(f"初始化用户引导系统失败: {e}")
+
+    def _show_welcome_wizard(self) -> None:
+        """显示欢迎向导"""
+        try:
+            if self.onboarding_manager:
+                self.onboarding_manager.start_welcome_wizard()
+        except Exception as e:
+            logger.error(f"显示欢迎向导失败: {e}")
+
+    def _start_tutorial(self, tutorial_id: str) -> None:
+        """启动教程"""
+        try:
+            if self.onboarding_manager:
+                self.onboarding_manager.start_tutorial(tutorial_id)
+        except Exception as e:
+            logger.error(f"启动教程失败: {e}")
+
+    def _handle_onboarding_completed(self) -> None:
+        """处理引导完成"""
+        logger.info("用户引导已完成")
+        # 可以在这里添加引导完成后的逻辑
 
     def handle_login_failed(self, attempt_count: int) -> None:
         """处理登录失败"""
