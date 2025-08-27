@@ -72,7 +72,7 @@ class QuickActionCard(SimpleCardWidget):
         description: str,
         icon: FluentIcon,
         action_id: str,
-        parent=None,
+        parent: Any = None,
     ) -> None:
         super().__init__(parent)
         self.action_id = action_id
@@ -118,7 +118,7 @@ class QuickActionCard(SimpleCardWidget):
 class SystemHealthCard(ElevatedCardWidget):
     """System health overview card"""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.setup_ui()
 
@@ -210,7 +210,7 @@ class SystemHealthCard(ElevatedCardWidget):
 class RecentActivityCard(ElevatedCardWidget):
     """Recent activity feed card"""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.activities: List[Dict[str, Any]] = []
         self.setup_ui()
@@ -320,7 +320,7 @@ class ModuleDashboard(QWidget):
         error_handler: ModuleErrorHandler,
         notification_system: ModuleNotificationSystem,
         bulk_operations: ModuleBulkOperations,
-        parent=None,
+        parent: Any = None,
     ) -> None:
         super().__init__(parent)
         self.logger = logger.bind(component="ModuleDashboard")

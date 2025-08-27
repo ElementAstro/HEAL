@@ -57,7 +57,7 @@ class SearchSuggestionWidget(QWidget):
 
     suggestion_selected = Signal(str)
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = get_logger("search_suggestions", module="SearchSuggestionWidget")
         self.suggestions: list[Any] = []
@@ -127,7 +127,7 @@ class SearchFilterWidget(CardWidget):
 
     filters_changed = Signal(list)  # List[SearchFilter]
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = get_logger("search_filters", module="SearchFilterWidget")
         self.filters: List[SearchFilter] = []
@@ -256,7 +256,7 @@ class SearchResultWidget(CardWidget):
 
     result_clicked = Signal(object)  # SearchResult
 
-    def __init__(self, result: SearchResult, parent=None) -> None:
+    def __init__(self, result: SearchResult, parent: Any = None) -> None:
         super().__init__(parent)
         self.result = result
         self.setup_ui()
@@ -336,7 +336,7 @@ class SearchResultWidget(CardWidget):
         setting_type = self.result.item.setting_type.lower()
         return type_icons.get(setting_type, FluentIcon.SETTING)
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event: Any) -> None:
         """Handle mouse press"""
         if event.button() == Qt.MouseButton.LeftButton:
             self.result_clicked.emit(self.result)
@@ -348,7 +348,7 @@ class SearchResultsWidget(QScrollArea):
 
     result_selected = Signal(object)  # SearchResult
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = get_logger("search_results", module="SearchResultsWidget")
         self.results: List[SearchResult] = []
@@ -428,7 +428,7 @@ class SettingsSearchWidget(QWidget):
     setting_selected = Signal(object)  # SettingItem
     search_mode_changed = Signal(bool)  # True when search is active
 
-    def __init__(self, search_engine: SettingsSearchEngine, parent=None) -> None:
+    def __init__(self, search_engine: SettingsSearchEngine, parent: Any = None) -> None:
         super().__init__(parent)
         self.search_engine = search_engine
         self.logger = get_logger(

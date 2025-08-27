@@ -3,6 +3,8 @@ Theme Manager
 Handles theme switching and configuration
 """
 
+from typing import Any
+
 from PySide6.QtCore import QObject, Signal
 from qfluentwidgets import Theme, setTheme
 
@@ -16,7 +18,7 @@ class ThemeManager(QObject):
     # 信号
     theme_changed = Signal(Theme)
 
-    def __init__(self, main_window) -> None:
+    def __init__(self, main_window: Any) -> None:
         super().__init__(main_window)
         self.main_window = main_window
         self.logger = get_logger("theme_manager", module="ThemeManager")

@@ -4,7 +4,7 @@
 """
 
 from pathlib import Path
-from typing import Dict  # List, Optional removed as per error
+from typing import Any, Dict  # List, Optional removed as per error
 
 from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QFont  # QColor removed as per error
@@ -45,7 +45,7 @@ class DownloadItemCard(CardWidget):
     cancel_requested = Signal(str)  # download_id
     retry_requested = Signal(str)  # download_id
 
-    def __init__(self, download_item: DownloadItem, parent=None) -> None:
+    def __init__(self, download_item: DownloadItem, parent: Any = None) -> None:
         super().__init__(parent)
         self.download_item = download_item
         self.init_ui()
@@ -256,7 +256,7 @@ class DownloadManagerWidget(QWidget):
     download_completed_signal = Signal(str)  # download_id ; Renamed
     download_failed_signal = Signal(str)  # download_id ; Renamed
 
-    def __init__(self, download_manager: DownloadManager, parent=None) -> None:
+    def __init__(self, download_manager: DownloadManager, parent: Any = None) -> None:
         super().__init__(parent)
         self.download_manager = download_manager
         self.download_cards: Dict[str, DownloadItemCard] = {}
@@ -355,7 +355,7 @@ class DownloadManagerWidget(QWidget):
 
     def _on_download_status_changed_for_infobar(
         self, download_id: str, status: DownloadStatus
-    ):
+    ) -> None:
         """Handles status changes to show specific InfoBars for pause/cancel."""
         if status == DownloadStatus.PAUSED:
             # This method shows the InfoBar

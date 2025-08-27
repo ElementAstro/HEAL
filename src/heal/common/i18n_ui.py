@@ -63,7 +63,7 @@ class I18nWidget(QObject):
         """注册占位符文本"""
         self.register_element(element, key, "setPlaceholderText", **kwargs)
 
-    def register_window_title(self, key: str, **kwargs) -> None:
+    def register_window_title(self, key: str, **kwargs: Any) -> None:
         """注册窗口标题"""
         if hasattr(self.widget, "setWindowTitle"):
             self.register_element(self.widget, key, "setWindowTitle", **kwargs)

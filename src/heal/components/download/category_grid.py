@@ -154,7 +154,7 @@ class CategoryGridWidget(CardWidget):
     category_selected = Signal(str, str)  # category_id, category_title
     view_all_categories = Signal()  # User wants to see all categories
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = get_logger("category_grid_widget", module="CategoryGridWidget")
         self.categories: list[Any] = []
@@ -372,7 +372,7 @@ class CategoryDetailView(CardWidget):
     back_requested = Signal()  # User wants to go back to grid
     item_selected = Signal(str, Dict)  # item_id, item_data
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = get_logger("category_detail_view", module="CategoryDetailView")
         self.current_category: Any = None

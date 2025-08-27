@@ -45,7 +45,7 @@ class EnvironmentStatusCard(SettingCard):
     update_requested = Signal(str)  # tool_name
     configure_requested = Signal(str)  # tool_name
 
-    def __init__(self, tool_name: str, tool_info: ToolInfo, parent=None) -> None:
+    def __init__(self, tool_name: str, tool_info: ToolInfo, parent: Any = None) -> None:
         # 根据状态选择图标
         icon = self._get_status_icon(tool_info.status)
         super().__init__(icon, tool_name, tool_info.version or "未安装", parent)
@@ -213,7 +213,7 @@ class SmartToolCard(SettingCard):
         content: str,
         options: List[Dict],
         tool_status: Optional[ToolStatus] = None,
-        parent=None,
+        parent: Any = None,
     ) -> None:
         super().__init__(FluentIcon.DOWNLOAD, title, content, parent)
 
@@ -281,7 +281,7 @@ class SmartToolCard(SettingCard):
 class ToolCategorySection(SettingCardGroup):
     """工具分类区域 - 可折叠的工具分组"""
 
-    def __init__(self, title: str, description: str = "", parent=None) -> None:
+    def __init__(self, title: str, description: str = "", parent: Any = None) -> None:
         super().__init__(parent)
         self.title = title
         self.description = description
@@ -334,7 +334,7 @@ class QuickActionPanel(QWidget):
 
     action_requested = Signal(str, str)  # action_type, target
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = get_logger("quick_action_panel", module="QuickActionPanel")
         self.init_ui()

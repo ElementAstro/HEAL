@@ -3,7 +3,7 @@ Proxy Signal Manager
 Handles signal connections and event management for proxy interface
 """
 
-from typing import Optional
+from typing import Any, Optional
 
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QWidget
@@ -30,7 +30,7 @@ class ProxySignalManager(QObject):
         self.proxy_manager = ProxyManager(parent_widget)
         self.sub_download_cmd = SubDownloadCMD(parent_widget)
 
-    def connect_download_signals(self, download_card) -> None:
+    def connect_download_signals(self, download_card: Any) -> None:
         """连接下载信号"""
         download_card.clicked.connect(lambda: self.handle_download_started("fiddler"))
         self.logger.debug("下载信号已连接")
@@ -45,7 +45,7 @@ class ProxySignalManager(QObject):
 
         self.logger.debug("Fiddler信号已连接")
 
-    def connect_proxy_signals(self, proxy_card) -> None:
+    def connect_proxy_signals(self, proxy_card: Any) -> None:
         """连接代理重置信号"""
         proxy_card.clicked.connect(self.proxy_manager.reset_proxy)
         self.logger.debug("代理重置信号已连接")

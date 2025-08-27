@@ -3,6 +3,8 @@ Update Manager
 Handles update checking and notifications
 """
 
+from typing import Any
+
 from PySide6.QtCore import QObject, Qt, Signal
 from qfluentwidgets import HyperlinkButton, InfoBar, InfoBarIcon, InfoBarPosition
 
@@ -16,7 +18,7 @@ class UpdateManager(QObject):
     # 信号
     update_checked = Signal(int, str)  # status, info
 
-    def __init__(self, main_window) -> None:
+    def __init__(self, main_window: Any) -> None:
         super().__init__(main_window)
         self.main_window = main_window
         self.logger = get_logger("update_manager", module="UpdateManager")

@@ -1,3 +1,5 @@
+from typing import Any
+
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QStackedWidget, QVBoxLayout, QWidget
 from qfluentwidgets import (
@@ -26,7 +28,7 @@ logger = get_logger(__name__)
 class Launcher(ScrollArea):
     Nav = Pivot
 
-    def __init__(self, text: str, parent=None) -> None:
+    def __init__(self, text: str, parent: Any = None) -> None:
         super().__init__(parent=parent)
         self._parent_widget = parent
         self.setObjectName(text)

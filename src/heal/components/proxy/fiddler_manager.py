@@ -6,7 +6,7 @@ Handles Fiddler operations and proxy management
 import os
 import subprocess
 import time
-from typing import Optional
+from typing import Any, Optional
 
 from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtWidgets import QWidget
@@ -80,7 +80,7 @@ class FiddlerManager(QObject):
         # 这里可以发出信号通知主界面切换到下载页面
         self.logger.info("请求导航到下载页面。")
 
-    def show_fiddler_tip(self, target_button) -> None:
+    def show_fiddler_tip(self, target_button: Any) -> None:
         """显示Fiddler提示"""
         PopupTeachingTip.make(
             target=target_button,

@@ -464,7 +464,7 @@ class EnhancedSettingsManager(QObject):
             self.logger.error(f"Error handling choice change: {e}")
             self.error_occurred.emit("handle_choice_changed", str(e))
 
-    def handle_proxy_changed(self, status, title_true, title_false) -> None:
+    def handle_proxy_changed(self, status: Any, title_true: Any, title_false: Any) -> None:
         """Handle proxy setting changes with error handling."""
         try:
             if status:

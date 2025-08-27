@@ -455,12 +455,12 @@ def settings_error_handler(
     operation: str,
     severity: ErrorSeverity = ErrorSeverity.MEDIUM,
     context: Optional[Dict[str, Any]] = None,
-) -> Any:
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """Decorator for automatic error handling in settings operations"""
 
     def decorator(func: Any) -> Any:
         @wraps(func)
-        def wrapper(*args, **kwargs: Any) -> Any:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             try:
                 return func(*args, **kwargs)
             except Exception as e:

@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Any, Union
 from PySide6.QtCore import QSize, Qt, QUrl
 from PySide6.QtGui import (
     QClipboard,
@@ -24,10 +24,10 @@ from src.heal.resources import resource_manager
 class AboutBackground(QWidget):
     """Background widget for the about section with rounded corners and app info."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent=parent)
 
-    def paintEvent(self, event) -> None:
+    def paintEvent(self, event: Any) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         pixmap = QPixmap(
@@ -56,7 +56,7 @@ class AboutBackground(QWidget):
 class About(QWidget):
     """About section widget with links and version info."""
 
-    def __init__(self, text: str, parent=None) -> None:
+    def __init__(self, text: str, parent: Any = None) -> None:
         super().__init__(parent=parent)
         self.setObjectName(text)
         self.__initWidget()

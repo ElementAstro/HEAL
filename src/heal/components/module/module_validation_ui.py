@@ -523,8 +523,10 @@ class ValidationReportWidget(QScrollArea):
             return ERROR_STYLE
         elif result == ValidationResult.CRITICAL:
             return CRITICAL_STYLE
-        else:
-            return ""
+
+        # All enum values are covered above, this should never be reached
+        # But we need a return statement for type checking
+        raise ValueError(f"Unexpected ValidationResult value: {result}")
 
 
 class ModuleValidationUI(QWidget):

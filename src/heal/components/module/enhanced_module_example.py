@@ -331,7 +331,7 @@ class EnhancedModuleInterface(QMainWindow):
 
     # Workflow step handlers
     def handle_download_step(
-        self, workflow_id: str, module_name: str, step_info
+        self, workflow_id: str, module_name: str, step_info: Any
     ) -> bool:
         """Handle download workflow step"""
         try:
@@ -345,7 +345,7 @@ class EnhancedModuleInterface(QMainWindow):
             return False
 
     def handle_validate_step(
-        self, workflow_id: str, module_name: str, step_info
+        self, workflow_id: str, module_name: str, step_info: Any
     ) -> bool:
         """Handle validation workflow step"""
         try:
@@ -359,7 +359,7 @@ class EnhancedModuleInterface(QMainWindow):
             return False
 
     def handle_install_step(
-        self, workflow_id: str, module_name: str, step_info
+        self, workflow_id: str, module_name: str, step_info: Any
     ) -> bool:
         """Handle installation workflow step"""
         try:
@@ -373,7 +373,7 @@ class EnhancedModuleInterface(QMainWindow):
             return False
 
     def handle_configure_step(
-        self, workflow_id: str, module_name: str, step_info
+        self, workflow_id: str, module_name: str, step_info: Any
     ) -> bool:
         """Handle configuration workflow step"""
         try:
@@ -383,7 +383,7 @@ class EnhancedModuleInterface(QMainWindow):
             logger.error(f"Configure step failed for {module_name}: {e}")
             return False
 
-    def handle_enable_step(self, workflow_id: str, module_name: str, step_info) -> bool:
+    def handle_enable_step(self, workflow_id: str, module_name: str, step_info: Any) -> bool:
         """Handle enable workflow step"""
         try:
             if module_name in self.module_manager.mods:
@@ -396,7 +396,7 @@ class EnhancedModuleInterface(QMainWindow):
             return False
 
     # Error recovery handlers
-    def handle_retry_operation(self, error, parameters) -> bool:
+    def handle_retry_operation(self, error: Any, parameters: Any) -> bool:
         """Handle retry operation recovery"""
         try:
             # Implement retry logic based on error context
@@ -404,7 +404,7 @@ class EnhancedModuleInterface(QMainWindow):
         except Exception:
             return False
 
-    def handle_check_network(self, error, parameters) -> bool:
+    def handle_check_network(self, error: Any, parameters: Any) -> bool:
         """Handle network check recovery"""
         try:
             # Implement network connectivity check
@@ -412,7 +412,7 @@ class EnhancedModuleInterface(QMainWindow):
         except Exception:
             return False
 
-    def handle_fix_permissions(self, error, parameters) -> bool:
+    def handle_fix_permissions(self, error: Any, parameters: Any) -> bool:
         """Handle permission fix recovery"""
         try:
             # Implement permission fixing logic
@@ -421,7 +421,7 @@ class EnhancedModuleInterface(QMainWindow):
             return False
 
     # Notification action handlers
-    def handle_view_details(self, notification, parameters) -> bool:
+    def handle_view_details(self, notification: Any, parameters: Any) -> bool:
         """Handle view details action"""
         try:
             # Switch to appropriate tab or show details dialog
@@ -429,7 +429,7 @@ class EnhancedModuleInterface(QMainWindow):
         except Exception:
             return False
 
-    def handle_retry_action(self, notification, parameters) -> bool:
+    def handle_retry_action(self, notification: Any, parameters: Any) -> bool:
         """Handle retry action"""
         try:
             # Implement retry logic based on notification context

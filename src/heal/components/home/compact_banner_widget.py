@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from PySide6.QtCore import QSize, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QFont, QLinearGradient, QPainter, QPixmap
@@ -237,7 +237,7 @@ class CompactBannerWidget(QFrame):
         self._update_tip_display()
         self.logger.debug(f"Tips list updated with {len(tips)} tips")
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event: Any) -> None:
         """Handle mouse press events."""
         if event.button() == Qt.MouseButton.LeftButton:
             self.banner_clicked.emit()

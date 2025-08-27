@@ -356,11 +356,11 @@ def get_performance_manager() -> SettingsPerformanceManager:
     return _performance_manager
 
 
-def performance_optimized(func: Any) -> Any:
+def performance_optimized(func: Callable[..., Any]) -> Callable[..., Any]:
     """Decorator to add performance optimization to setting operations"""
 
     @wraps(func)
-    def wrapper(*args, **kwargs: Any) -> Any:
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         start_time = time.time()
         try:
             result = func(*args, **kwargs)

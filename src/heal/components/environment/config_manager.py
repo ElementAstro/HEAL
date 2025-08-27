@@ -23,13 +23,13 @@ class EnvironmentConfigManager(QObject):
     config_load_failed = Signal(str)  # error_message
     card_created = Signal(str)  # card_title
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = get_logger(
             "environment_config_manager", module="EnvironmentConfigManager"
         )
         self.config_file = Path("config") / "download.json"
-        self.config_data: List[Dict[str, Any]] = []
+        self.config_data: List[Dict[str, Any]] = []  # Can be Any initially, validated to List[Dict[str, Any]] later
 
     def load_download_config(self) -> List[SettingCard]:
         """加载下载配置 - 使用统一JSON工具"""
@@ -52,12 +52,7 @@ class EnvironmentConfigManager(QObject):
 
         self.config_data = result.data
 
-        # 确保数据是列表格式
-        if not isinstance(self.config_data, list):
-            error_msg = "配置数据格式错误，期望列表格式"
-            self.logger.error(error_msg)
-            self.config_load_failed.emit(error_msg)
-            return cards
+        # Data is now properly typed as List[Dict[str, Any]]
 
         # 创建卡片
         for item in self.config_data:

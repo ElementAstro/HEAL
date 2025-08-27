@@ -197,7 +197,7 @@ class Setting(ScrollArea, SearchEnabledSettingsInterface):
         """Get search statistics for debugging"""
         return self.search_integrator.get_search_statistics()
 
-    def onCurrentIndexChanged(self, index) -> None:
+    def onCurrentIndexChanged(self, index: Any) -> None:
         """Legacy method for compatibility."""
         self.layout_manager.on_current_index_changed(
             self.pivot, self.stackedWidget, index

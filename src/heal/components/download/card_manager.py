@@ -35,7 +35,7 @@ class DownloadCardManager:
     )
     def add_items_to_section(
         self, section_interface: SettingCardGroup, items: List[Dict[str, Any]]
-    ):
+    ) -> None:
         """向部分添加项目"""
         for item in items:
             item_type = item.get("type")

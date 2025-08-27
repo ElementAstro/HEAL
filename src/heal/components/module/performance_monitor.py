@@ -616,7 +616,7 @@ class ModulePerformanceTracker:
             def __enter__(self) -> "LoadContext":
                 return self
 
-            def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+            def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
                 end_time = time.time()
                 load_time = (end_time - start_time) * 1000  # ms
 
@@ -631,7 +631,7 @@ class ModulePerformanceTracker:
                 if exc_type is not None:
                     self.outer.track_module_error(module_name, str(exc_val))
 
-            def __init__(self, outer) -> None:
+            def __init__(self, outer: Any) -> None:
                 self.outer = outer
 
         return LoadContext(self)

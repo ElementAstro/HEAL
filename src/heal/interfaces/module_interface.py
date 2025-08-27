@@ -46,7 +46,7 @@ class Module(ScrollArea):
     module_operation_requested = Signal(str, str)  # operation, module_name
     performance_alert = Signal(str, str, str)  # alert_name, message, severity
 
-    def __init__(self, text: str, parent=None) -> None:
+    def __init__(self, text: str, parent: Any = None) -> None:
         super().__init__(parent=parent)
         self.parent_widget = parent
         self.setObjectName(text)
@@ -388,7 +388,7 @@ class Module(ScrollArea):
 
     def _show_critical_validation_warning(
         self, module_name: str, critical_issues: List[Dict]
-    ):
+    ) -> None:
         """显示严重验证警告"""
         issues_text = "\n".join(
             [issue.get("message", "") for issue in critical_issues[:3]]
@@ -506,7 +506,7 @@ class Module(ScrollArea):
             "memory_usage": 0,
         }
 
-    def addSubInterface(self, widget: QWidget, object_name: str, text: str, icon=None) -> None:
+    def addSubInterface(self, widget: QWidget, object_name: str, text: str, icon: Any = None) -> None:
         """添加子界面"""
         widget.setObjectName(object_name)
         self.stackedWidget.addWidget(widget)

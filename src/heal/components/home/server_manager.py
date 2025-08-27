@@ -67,7 +67,7 @@ class ServerManager:
             "ICON" in details and details["ICON"]
         ):  # 处理只有 ICON 没有 ICON_TYPE 的情况
             icon = details["ICON"]
-        return icon  # type: ignore[no-any-return]
+        return icon
 
     def get_selected_servers(self) -> List[TogglePushButton]:
         """获取选中的服务器按钮"""
@@ -127,7 +127,7 @@ class ServerManager:
 
     def _handle_server_start_exception(
         self, server: TogglePushButton, name: str, exception: Exception
-    ):
+    ) -> None:
         """处理服务器启动异常"""
         self.exception_handler.handle_known_exception(
             exception,

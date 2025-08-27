@@ -38,7 +38,7 @@ class QuickDownloadSection(CardWidget):
 
     download_requested = Signal(str, str)  # name, url
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = get_logger(
             "quick_download_section", module="QuickDownloadSection"
@@ -118,7 +118,7 @@ class SearchSection(CardWidget):
     search_requested = Signal(str, str)  # search_text, category
     category_selected = Signal(str)  # category
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = get_logger("search_section", module="SearchSection")
         self.categories: list[Any] = []
@@ -220,7 +220,7 @@ class DownloadStatusIndicator(CardWidget):
 
     status_clicked = Signal()  # User wants to see download details
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = get_logger(
             "download_status_indicator", module="DownloadStatusIndicator"
@@ -283,7 +283,7 @@ class DownloadStatusIndicator(CardWidget):
 
         # Note: CardWidget automatically manages its layout, no need to call setLayout()
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event: Any) -> None:
         """Handle click to show download details"""
         if event.button() == Qt.MouseButton.LeftButton:
             self.status_clicked.emit()
@@ -326,7 +326,7 @@ class DownloadHeaderSection(QWidget):
     download_requested = Signal(str, str)  # name, url
     status_clicked = Signal()  # User wants to see download details
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = get_logger(
             "download_header_section", module="DownloadHeaderSection"

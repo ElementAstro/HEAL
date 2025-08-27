@@ -15,6 +15,8 @@ from qfluentwidgets import (
 )
 
 from src.heal.common.logging_config import get_logger
+from src.heal.components.setting.error_handler import settings_error_handler, ErrorSeverity
+from src.heal.components.setting.performance_manager import performance_optimized
 from src.heal.models.check_update import check_update
 from src.heal.models.config import Info, cfg, get_json
 from src.heal.models.setting_card import CustomDialog, SettingCardGroup
@@ -325,14 +327,14 @@ class SettingsManager(QObject):
         self.config_editor_dialog = CustomDialog(self.config_editor)
         self.config_editor_dialog.show()
 
-    def handle_choice_changed(self, status, title_true, title_false) -> None:
+    def handle_choice_changed(self, status: Any, title_true: Any, title_false: Any) -> None:
         """Handle toggle setting changes."""
         if status:
             Info(self.parent, "S", 1000, title_true)
         else:
             Info(self.parent, "S", 1000, title_false)
 
-    def handle_proxy_changed(self, status, title_true, title_false) -> None:
+    def handle_proxy_changed(self, status: Any, title_true: Any, title_false: Any) -> None:
         """Handle proxy setting changes."""
         if status:
             Info(self.parent, "S", 1000, title_true)

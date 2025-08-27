@@ -3,7 +3,7 @@ Environment Signal Manager
 Handles signal connections and event management for environment interface
 """
 
-from typing import TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 from PySide6.QtCore import QObject, Qt, Signal
 from qfluentwidgets import InfoBar, InfoBarIcon, InfoBarPosition, PrimaryPushButton
@@ -23,7 +23,7 @@ class EnvironmentSignalManager(QObject):
     restart_requested = Signal()
     download_to_page_requested = Signal(int)  # page_index
 
-    def __init__(self, parent_widget, download_interface_widget) -> None:
+    def __init__(self, parent_widget: Any, download_interface_widget: Any) -> None:
         super().__init__(parent_widget)
         self.parent_widget = parent_widget
         self.download_interface_widget = download_interface_widget
@@ -34,7 +34,7 @@ class EnvironmentSignalManager(QObject):
         # 初始化下载命令处理器
         self.sub_download_cmd = SubDownloadCMD(parent_widget)
 
-    def connect_card_signals(self, cards_container) -> None:
+    def connect_card_signals(self, cards_container: Any) -> None:
         """连接卡片信号"""
         for i in range(cards_container.cardLayout.count()):
             item = cards_container.cardLayout.itemAt(i)
@@ -51,7 +51,7 @@ class EnvironmentSignalManager(QObject):
 
         self.logger.info("卡片信号已连接完成。")
 
-    def connect_database_signals(self, database_manager) -> None:
+    def connect_database_signals(self, database_manager: Any) -> None:
         """连接数据库管理器信号"""
         database_manager.database_not_found.connect(
             lambda: self.download_to_page_requested.emit(1)

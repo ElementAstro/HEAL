@@ -206,9 +206,8 @@ class DateRangeFilter(CardWidget):
         to_timestamp = self.to_date.date().toPython().timestamp() + 86400  # End of day
 
         def date_filter(item: SettingItem) -> bool:
-            if isinstance(item.last_modified, (int, float)):
-                return bool(from_timestamp <= item.last_modified <= to_timestamp)
-            return False
+            # last_modified is always a float, so no need to check isinstance
+            return bool(from_timestamp <= item.last_modified <= to_timestamp)
 
         advanced_filter = AdvancedFilter(
             filter_type=AdvancedFilterType.DATE_RANGE,

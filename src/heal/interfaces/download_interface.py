@@ -338,7 +338,7 @@ class Download(ScrollArea):
 
     def add_items_to_section(
         self, section_interface: SettingCardGroup, items: List[Dict[str, Any]]
-    ):
+    ) -> None:
         """向部分添加项目"""
         self.card_manager.add_items_to_section(section_interface, items)
 
@@ -461,7 +461,7 @@ class Download(ScrollArea):
 
     def add_sub_interface(
         self, widget: QWidget, object_name: str, text: str, icon: Any = FIF.DOWNLOAD
-    ):
+    ) -> None:
         """添加子界面"""
         self.navigation_manager.add_sub_interface(widget, object_name, text, icon)
         logger.debug(t("download.sub_interface_added", name=object_name))

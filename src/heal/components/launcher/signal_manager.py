@@ -3,7 +3,7 @@ Launcher Signal Manager
 Handles signal connections and event management for launcher interface
 """
 
-from typing import Optional
+from typing import Any, Optional
 
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QWidget
@@ -30,14 +30,14 @@ class LauncherSignalManager(QObject):
         # 初始化下载命令处理器
         self.sub_download_cmd = SubDownloadCMD(parent_widget)
 
-    def connect_audio_download_signal(self, audio_download_card) -> None:
+    def connect_audio_download_signal(self, audio_download_card: Any) -> None:
         """连接音频下载信号"""
         audio_download_card.clicked.connect(
             lambda: self.handle_download_started("audio")
         )
         self.logger.debug("音频下载信号已连接")
 
-    def connect_config_signal(self, config_card) -> None:
+    def connect_config_signal(self, config_card: Any) -> None:
         """连接配置文件信号"""
         config_card.clicked.connect(lambda: self.handle_file_open("config/config.json"))
         self.logger.debug("配置文件信号已连接")

@@ -38,7 +38,7 @@ class LazyLoadWorker(QThread):
     finished = Signal(str, object)  # setting_key, result
     error_occurred = Signal(str, str)  # setting_key, error
 
-    def __init__(self, setting_key: str, loader_func: Callable, parent=None) -> None:
+    def __init__(self, setting_key: str, loader_func: Callable, parent: Any = None) -> None:
         super().__init__(parent)
         self.setting_key = setting_key
         self.loader_func = loader_func
@@ -363,12 +363,12 @@ def get_lazy_manager() -> LazySettingsManager:
     return _lazy_manager
 
 
-def lazy_setting(setting_key: str, fallback_value: Any | None = None):
+def lazy_setting(setting_key: str, fallback_value: Any | None = None) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """Decorator for lazy setting access"""
 
     def decorator(func: Any) -> Any:
         @wraps(func)
-        def wrapper(*args, **kwargs: Any) -> Any:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             manager = get_lazy_manager()
             value = manager.get_setting(setting_key)
             if value is not None:

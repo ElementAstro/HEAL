@@ -4,7 +4,7 @@ Provides a comprehensive download management interface
 """
 
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from PySide6.QtCore import QObject, Qt, QTimer, Signal
 from PySide6.QtWidgets import (
@@ -42,7 +42,7 @@ from src.heal.components.monitoring.download_monitor import DownloadItemCard, Do
 class DownloadStatsCard(CardWidget):
     """下载统计卡片"""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.init_ui()
 
@@ -103,7 +103,7 @@ class QuickDownloadCard(CardWidget):
 
     download_requested = Signal(str, str)  # name, url
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.init_ui()
 
@@ -156,7 +156,7 @@ class QuickDownloadCard(CardWidget):
 class DownloadHistoryWidget(QWidget):
     """下载历史组件"""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.init_ui()
         self.download_history: List[Dict] = []
@@ -251,7 +251,7 @@ class DownloadPanel(QWidget):
 
     download_requested = Signal(str, str)  # name, url
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = get_logger("download_panel", module="DownloadPanel")
 
@@ -329,7 +329,7 @@ class DownloadPanel(QWidget):
         stats = {"total": 10, "active": 2, "completed": 7, "failed": 1}
         self.stats_card.update_stats(stats)
 
-    def on_download_completed(self, download_item) -> None:
+    def on_download_completed(self, download_item: Any) -> None:
         """下载完成处理"""
         from datetime import datetime
 

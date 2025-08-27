@@ -54,7 +54,7 @@ class ToolStatusManager(QObject):
     check_started = Signal(str)  # tool_name
     check_completed = Signal(str)  # tool_name
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.logger = get_logger("tool_status_manager", module="ToolStatusManager")
         self.platform_info = get_current_platform_info()

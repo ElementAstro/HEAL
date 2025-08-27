@@ -195,7 +195,7 @@ class Environment(ScrollArea):
         self.signal_manager.handle_download_started(option_key)
         logger.info(f"下载请求: {tool_name} - {option_key}")
 
-    def on_tool_status_updated(self, tool_name: str, tool_info) -> None:
+    def on_tool_status_updated(self, tool_name: str, tool_info: Any) -> None:
         """工具状态更新回调"""
         # 更新对应的状态卡片
         self.update_status_card(tool_name, tool_info)
@@ -205,14 +205,14 @@ class Environment(ScrollArea):
         for tool_name, tool_info in all_status.items():
             self.update_status_card(tool_name, tool_info)
 
-    def update_status_card(self, tool_name: str, tool_info) -> None:
+    def update_status_card(self, tool_name: str, tool_info: Any) -> None:
         """更新状态卡片"""
         # 查找或创建状态卡片
         status_card = self.find_or_create_status_card(tool_name, tool_info)
         if status_card:
             status_card.update_status(tool_info)
 
-    def find_or_create_status_card(self, tool_name: str, tool_info) -> Any:
+    def find_or_create_status_card(self, tool_name: str, tool_info: Any) -> Any:
         """查找或创建状态卡片"""
         # 在状态区域查找现有卡片
         if hasattr(self.status_section, "findChild"):

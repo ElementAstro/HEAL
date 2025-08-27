@@ -100,7 +100,7 @@ class HomeLayoutManager:
         self, server_configs: Dict[str, Any]
     ) -> List[ServerStatusCard]:
         """创建服务器状态卡片"""
-        self.server_status_cards: list[Any] = []
+        self.server_status_cards = []  # Clear existing cards
         for server_name, server_config in server_configs.items():
             card = ServerStatusCard(server_name, server_config, self.parent)
             self.server_status_cards.append(card)

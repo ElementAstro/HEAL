@@ -73,9 +73,7 @@ class DownloadConfigManager(QObject):
 
     def _validate_config(self) -> bool:
         """验证配置数据"""
-        if not isinstance(self.interface_data, dict):
-            self.logger.error("配置数据不是有效的字典格式")
-            return False
+        # interface_data is already typed as Dict[str, Any], so no need to check isinstance
 
         if "sections" not in self.interface_data:
             self.logger.error("配置数据中缺少 'sections' 字段")

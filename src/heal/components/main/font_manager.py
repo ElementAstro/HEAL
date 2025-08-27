@@ -6,6 +6,7 @@ Handles font checking and installation
 import subprocess
 import sys
 import winreg
+from typing import Any
 
 from PySide6.QtCore import QObject, Signal
 
@@ -20,7 +21,7 @@ class FontManager(QObject):
     font_check_completed = Signal(bool)  # is_font_installed
     font_installation_started = Signal()
 
-    def __init__(self, main_window) -> None:
+    def __init__(self, main_window: Any) -> None:
         super().__init__(main_window)
         self.main_window = main_window
         self.logger = get_logger("font_manager", module="FontManager")

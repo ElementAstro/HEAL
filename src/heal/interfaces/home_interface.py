@@ -116,13 +116,13 @@ class Home(QWidget):
 
         # Set new components to None for legacy mode
         if not hasattr(self, 'compact_banner'):
-            self.compact_banner: Any = None
+            self.compact_banner = None
         if not hasattr(self, 'status_overview'):
-            self.status_overview: Any = None
+            self.status_overview = None
         if not hasattr(self, 'quick_action_bar'):
-            self.quick_action_bar: Any = None
+            self.quick_action_bar = None
         if not hasattr(self, 'server_status_cards'):
-            self.server_status_cards: list[Any] = []
+            self.server_status_cards = []
 
     def initLayout(self) -> None:
         # Use appropriate layout based on configuration
@@ -307,7 +307,7 @@ class Home(QWidget):
 
     def _handle_server_start_exception(
         self, server: TogglePushButton, name: str, exception: Exception
-    ):
+    ) -> None:
         """处理服务器启动异常"""
         self.exception_handler.handle_known_exception(
             exception,
@@ -326,11 +326,11 @@ class Home(QWidget):
                 self, "S", 1000, self.tr(f"服务端 {', '.join(launched_servers)} 启动中...")
             )
 
-        def update_button():
+        def update_button() -> None:
             self.button_toggle.setText(self.tr(STOP_ALL_TEXT))
             self.button_toggle.setIcon(FluentIcon.CLOSE)
 
-        def update_toolbar():
+        def update_toolbar() -> None:
             self.toolbar.setVisible(True)
 
         # 批量处理UI更新
@@ -399,7 +399,7 @@ class Home(QWidget):
         """修改服务器配置"""
         self.dialog_manager.show_config_dialog(server_name)
 
-    def saveConfig(self, server_name: str, config_path: str, dialog_to_close) -> None:
+    def saveConfig(self, server_name: str, config_path: str, dialog_to_close: Any) -> None:
         """保存服务器配置"""
         self.dialog_manager.save_config(server_name, config_path, dialog_to_close)
 

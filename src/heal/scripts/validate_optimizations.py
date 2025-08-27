@@ -8,6 +8,7 @@ import json
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 # 添加项目根目录到Python路径
 project_root = Path(__file__).parent.parent.parent
@@ -21,7 +22,7 @@ from src.heal.common.logging_config import get_logger
 logger = get_logger(__name__)
 
 
-def run_performance_benchmarks():
+def run_performance_benchmarks() -> Any:
     """运行性能基准测试"""
     logger.info("开始性能基准测试")
     
@@ -35,7 +36,7 @@ def run_performance_benchmarks():
     # 2. JSON处理基准测试
     logger.info("测试JSON处理性能")
     
-    def json_processing_test():
+    def json_processing_test() -> Any:
         from src.heal.common.json_utils import JsonUtils
         import tempfile
         
@@ -67,7 +68,7 @@ def run_performance_benchmarks():
     # 3. 缓存系统基准测试
     logger.info("测试缓存系统性能")
     
-    def cache_performance_test():
+    def cache_performance_test() -> int:
         from src.heal.common.cache_manager import global_cache_manager
         
         cache = global_cache_manager.get_cache("benchmark_test")
@@ -97,18 +98,18 @@ def run_performance_benchmarks():
     # 4. 工作流系统基准测试
     logger.info("测试工作流系统性能")
     
-    def workflow_performance_test():
+    def workflow_performance_test() -> Any:
         workflow = create_workflow("benchmark_workflow")
-        
-        def step1():
+
+        def step1() -> str:
             time.sleep(0.001)  # 1ms模拟工作
             return "step1_done"
-        
-        def step2():
+
+        def step2() -> str:
             time.sleep(0.001)  # 1ms模拟工作
             return "step2_done"
-        
-        def step3():
+
+        def step3() -> str:
             time.sleep(0.001)  # 1ms模拟工作
             return "step3_done"
         
@@ -126,7 +127,7 @@ def run_performance_benchmarks():
     return benchmarks
 
 
-def validate_optimizations():
+def validate_optimizations() -> Any:
     """验证优化效果"""
     logger.info("开始优化验证")
     
@@ -147,7 +148,7 @@ def validate_optimizations():
     }
 
 
-def generate_optimization_report(results, output_file=None):
+def generate_optimization_report(results: Any, output_file: Any = None) -> Any:
     """生成优化报告"""
     logger.info("生成优化报告")
     
@@ -215,7 +216,7 @@ def generate_optimization_report(results, output_file=None):
     return report_content
 
 
-def print_summary(results):
+def print_summary(results: Any) -> None:
     """打印优化摘要"""
     summary = results["validation_summary"]
     
@@ -251,7 +252,7 @@ def print_summary(results):
     print("\n" + "="*60)
 
 
-def main():
+def main() -> int:
     """主函数"""
     logger.info("开始HEAL项目优化验证")
     

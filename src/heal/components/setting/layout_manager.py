@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QStackedWidget, QVBoxLayout, QWidget
@@ -39,8 +39,8 @@ class SettingsLayoutManager:
         widget: QWidget,
         object_name: str,
         text: str,
-        icon=None,
-    ):
+        icon: Any = None,
+    ) -> None:
         """Add a sub-interface to the stacked widget and pivot."""
         widget.setObjectName(object_name)
         stacked_widget.addWidget(widget)
@@ -59,7 +59,7 @@ class SettingsLayoutManager:
         behavior_interface: SettingCardGroup,
         network_interface: SettingCardGroup,
         system_interface: SettingCardGroup,
-    ):
+    ) -> None:
         """Setup all setting interfaces."""
         # Add interfaces to navigation with improved labels and icons
         self.add_sub_interface(
@@ -118,7 +118,7 @@ class SettingsLayoutManager:
 
     def on_current_index_changed(
         self, pivot: Pivot, stacked_widget: QStackedWidget, index: int
-    ):
+    ) -> None:
         """Handle navigation index changes."""
         widget = stacked_widget.widget(index)
         pivot.setCurrentItem(widget.objectName())
