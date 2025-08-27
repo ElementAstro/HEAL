@@ -94,7 +94,8 @@ class LogHighlighter(QSyntaxHighlighter):
         timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}"
         for match in re.finditer(timestamp_pattern, text):
             self.setFormat(
-                match.start(), match.end() - match.start(), self.formats["timestamp"]
+                match.start(), match.end() -
+                match.start(), self.formats["timestamp"]
             )
 
         # 日志级别高亮
@@ -103,7 +104,8 @@ class LogHighlighter(QSyntaxHighlighter):
             level = match.group(1)
             if level in self.formats:
                 self.setFormat(
-                    match.start(), match.end() - match.start(), self.formats[level]
+                    match.start(), match.end() -
+                    match.start(), self.formats[level]
                 )
 
         # 模块名高亮
@@ -112,7 +114,8 @@ class LogHighlighter(QSyntaxHighlighter):
         )
         for match in re.finditer(module_pattern, text):
             self.setFormat(
-                match.start(), match.end() - match.start(), self.formats["module"]
+                match.start(), match.end() -
+                match.start(), self.formats["module"]
             )
 
 

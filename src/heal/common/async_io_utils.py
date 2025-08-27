@@ -431,7 +431,8 @@ class AsyncIOWorker(QThread):
             )
         elif op_type == "http_get":
             return await self.network_manager.get_async(
-                operation["url"], operation.get("headers"), operation.get("params")
+                operation["url"], operation.get(
+                    "headers"), operation.get("params")
             )
         elif op_type == "http_post":
             return await self.network_manager.post_async(

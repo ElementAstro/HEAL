@@ -16,7 +16,8 @@ class ModuleConfigManager:
     """模块配置管理器"""
 
     def __init__(self) -> None:
-        self.logger = get_logger("module_config_manager", module="ModuleConfigManager")
+        self.logger = get_logger(
+            "module_config_manager", module="ModuleConfigManager")
         self.module_configs: Dict[str, ModuleConfig] = {}
         self.config_path = Path("config/module_configs.json")
 

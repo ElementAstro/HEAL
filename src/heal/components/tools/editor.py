@@ -48,7 +48,8 @@ class JsonTextEdit(TextEdit):
             and event.modifiers() == Qt.KeyboardModifier.ShiftModifier
         ):
             cursor = self.textCursor()
-            indent = len(cursor.block().text()) - len(cursor.block().text().lstrip())
+            indent = len(cursor.block().text()) - \
+                len(cursor.block().text().lstrip())
             cursor.insertText("\n" + " " * indent)
             self.setTextCursor(cursor)
         elif event.key() == Qt.Key.Key_BraceLeft:
@@ -250,7 +251,8 @@ class JsonEditor(QWidget):
                 try:
                     with open(file_name, "r", encoding="utf-8") as file:
                         data = json.load(file)
-                        formatted = json.dumps(data, indent=4, ensure_ascii=False)
+                        formatted = json.dumps(
+                            data, indent=4, ensure_ascii=False)
                         self.text_edit.append(formatted)
                         self.auto_parse_render()
                         self.status_bar.showMessage(f"处理文件: {file_name}", 3000)

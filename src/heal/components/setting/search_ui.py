@@ -59,7 +59,8 @@ class SearchSuggestionWidget(QWidget):
 
     def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
-        self.logger = get_logger("search_suggestions", module="SearchSuggestionWidget")
+        self.logger = get_logger("search_suggestions",
+                                 module="SearchSuggestionWidget")
         self.suggestions: list[Any] = []
         self.setup_ui()
 
@@ -176,7 +177,8 @@ class SearchFilterWidget(CardWidget):
 
         # Recently changed filter
         self.recent_combo = ComboBox()
-        self.recent_combo.addItems(["Any time", "Last hour", "Last day", "Last week"])
+        self.recent_combo.addItems(
+            ["Any time", "Last hour", "Last day", "Last week"])
         self.recent_combo.currentTextChanged.connect(self._on_filter_changed)
         controls_layout.addWidget(QLabel("Changed:"))
         controls_layout.addWidget(self.recent_combo)
@@ -224,7 +226,8 @@ class SearchFilterWidget(CardWidget):
         # Recently changed filter
         recent = self.recent_combo.currentText()
         if recent != "Any time":
-            seconds_map = {"Last hour": 3600, "Last day": 86400, "Last week": 604800}
+            seconds_map = {"Last hour": 3600,
+                           "Last day": 86400, "Last week": 604800}
             if recent in seconds_map:
                 self.filters.append(
                     SearchFilter(
@@ -350,14 +353,16 @@ class SearchResultsWidget(QScrollArea):
 
     def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
-        self.logger = get_logger("search_results", module="SearchResultsWidget")
+        self.logger = get_logger(
+            "search_results", module="SearchResultsWidget")
         self.results: List[SearchResult] = []
         self.setup_ui()
 
     def setup_ui(self) -> None:
         """Setup the results UI"""
         self.setWidgetResizable(True)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         # Content widget
         self.content_widget = QWidget()
@@ -366,7 +371,8 @@ class SearchResultsWidget(QScrollArea):
         self.content_layout.setSpacing(4)
 
         # No results label
-        self.no_results_label = BodyLabel("No settings found matching your search.")
+        self.no_results_label = BodyLabel(
+            "No settings found matching your search.")
         self.no_results_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.no_results_label.setStyleSheet("color: #999; padding: 40px;")
         self.no_results_label.hide()
@@ -374,7 +380,8 @@ class SearchResultsWidget(QScrollArea):
 
         # Results info
         self.results_info_label = CaptionLabel("")
-        self.results_info_label.setStyleSheet("color: #666; padding: 8px 16px;")
+        self.results_info_label.setStyleSheet(
+            "color: #666; padding: 8px 16px;")
         self.content_layout.addWidget(self.results_info_label)
 
         self.content_layout.addStretch()
@@ -394,7 +401,8 @@ class SearchResultsWidget(QScrollArea):
             self.no_results_label.show()
             self.results_info_label.hide()
             if query:
-                self.no_results_label.setText(f"No settings found for '{query}'")
+                self.no_results_label.setText(
+                    f"No settings found for '{query}'")
             else:
                 self.no_results_label.setText(
                     "No settings found matching your filters."
@@ -419,7 +427,8 @@ class SearchResultsWidget(QScrollArea):
                     self.content_layout.count() - 1, result_widget  # Before stretch
                 )
 
-        self.logger.debug(f"Updated results display with {len(results)} results")
+        self.logger.debug(
+            f"Updated results display with {len(results)} results")
 
 
 class SettingsSearchWidget(QWidget):
@@ -496,11 +505,13 @@ class SettingsSearchWidget(QWidget):
         fuzzy_action = Action(FluentIcon.SEARCH, "Fuzzy Search")
         fuzzy_action.setCheckable(True)
         fuzzy_action.setChecked(True)
-        fuzzy_action.triggered.connect(lambda: self.set_search_type(SearchType.FUZZY))
+        fuzzy_action.triggered.connect(
+            lambda: self.set_search_type(SearchType.FUZZY))
 
         exact_action = Action(FluentIcon.SEARCH, "Exact Match")
         exact_action.setCheckable(True)
-        exact_action.triggered.connect(lambda: self.set_search_type(SearchType.EXACT))
+        exact_action.triggered.connect(
+            lambda: self.set_search_type(SearchType.EXACT))
 
         keyword_action = Action(FluentIcon.TAG, "Keyword Search")
         keyword_action.setCheckable(True)
@@ -510,9 +521,11 @@ class SettingsSearchWidget(QWidget):
 
         regex_action = Action(FluentIcon.CODE, "Regex Search")
         regex_action.setCheckable(True)
-        regex_action.triggered.connect(lambda: self.set_search_type(SearchType.REGEX))
+        regex_action.triggered.connect(
+            lambda: self.set_search_type(SearchType.REGEX))
 
-        menu.addActions([fuzzy_action, exact_action, keyword_action, regex_action])
+        menu.addActions([fuzzy_action, exact_action,
+                        keyword_action, regex_action])
 
         # Toggle filters action
         menu.addSeparator()
@@ -534,7 +547,8 @@ class SettingsSearchWidget(QWidget):
         self.search_engine.search_completed.connect(self.on_search_completed)
 
         # Suggestions
-        self.suggestions_widget.suggestion_selected.connect(self.on_suggestion_selected)
+        self.suggestions_widget.suggestion_selected.connect(
+            self.on_suggestion_selected)
 
         # Filters
         self.filter_widget.filters_changed.connect(self.on_filters_changed)

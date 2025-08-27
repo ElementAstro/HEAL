@@ -175,13 +175,15 @@ def handleDownloadGenerate(name: Any) -> tuple[str, str, str]:
         )
     elif name == "git":
         types = "url"
-        file_path = os.path.join("temp", cfg.DOWNLOAD_COMMANDS_GIT.split("/")[-1])
+        file_path = os.path.join(
+            "temp", cfg.DOWNLOAD_COMMANDS_GIT.split("/")[-1])
         command = __handleUrlGenerate(
             types, cfg.DOWNLOAD_COMMANDS_GIT, cfg.DOWNLOAD_COMMANDS_GIT_MIRROR
         )
     elif name == "java":
         types = "url"
-        file_path = os.path.join("temp", cfg.DOWNLOAD_COMMANDS_JAVA.split("/")[-1])
+        file_path = os.path.join(
+            "temp", cfg.DOWNLOAD_COMMANDS_JAVA.split("/")[-1])
         command = __handleUrlGenerate(
             types, cfg.DOWNLOAD_COMMANDS_JAVA, cfg.DOWNLOAD_COMMANDS_JAVA_MIRROR
         )

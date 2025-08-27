@@ -68,7 +68,8 @@ class ValueRangeFilter(CardWidget):
 
     def __init__(self, parent: Optional[Any] = None) -> None:
         super().__init__(parent)
-        self.logger = get_logger("value_range_filter", module="ValueRangeFilter")
+        self.logger = get_logger("value_range_filter",
+                                 module="ValueRangeFilter")
         self.min_value = 0
         self.max_value = 100
         self.current_min = 0
@@ -226,7 +227,8 @@ class ComplexityFilter(CardWidget):
 
     def __init__(self, parent: Optional[Any] = None) -> None:
         super().__init__(parent)
-        self.logger = get_logger("complexity_filter", module="ComplexityFilter")
+        self.logger = get_logger(
+            "complexity_filter", module="ComplexityFilter")
         self.setup_ui()
 
     def setup_ui(self) -> None:
@@ -269,13 +271,13 @@ class ComplexityFilter(CardWidget):
     def on_complexity_changed(self) -> None:
         """Handle complexity filter change"""
         if self.all_radio.isChecked():
-            filter_function = lambda item: True
+            def filter_function(item): return True
             description = "All complexity levels"
         elif self.basic_radio.isChecked():
-            filter_function = lambda item: not item.is_advanced
+            def filter_function(item): return not item.is_advanced
             description = "Basic settings only"
         else:  # advanced_radio
-            filter_function = lambda item: item.is_advanced
+            def filter_function(item): return item.is_advanced
             description = "Advanced settings only"
 
         advanced_filter = AdvancedFilter(
@@ -325,7 +327,8 @@ class UsageFrequencyFilter(CardWidget):
                 "Never Used",
             ]
         )
-        self.frequency_combo.currentTextChanged.connect(self.on_frequency_changed)
+        self.frequency_combo.currentTextChanged.connect(
+            self.on_frequency_changed)
         layout.addWidget(self.frequency_combo)
 
     def update_usage_stats(self, stats: Dict[str, int]) -> None:
@@ -338,15 +341,19 @@ class UsageFrequencyFilter(CardWidget):
         selection = self.frequency_combo.currentText()
 
         if selection == "All Settings":
-            filter_function = lambda item: True
+            def filter_function(item): return True
         elif selection == "Frequently Used (>10 times)":
-            filter_function = lambda item: self.usage_stats.get(item.key, 0) > 10
+            def filter_function(item): return self.usage_stats.get(
+                item.key, 0) > 10
         elif selection == "Moderately Used (3-10 times)":
-            filter_function = lambda item: 3 <= self.usage_stats.get(item.key, 0) <= 10
+            def filter_function(item): return 3 <= self.usage_stats.get(
+                item.key, 0) <= 10
         elif selection == "Rarely Used (1-2 times)":
-            filter_function = lambda item: 1 <= self.usage_stats.get(item.key, 0) <= 2
+            def filter_function(item): return 1 <= self.usage_stats.get(
+                item.key, 0) <= 2
         else:  # Never Used
-            filter_function = lambda item: self.usage_stats.get(item.key, 0) == 0
+            def filter_function(item): return self.usage_stats.get(
+                item.key, 0) == 0
 
         advanced_filter = AdvancedFilter(
             filter_type=AdvancedFilterType.USAGE_FREQUENCY,
@@ -365,7 +372,8 @@ class CustomFilterBuilder(CardWidget):
 
     def __init__(self, parent: Optional[Any] = None) -> None:
         super().__init__(parent)
-        self.logger = get_logger("custom_filter_builder", module="CustomFilterBuilder")
+        self.logger = get_logger(
+            "custom_filter_builder", module="CustomFilterBuilder")
         self.setup_ui()
 
     def setup_ui(self) -> None:
@@ -503,11 +511,13 @@ class AdvancedFilterManager(QWidget):
         layout.addWidget(self.complexity_filter)
 
         self.usage_frequency_filter = UsageFrequencyFilter()
-        self.usage_frequency_filter.filter_changed.connect(self.on_filter_changed)
+        self.usage_frequency_filter.filter_changed.connect(
+            self.on_filter_changed)
         layout.addWidget(self.usage_frequency_filter)
 
         self.custom_filter_builder = CustomFilterBuilder()
-        self.custom_filter_builder.filter_changed.connect(self.on_filter_changed)
+        self.custom_filter_builder.filter_changed.connect(
+            self.on_filter_changed)
         layout.addWidget(self.custom_filter_builder)
 
     def on_filter_changed(self, advanced_filter: AdvancedFilter) -> None:

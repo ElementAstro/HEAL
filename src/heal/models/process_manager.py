@@ -100,7 +100,8 @@ class ProcessManager(QObject):
     process_stopped = Signal(str)
     process_crashed = Signal(str)
     process_output = Signal(str, str)
-    process_restarted = Signal(str)  # Signal emitted when a process is restarted
+    # Signal emitted when a process is restarted
+    process_restarted = Signal(str)
 
     def __init__(self) -> None:
         super().__init__()
@@ -276,7 +277,8 @@ class ProcessManager(QObject):
                         # 等待进程结束
                         try:
                             psutil_proc.wait(timeout=timeout)
-                            logger.info(f"Process {name} terminated gracefully")
+                            logger.info(
+                                f"Process {name} terminated gracefully")
                         except psutil.TimeoutExpired:
                             logger.warning(
                                 f"Process {name} did not terminate, killing..."
@@ -427,7 +429,8 @@ class ProcessManager(QObject):
                     if proc.stderr:
                         line = proc.stderr.readline()
                         if line:
-                            self.process_output.emit(name, f"ERROR: {line.strip()}")
+                            self.process_output.emit(
+                                name, f"ERROR: {line.strip()}")
                             self._write_to_log(name, f"ERROR: {line.strip()}")
 
             except Exception as e:

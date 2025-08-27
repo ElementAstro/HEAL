@@ -400,7 +400,8 @@ class DownloadManager(QObject):
     def add_download(self, url: str, file_path: Optional[str] = None, **kwargs: Any) -> str:
         """添加下载任务"""
         try:
-            download_id = hashlib.md5(f"{url}{time.time()}".encode()).hexdigest()[:12]
+            download_id = hashlib.md5(
+                f"{url}{time.time()}".encode()).hexdigest()[:12]
 
             actual_file_path: str
             if not file_path:
@@ -429,7 +430,8 @@ class DownloadManager(QObject):
             return download_id
 
         except Exception as e:
-            logger.error(f"Failed to add download for URL {url}: {e}", exc_info=True)
+            logger.error(
+                f"Failed to add download for URL {url}: {e}", exc_info=True)
             raise  # Re-raise after logging
 
     def start_download(self, download_id: str) -> bool:
@@ -451,7 +453,8 @@ class DownloadManager(QObject):
 
             if not self._can_start_download():
                 download_item.status = DownloadStatus.PENDING
-                self.download_status_changed.emit(download_id, download_item.status)
+                self.download_status_changed.emit(
+                    download_id, download_item.status)
                 logger.info(
                     f"Download {download_id} queued, max concurrent downloads reached."
                 )
@@ -474,13 +477,15 @@ class DownloadManager(QObject):
             return True
 
         except Exception as e:
-            logger.error(f"Failed to start download {download_id}: {e}", exc_info=True)
+            logger.error(
+                f"Failed to start download {download_id}: {e}", exc_info=True)
             if (
                 download_id in self.downloads
             ):  # Ensure item exists before trying to set status
                 self.downloads[download_id].status = DownloadStatus.FAILED
                 self.downloads[download_id].error_message = str(e)
-                self.download_status_changed.emit(download_id, DownloadStatus.FAILED)
+                self.download_status_changed.emit(
+                    download_id, DownloadStatus.FAILED)
                 self.download_failed.emit(download_id, str(e))
             return False
 
@@ -488,7 +493,8 @@ class DownloadManager(QObject):
         """暂停下载"""
         try:
             if download_id not in self.downloads:
-                logger.warning(f"Download {download_id} not found for pausing.")
+                logger.warning(
+                    f"Download {download_id} not found for pausing.")
                 return False
 
             download_item = self.downloads[download_id]
@@ -506,20 +512,23 @@ class DownloadManager(QObject):
                 # We set to PAUSED here to reflect user intent. Worker might finish chunk then stop.
 
             download_item.status = DownloadStatus.PAUSED
-            self.download_status_changed.emit(download_id, download_item.status)
+            self.download_status_changed.emit(
+                download_id, download_item.status)
 
             logger.info(f"Paused download: {download_id}")
             return True
 
         except Exception as e:
-            logger.error(f"Failed to pause download {download_id}: {e}", exc_info=True)
+            logger.error(
+                f"Failed to pause download {download_id}: {e}", exc_info=True)
             return False
 
     def resume_download(self, download_id: str) -> bool:
         """恢复下载"""
         try:
             if download_id not in self.downloads:
-                logger.warning(f"Download {download_id} not found for resuming.")
+                logger.warning(
+                    f"Download {download_id} not found for resuming.")
                 return False
 
             download_item = self.downloads[download_id]
@@ -541,14 +550,16 @@ class DownloadManager(QObject):
             return self.start_download(download_id)
 
         except Exception as e:
-            logger.error(f"Failed to resume download {download_id}: {e}", exc_info=True)
+            logger.error(
+                f"Failed to resume download {download_id}: {e}", exc_info=True)
             return False
 
     def cancel_download(self, download_id: str, delete_file: bool = True) -> bool:
         """取消下载"""
         try:
             if download_id not in self.downloads:
-                logger.warning(f"Download {download_id} not found for cancelling.")
+                logger.warning(
+                    f"Download {download_id} not found for cancelling.")
                 return False
 
             download_item = self.downloads[download_id]
@@ -559,7 +570,8 @@ class DownloadManager(QObject):
                 # Worker will set its own status to CANCELLED upon graceful exit
 
             download_item.status = DownloadStatus.CANCELLED
-            self.download_status_changed.emit(download_id, download_item.status)
+            self.download_status_changed.emit(
+                download_id, download_item.status)
 
             if (
                 delete_file
@@ -581,14 +593,16 @@ class DownloadManager(QObject):
             return True
 
         except Exception as e:
-            logger.error(f"Failed to cancel download {download_id}: {e}", exc_info=True)
+            logger.error(
+                f"Failed to cancel download {download_id}: {e}", exc_info=True)
             return False
 
     def remove_download(self, download_id: str, delete_file: bool = False) -> bool:
         """移除下载任务"""
         try:
             if download_id not in self.downloads:
-                logger.warning(f"Download {download_id} not found for removal.")
+                logger.warning(
+                    f"Download {download_id} not found for removal.")
                 return False
 
             # Get item before potential cancel
@@ -625,7 +639,8 @@ class DownloadManager(QObject):
             return True
 
         except Exception as e:
-            logger.error(f"Failed to remove download {download_id}: {e}", exc_info=True)
+            logger.error(
+                f"Failed to remove download {download_id}: {e}", exc_info=True)
             return False
 
     def get_download_info(self, download_id: str) -> Optional[DownloadItem]:
@@ -643,7 +658,8 @@ class DownloadManager(QObject):
 
     def get_download_statistics(self) -> Dict[str, Any]:
         total = len(self.downloads)
-        completed = sum(1 for item in self.downloads.values() if item.is_completed)
+        completed = sum(1 for item in self.downloads.values()
+                        if item.is_completed)
         downloading = len(self.get_active_downloads())
         failed = sum(
             1
@@ -664,7 +680,8 @@ class DownloadManager(QObject):
         total_size = sum(
             item.file_size for item in self.downloads.values() if item.file_size > 0
         )
-        downloaded_size = sum(item.downloaded_size for item in self.downloads.values())
+        downloaded_size = sum(
+            item.downloaded_size for item in self.downloads.values())
 
         total_speed = sum(
             item.speed
@@ -722,7 +739,8 @@ class DownloadManager(QObject):
                 self.download_started.emit(download_id)
 
         else:
-            logger.warning(f"Status changed for unknown download_id: {download_id}")
+            logger.warning(
+                f"Status changed for unknown download_id: {download_id}")
 
     def _on_download_completed(self, download_id: str) -> None:
         logger.info(f"Manager notified: Download completed for {download_id}")
@@ -764,7 +782,8 @@ class DownloadManager(QObject):
 
         for download_id, item in self.downloads.items():
             if item.status == DownloadStatus.PENDING:
-                logger.info(f"Attempting to start next pending download: {download_id}")
+                logger.info(
+                    f"Attempting to start next pending download: {download_id}")
                 self.start_download(download_id)
                 return  # Start one at a time
 
@@ -859,7 +878,8 @@ class DownloadManager(QObject):
 
             active_workers_ids = list(self.workers.keys())
             if active_workers_ids:
-                logger.info(f"Cancelling {len(active_workers_ids)} active downloads...")
+                logger.info(
+                    f"Cancelling {len(active_workers_ids)} active downloads...")
                 for download_id in active_workers_ids:
                     if (
                         download_id in self.workers
@@ -879,7 +899,8 @@ class DownloadManager(QObject):
             logger.info("Download manager shutdown process initiated.")
 
         except Exception as e:
-            logger.error(f"Error during download manager shutdown: {e}", exc_info=True)
+            logger.error(
+                f"Error during download manager shutdown: {e}", exc_info=True)
 
 
 # Global instance (consider if this is the best pattern for your app structure)

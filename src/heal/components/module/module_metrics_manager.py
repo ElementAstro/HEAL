@@ -56,7 +56,8 @@ class ModuleMetricsManager:
             # 计算成功率
             if metrics.operations_count > 0:
                 success_count = metrics.operations_count - metrics.error_count
-                metrics.success_rate = (success_count / metrics.operations_count) * 100
+                metrics.success_rate = (
+                    success_count / metrics.operations_count) * 100
 
         except Exception as e:
             self.logger.error(f"记录操作失败: {e}")
@@ -71,7 +72,8 @@ class ModuleMetricsManager:
             # 重新计算成功率
             if metrics.operations_count > 0:
                 success_count = metrics.operations_count - metrics.error_count
-                metrics.success_rate = (success_count / metrics.operations_count) * 100
+                metrics.success_rate = (
+                    success_count / metrics.operations_count) * 100
 
         except Exception as e:
             self.logger.error(f"记录错误失败: {e}")
@@ -84,7 +86,8 @@ class ModuleMetricsManager:
         self, module_name: str, cpu_usage: float = 0.0, memory_usage: float = 0.0
     ) -> None:
         """更新资源使用情况"""
-        self.update_metrics(module_name, cpu_usage=cpu_usage, memory_usage=memory_usage)
+        self.update_metrics(module_name, cpu_usage=cpu_usage,
+                            memory_usage=memory_usage)
 
     def get_metrics(self, module_name: str) -> Optional[ModuleMetrics]:
         """获取模块性能指标"""
@@ -135,7 +138,8 @@ class ModuleMetricsManager:
     def get_performance_summary(self) -> Dict[str, Any]:
         """获取性能摘要"""
         total_modules = len(self.module_metrics)
-        total_operations = sum(m.operations_count for m in self.module_metrics.values())
+        total_operations = sum(
+            m.operations_count for m in self.module_metrics.values())
         total_errors = sum(m.error_count for m in self.module_metrics.values())
         avg_success_rate = (
             sum(m.success_rate for m in self.module_metrics.values()) / total_modules

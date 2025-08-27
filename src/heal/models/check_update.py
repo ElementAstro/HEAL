@@ -35,7 +35,8 @@ def get_latest_version() -> Optional[str]:
 
     try:
         logger.info(f"Fetching latest version from {url}")
-        response = requests.get(url, headers=headers, proxies=proxies, timeout=10)
+        response = requests.get(url, headers=headers,
+                                proxies=proxies, timeout=10)
         response.raise_for_status()
         release_info = response.json()
         latest_version = release_info.get("tag_name")
@@ -43,7 +44,8 @@ def get_latest_version() -> Optional[str]:
             logger.info(f"Latest version fetched: {latest_version}")
             return latest_version
         else:
-            logger.warning("tag_name not found or not a string in release info")
+            logger.warning(
+                "tag_name not found or not a string in release info")
             return None
     except requests.RequestException as e:
         logger.error(f"Error fetching latest version: {e}")
@@ -65,14 +67,16 @@ class UpdateThread(QThread):
                 "'firefly-launcher.py' does not exist. Proceeding with version check."
             )
             latest_version = get_latest_version()
-            installed_version = get_json("./config/version.json", "APP_VERSION")
+            installed_version = get_json(
+                "./config/version.json", "APP_VERSION")
             self.logger.debug(
                 f"Installed version: {installed_version}, Latest version: {latest_version}"
             )
 
             if latest_version and installed_version:
                 if latest_version > installed_version:
-                    self.logger.info(f"New version available: {latest_version}")
+                    self.logger.info(
+                        f"New version available: {latest_version}")
                     self.update_signal.emit(2, latest_version)
                 elif latest_version == installed_version:
                     self.logger.info("Already on the latest version.")

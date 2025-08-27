@@ -112,24 +112,30 @@ class Download(ScrollArea):
         # 初始化新的头部组件
         self.header_section = DownloadHeaderSection(self.scroll_widget)
         self.header_section.search_requested.connect(self._on_search_requested)
-        self.header_section.category_selected.connect(self._on_category_selected)
+        self.header_section.category_selected.connect(
+            self._on_category_selected)
         self.header_section.download_requested.connect(
             self._on_quick_download_requested
         )
-        self.header_section.status_clicked.connect(self._on_download_status_clicked)
+        self.header_section.status_clicked.connect(
+            self._on_download_status_clicked)
 
         # 初始化精选下载组件
         self.featured_section = FeaturedDownloadsSection(self.scroll_widget)
         self.featured_section.download_requested.connect(
             self._on_featured_download_requested
         )
-        self.featured_section.favorite_toggled.connect(self._on_favorite_toggled)
-        self.featured_section.view_all_requested.connect(self._on_view_all_requested)
+        self.featured_section.favorite_toggled.connect(
+            self._on_favorite_toggled)
+        self.featured_section.view_all_requested.connect(
+            self._on_view_all_requested)
 
         # 初始化分类网格组件
         self.category_grid = CategoryGridWidget(self.scroll_widget)
-        self.category_grid.category_selected.connect(self._on_category_grid_selected)
-        self.category_grid.view_all_categories.connect(self._on_view_all_categories)
+        self.category_grid.category_selected.connect(
+            self._on_category_grid_selected)
+        self.category_grid.view_all_categories.connect(
+            self._on_view_all_categories)
 
         # 初始化搜索组件（保留用于兼容性）
         search_components = self.search_manager.init_search_components()
@@ -147,7 +153,8 @@ class Download(ScrollArea):
         )
 
         # 初始化刷新按钮
-        self.refresh_button = PushButton(t("common.refresh"), self.scroll_widget)
+        self.refresh_button = PushButton(
+            t("common.refresh"), self.scroll_widget)
         self.refresh_button.clicked.connect(self.load_interface_from_json)
 
         # 初始化响应式布局管理器
@@ -157,19 +164,23 @@ class Download(ScrollArea):
         """连接管理器信号"""
         # 配置管理器信号
         self.config_manager.config_loaded.connect(self._on_config_loaded)
-        self.config_manager.config_load_failed.connect(self._on_config_load_failed)
+        self.config_manager.config_load_failed.connect(
+            self._on_config_load_failed)
 
         # 搜索管理器信号
         self.search_manager.section_found.connect(self._on_section_found)
         self.search_manager.search_performed.connect(self._on_search_performed)
 
         # 下载处理器信号
-        self.download_handler.download_started.connect(self._on_download_started)
-        self.download_handler.download_completed.connect(self._on_download_completed)
+        self.download_handler.download_started.connect(
+            self._on_download_started)
+        self.download_handler.download_completed.connect(
+            self._on_download_completed)
         self.download_handler.file_exists.connect(self._on_file_exists)
 
         # 导航管理器信号
-        self.navigation_manager.navigation_changed.connect(self._on_navigation_changed)
+        self.navigation_manager.navigation_changed.connect(
+            self._on_navigation_changed)
 
     def _setup_interface(self) -> None:
         """设置界面"""
@@ -391,7 +402,8 @@ class Download(ScrollArea):
         traditional_content = QWidget()
         traditional_content.setObjectName("downloadTraditionalContent")
         traditional_layout = QVBoxLayout(traditional_content)
-        traditional_layout.setContentsMargins(0, 20, 0, 0)  # Standard top margin
+        traditional_layout.setContentsMargins(
+            0, 20, 0, 0)  # Standard top margin
         traditional_layout.setSpacing(16)  # Standard spacing
 
         # 导航和内容区域
@@ -435,13 +447,16 @@ class Download(ScrollArea):
         self.responsive_manager.set_components(
             main_splitter, self.download_panel, main_content
         )
-        self.responsive_manager.layout_changed.connect(self._on_layout_mode_changed)
-        self.responsive_manager.sidebar_toggled.connect(self._on_sidebar_toggled)
+        self.responsive_manager.layout_changed.connect(
+            self._on_layout_mode_changed)
+        self.responsive_manager.sidebar_toggled.connect(
+            self._on_sidebar_toggled)
 
     def init_widgets(self) -> None:
         """初始化窗口组件"""
         # 设置ScrollArea属性以获得最佳性能和用户体验
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.setViewportMargins(0, 0, 0, 0)  # 移除边距，让组件自己控制
         self.setWidget(self.scroll_widget)
@@ -463,7 +478,8 @@ class Download(ScrollArea):
         self, widget: QWidget, object_name: str, text: str, icon: Any = FIF.DOWNLOAD
     ) -> None:
         """添加子界面"""
-        self.navigation_manager.add_sub_interface(widget, object_name, text, icon)
+        self.navigation_manager.add_sub_interface(
+            widget, object_name, text, icon)
         logger.debug(t("download.sub_interface_added", name=object_name))
 
     def on_current_index_changed(self, index: int) -> None:

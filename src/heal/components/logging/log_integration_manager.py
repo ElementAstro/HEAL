@@ -161,7 +161,8 @@ class LogIntegrationManager(QObject):
                     content = file.read()
                     # 过滤出特定进程的日志
                     lines = content.split("\n")
-                    process_lines = [line for line in lines if process_name in line]
+                    process_lines = [
+                        line for line in lines if process_name in line]
                     return "\n".join(process_lines)
             except Exception as e:
                 logger.error(f"读取进程日志失败: {e}")
@@ -198,7 +199,8 @@ class LogIntegrationManager(QObject):
                     if download_id:
                         # 过滤出特定下载的日志
                         lines = content.split("\n")
-                        download_lines = [line for line in lines if download_id in line]
+                        download_lines = [
+                            line for line in lines if download_id in line]
                         return "\n".join(download_lines)
                     return content
             except Exception as e:
@@ -216,7 +218,8 @@ class LogIntegrationManager(QObject):
                     if request_type:
                         # 过滤出特定类型的网络请求日志
                         lines = content.split("\n")
-                        request_lines = [line for line in lines if request_type in line]
+                        request_lines = [
+                            line for line in lines if request_type in line]
                         return "\n".join(request_lines)
                     return content
             except Exception as e:

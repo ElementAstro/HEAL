@@ -151,8 +151,10 @@ class PerformanceMonitor:
 
     def _calculate_error_rate(self) -> float:
         """计算错误率"""
-        total_ops = sum(m.get("operations", 0) for m in self.modules_data.values())
-        total_errors = sum(m.get("errors", 0) for m in self.modules_data.values())
+        total_ops = sum(m.get("operations", 0)
+                        for m in self.modules_data.values())
+        total_errors = sum(m.get("errors", 0)
+                           for m in self.modules_data.values())
         return (total_errors / total_ops * 100) if total_ops > 0 else 0
 
     def _calculate_avg_response_time(self) -> float:
@@ -233,8 +235,8 @@ class PerformanceChartWidget:
 
             # Limit data points
             if len(self.values) > self.max_points:
-                self.times = self.times[-self.max_points :]
-                self.values = self.values[-self.max_points :]
+                self.times = self.times[-self.max_points:]
+                self.values = self.values[-self.max_points:]
 
             # Update plot
             if len(self.values) > 1:
@@ -246,7 +248,8 @@ class PerformanceChartWidget:
                 if self.values:
                     y_min, y_max = min(self.values), max(self.values)
                     y_range = y_max - y_min if y_max != y_min else 1
-                    self.ax.set_ylim(y_min - y_range * 0.1, y_max + y_range * 0.1)
+                    self.ax.set_ylim(y_min - y_range * 0.1,
+                                     y_max + y_range * 0.1)
 
                 # Update x-axis labels with time
                 if len(self.times) > 5:
@@ -309,7 +312,8 @@ class MetricsDisplayWidget:
             value_label = ttk.Label(
                 self.frame, textvariable=var, font=("TkDefaultFont", 9, "bold")
             )
-            value_label.grid(row=row, column=col + 1, sticky=tk.W, padx=(0, 20), pady=2)
+            value_label.grid(row=row, column=col + 1,
+                             sticky=tk.W, padx=(0, 20), pady=2)
 
     def update_metrics(self, metrics: Dict[str, Any]) -> None:
         """Update displayed metrics"""
@@ -332,7 +336,8 @@ class AlertsWidget:
 
     def __init__(self, parent: Any) -> None:
         self.parent = parent
-        self.frame = ttk.LabelFrame(parent, text="Performance Alerts", padding=10)
+        self.frame = ttk.LabelFrame(
+            parent, text="Performance Alerts", padding=10)
         self.frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         # Create listbox for alerts
@@ -457,7 +462,8 @@ class PerformanceDashboardUI:
         self.notebook.add(system_frame, text="System")
 
         # System info
-        info_frame = ttk.LabelFrame(system_frame, text="System Information", padding=10)
+        info_frame = ttk.LabelFrame(
+            system_frame, text="System Information", padding=10)
         info_frame.pack(fill=tk.X, padx=5, pady=5)
 
         self.system_info_text = tk.Text(info_frame, height=8, wrap=tk.WORD)
@@ -482,11 +488,13 @@ class PerformanceDashboardUI:
         self.notebook.add(modules_frame, text="Modules")
 
         # Module list
-        list_frame = ttk.LabelFrame(modules_frame, text="Active Modules", padding=10)
+        list_frame = ttk.LabelFrame(
+            modules_frame, text="Active Modules", padding=10)
         list_frame.pack(fill=tk.X, padx=5, pady=5)
 
         # Treeview for modules
-        columns = ("Module", "Status", "CPU %", "Memory MB", "Operations", "Errors")
+        columns = ("Module", "Status", "CPU %",
+                   "Memory MB", "Operations", "Errors")
         self.modules_tree = ttk.Treeview(
             list_frame, columns=columns, show="headings", height=8
         )
@@ -498,10 +506,12 @@ class PerformanceDashboardUI:
         self.modules_tree.pack(fill=tk.BOTH, expand=True)
 
         # Module details
-        details_frame = ttk.LabelFrame(modules_frame, text="Module Details", padding=10)
+        details_frame = ttk.LabelFrame(
+            modules_frame, text="Module Details", padding=10)
         details_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-        self.module_details_text = tk.Text(details_frame, height=8, wrap=tk.WORD)
+        self.module_details_text = tk.Text(
+            details_frame, height=8, wrap=tk.WORD)
         self.module_details_text.pack(fill=tk.BOTH, expand=True)
 
         # Bind selection event
@@ -548,7 +558,8 @@ class PerformanceDashboardUI:
         memory_entry.grid(row=2, column=1, sticky=tk.W, pady=(5, 0))
 
         # Control buttons
-        controls_frame = ttk.LabelFrame(settings_frame, text="Controls", padding=10)
+        controls_frame = ttk.LabelFrame(
+            settings_frame, text="Controls", padding=10)
         controls_frame.pack(fill=tk.X, padx=5, pady=5)
 
         ttk.Button(
@@ -563,12 +574,14 @@ class PerformanceDashboardUI:
 
         # Status
         self.status_var = tk.StringVar(value="Monitoring active")
-        ttk.Label(controls_frame, textvariable=self.status_var).pack(side=tk.RIGHT)
+        ttk.Label(controls_frame, textvariable=self.status_var).pack(
+            side=tk.RIGHT)
 
     def start_monitoring(self) -> None:
         """Start the monitoring thread"""
         self.running = True
-        self.update_thread = threading.Thread(target=self.monitoring_loop, daemon=True)
+        self.update_thread = threading.Thread(
+            target=self.monitoring_loop, daemon=True)
         self.update_thread.start()
 
         # Start UI update timer
@@ -592,7 +605,8 @@ class PerformanceDashboardUI:
                 # Queue updates for UI thread
                 self.update_queue.put({"type": "metrics", "data": metrics})
 
-                self.update_queue.put({"type": "system_info", "data": system_info})
+                self.update_queue.put(
+                    {"type": "system_info", "data": system_info})
 
                 if alerts:
                     for alert in alerts:
@@ -772,7 +786,8 @@ class PerformanceDashboardUI:
             memory_threshold = float(self.memory_threshold_var.get())
 
             if update_interval < 0.1:
-                raise ValueError("Update interval must be at least 0.1 seconds")
+                raise ValueError(
+                    "Update interval must be at least 0.1 seconds")
 
             if not (0 <= cpu_threshold <= 100):
                 raise ValueError("CPU threshold must be between 0 and 100")

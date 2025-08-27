@@ -96,7 +96,8 @@ class CustomMessageBox(QDialog):
         box.setWindowTitle(title)
         box.setText(text)
         box.setIconType("Information")
-        box.addButton(tr("custom_messagebox.ok"), QMessageBox.ButtonRole.AcceptRole)
+        box.addButton(tr("custom_messagebox.ok"),
+                      QMessageBox.ButtonRole.AcceptRole)
         return box.exec_()
 
     @staticmethod
@@ -105,7 +106,8 @@ class CustomMessageBox(QDialog):
         box.setWindowTitle(title)
         box.setText(text)
         box.setIconType("Warning")
-        box.addButton(tr("custom_messagebox.ok"), QMessageBox.ButtonRole.AcceptRole)
+        box.addButton(tr("custom_messagebox.ok"),
+                      QMessageBox.ButtonRole.AcceptRole)
         box.addButton(tr("cancel"), QMessageBox.ButtonRole.RejectRole)
         return box.exec_()
 
@@ -115,7 +117,8 @@ class CustomMessageBox(QDialog):
         box.setWindowTitle(title)
         box.setText(text)
         box.setIconType("Critical")
-        box.addButton(tr("custom_messagebox.ok"), QMessageBox.ButtonRole.AcceptRole)
+        box.addButton(tr("custom_messagebox.ok"),
+                      QMessageBox.ButtonRole.AcceptRole)
         return box.exec_()
 
     @staticmethod
@@ -124,8 +127,10 @@ class CustomMessageBox(QDialog):
         box.setWindowTitle(title)
         box.setText(text)
         box.setIconType("Question")
-        box.addButton(tr("custom_messagebox.yes"), QMessageBox.ButtonRole.YesRole)
-        box.addButton(tr("custom_messagebox.no"), QMessageBox.ButtonRole.NoRole)
+        box.addButton(tr("custom_messagebox.yes"),
+                      QMessageBox.ButtonRole.YesRole)
+        box.addButton(tr("custom_messagebox.no"),
+                      QMessageBox.ButtonRole.NoRole)
         return box.exec_()
 
 

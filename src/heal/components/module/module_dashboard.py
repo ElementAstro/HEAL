@@ -425,7 +425,8 @@ class ModuleDashboard(QWidget):
         self.error_modules_card = self.create_stat_card(
             "错误模组", "0", FluentIcon.CLOSE
         )
-        self.workflows_card = self.create_stat_card("活跃工作流", "0", FluentIcon.PLAY)
+        self.workflows_card = self.create_stat_card(
+            "活跃工作流", "0", FluentIcon.PLAY)
 
         stats_layout.addWidget(self.total_modules_card, 0, 0)
         stats_layout.addWidget(self.enabled_modules_card, 0, 1)
@@ -478,8 +479,10 @@ class ModuleDashboard(QWidget):
     def setup_connections(self) -> None:
         """Setup signal connections"""
         # Connect to system events
-        self.workflow_manager.workflow_completed.connect(self._on_workflow_completed)
-        self.workflow_manager.workflow_step_failed.connect(self._on_workflow_failed)
+        self.workflow_manager.workflow_completed.connect(
+            self._on_workflow_completed)
+        self.workflow_manager.workflow_step_failed.connect(
+            self._on_workflow_failed)
         self.bulk_operations.operation_completed.connect(
             self._on_bulk_operation_completed
         )
@@ -537,7 +540,8 @@ class ModuleDashboard(QWidget):
         stats = self.current_stats
 
         self.total_modules_card.value_label.setText(str(stats.total_modules))
-        self.enabled_modules_card.value_label.setText(str(stats.enabled_modules))
+        self.enabled_modules_card.value_label.setText(
+            str(stats.enabled_modules))
         self.error_modules_card.value_label.setText(str(stats.error_modules))
         self.workflows_card.value_label.setText(str(stats.active_workflows))
 

@@ -85,8 +85,10 @@ class PerformanceAnalyzer:
         # 分析数据 - 优化内存使用
         self.function_profiles: Dict[str, FunctionProfile] = {}
         self.performance_issues: List[PerformanceIssue] = []
-        self.io_operations: Deque[Any] = collections.deque(maxlen=1000)  # 限制大小防止内存泄漏
-        self.memory_snapshots: Deque[Any] = collections.deque(maxlen=100)  # 限制大小
+        self.io_operations: Deque[Any] = collections.deque(
+            maxlen=1000)  # 限制大小防止内存泄漏
+        self.memory_snapshots: Deque[Any] = collections.deque(
+            maxlen=100)  # 限制大小
 
         # 新增性能统计
         self.cache_stats: Dict[str, Dict[str, int]] = {}
@@ -176,7 +178,8 @@ class PerformanceAnalyzer:
                     if execution_time > used_threshold:
                         self._report_performance_issue(
                             category="cpu",
-                            severity=self._get_severity(execution_time, used_threshold),
+                            severity=self._get_severity(
+                                execution_time, used_threshold),
                             description=f"函数执行时间过长: {execution_time:.3f}s",
                             location=func_name,
                             metric_value=execution_time,
@@ -218,7 +221,8 @@ class PerformanceAnalyzer:
             end_time = time.perf_counter()
             execution_time = end_time - start_time
 
-            io_info.update({"end_time": end_time, "execution_time": execution_time})
+            io_info.update(
+                {"end_time": end_time, "execution_time": execution_time})
 
             with self.analysis_lock:
                 self.io_operations.append(io_info)
@@ -276,7 +280,8 @@ class PerformanceAnalyzer:
             curr_snapshot = snapshots[i]
 
             memory_growth = curr_snapshot["rss_mb"] - prev_snapshot["rss_mb"]
-            time_delta = curr_snapshot["timestamp"] - prev_snapshot["timestamp"]
+            time_delta = curr_snapshot["timestamp"] - \
+                prev_snapshot["timestamp"]
 
             if memory_growth > 10 and time_delta < 60:  # 1分钟内增长超过10MB
                 issue = PerformanceIssue(
@@ -310,7 +315,8 @@ class PerformanceAnalyzer:
             sorted_functions = sorted(
                 memory_functions,
                 key=lambda x: (
-                    sum(x.memory_usage) / len(x.memory_usage) if x.memory_usage else 0
+                    sum(x.memory_usage) /
+                    len(x.memory_usage) if x.memory_usage else 0
                 ),
                 reverse=True,
             )
@@ -405,7 +411,8 @@ class PerformanceAnalyzer:
             self.cache_stats[cache_name]["misses"] += misses
 
             # 检查缓存命中率
-            total = self.cache_stats[cache_name]["hits"] + self.cache_stats[cache_name]["misses"]
+            total = self.cache_stats[cache_name]["hits"] + \
+                self.cache_stats[cache_name]["misses"]
             if total > 0:
                 hit_ratio = self.cache_stats[cache_name]["hits"] / total
                 if hit_ratio < self.thresholds["cache_hit_ratio"]:
@@ -427,7 +434,8 @@ class PerformanceAnalyzer:
             if response_time > self.thresholds["ui_block_time"]:
                 self._report_performance_issue(
                     category="ui",
-                    severity=self._get_severity(response_time, self.thresholds["ui_block_time"]),
+                    severity=self._get_severity(
+                        response_time, self.thresholds["ui_block_time"]),
                     description=f"UI操作响应时间过长: {response_time:.3f}s",
                     location=operation,
                     metric_value=response_time,
@@ -688,4 +696,5 @@ class PerformanceOptimizer:
 
 
 # 全局优化器实例
-global_performance_optimizer = PerformanceOptimizer(global_performance_analyzer)
+global_performance_optimizer = PerformanceOptimizer(
+    global_performance_analyzer)

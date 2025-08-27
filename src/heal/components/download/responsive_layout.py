@@ -96,7 +96,8 @@ class ResponsiveLayoutManager(QObject):
                 self.current_mode = new_mode
                 self._apply_layout_mode(new_mode)
                 self.layout_changed.emit(new_mode)
-                self.logger.info(f"Layout mode changed to: {new_mode} (width: {width}px)")
+                self.logger.info(
+                    f"Layout mode changed to: {new_mode} (width: {width}px)")
 
         finally:
             # Clear updating flag
@@ -139,12 +140,14 @@ class ResponsiveLayoutManager(QObject):
             self.main_splitter.setOrientation(Qt.Orientation.Vertical)
 
             # Optimize for mobile touch interaction
-            self.main_splitter.setHandleWidth(0)  # Hide splitter handle on mobile
+            # Hide splitter handle on mobile
+            self.main_splitter.setHandleWidth(0)
 
             # Adjust sizes for mobile - full width for main content
             if self.main_content:
                 self.main_content.setMinimumWidth(0)
-                self.main_content.setMaximumWidth(16777215)  # Remove width constraints
+                self.main_content.setMaximumWidth(
+                    16777215)  # Remove width constraints
 
         self.logger.debug("Applied mobile layout")
 
@@ -162,7 +165,8 @@ class ResponsiveLayoutManager(QObject):
             self.main_splitter.setHandleWidth(2)
 
             # Adjust sidebar width for tablet with responsive sizing
-            tablet_sidebar_width = min(320, max(250, self.window_size.width() // 4))
+            tablet_sidebar_width = min(
+                320, max(250, self.window_size.width() // 4))
             self.sidebar_widget.setMaximumWidth(tablet_sidebar_width)
             self.sidebar_widget.setMinimumWidth(250)
 
@@ -186,7 +190,8 @@ class ResponsiveLayoutManager(QObject):
             self.main_splitter.setHandleWidth(2)
 
             # Full sidebar width for desktop with responsive sizing
-            desktop_sidebar_width = min(400, max(300, self.window_size.width() // 3.5))
+            desktop_sidebar_width = min(
+                400, max(300, self.window_size.width() // 3.5))
             self.sidebar_widget.setMaximumWidth(desktop_sidebar_width)
             self.sidebar_widget.setMinimumWidth(300)
 

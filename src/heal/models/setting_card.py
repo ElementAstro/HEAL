@@ -90,11 +90,14 @@ class SettingCard(QFrame):
         FluentStyleSheet.SETTING_CARD.apply(self)
 
     def _add_widgets_to_layout(self) -> None:
-        self.hBoxLayout.addWidget(self.iconLabel, 0, Qt.AlignmentFlag.AlignLeft)
+        self.hBoxLayout.addWidget(
+            self.iconLabel, 0, Qt.AlignmentFlag.AlignLeft)
         self.hBoxLayout.addSpacing(16)
         self.hBoxLayout.addLayout(self.vBoxLayout)
-        self.vBoxLayout.addWidget(self.titleLabel, 0, Qt.AlignmentFlag.AlignLeft)
-        self.vBoxLayout.addWidget(self.contentLabel, 0, Qt.AlignmentFlag.AlignLeft)
+        self.vBoxLayout.addWidget(
+            self.titleLabel, 0, Qt.AlignmentFlag.AlignLeft)
+        self.vBoxLayout.addWidget(
+            self.contentLabel, 0, Qt.AlignmentFlag.AlignLeft)
         self.hBoxLayout.addSpacing(16)
         self.hBoxLayout.addStretch(1)
 
@@ -157,9 +160,11 @@ class CustomFrame(QFrame):
         self.hBoxLayout.setContentsMargins(16, 0, 0, 0)
         self.hBoxLayout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
-        self.hBoxLayout.addWidget(self.iconLabel, 0, Qt.AlignmentFlag.AlignLeft)
+        self.hBoxLayout.addWidget(
+            self.iconLabel, 0, Qt.AlignmentFlag.AlignLeft)
         self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.titleLabel, 0, Qt.AlignmentFlag.AlignLeft)
+        self.hBoxLayout.addWidget(
+            self.titleLabel, 0, Qt.AlignmentFlag.AlignLeft)
         self.hBoxLayout.addStretch(1)
 
 

@@ -413,7 +413,8 @@ class ModuleNotificationSystem(QObject):
             toast = self.active_toasts[notification_id]
             # Update toast UI (would need to implement update method)
 
-        self.logger.debug(f"Updated progress for {notification_id}: {progress}%")
+        self.logger.debug(
+            f"Updated progress for {notification_id}: {progress}%")
 
     def dismiss_notification(self, notification_id: str) -> None:
         """Dismiss a notification"""
@@ -518,7 +519,8 @@ class ModuleNotificationSystem(QObject):
 
     def clear_read_notifications(self) -> None:
         """Clear read notifications"""
-        read_notifications = [nid for nid, n in self.notifications.items() if n.read]
+        read_notifications = [nid for nid,
+                              n in self.notifications.items() if n.read]
 
         for notification_id in read_notifications:
             if notification_id in self.active_toasts:
@@ -526,7 +528,8 @@ class ModuleNotificationSystem(QObject):
             else:
                 del self.notifications[notification_id]
 
-        self.logger.info(f"Cleared {len(read_notifications)} read notifications")
+        self.logger.info(
+            f"Cleared {len(read_notifications)} read notifications")
         self.save_notifications()
 
     def process_queue(self) -> None:
@@ -643,7 +646,8 @@ class ModuleNotificationSystem(QObject):
         """Save notifications to disk"""
         try:
             # Only save recent notifications to avoid large files
-            recent_notifications = self.get_recent_notifications(hours=168)  # 1 week
+            recent_notifications = self.get_recent_notifications(
+                hours=168)  # 1 week
 
             notifications_data = {}
             for notification in recent_notifications:
@@ -704,7 +708,8 @@ class ModuleNotificationSystem(QObject):
                     notification_id=data["notification_id"],
                     title=data["title"],
                     message=data["message"],
-                    notification_type=NotificationType(data["notification_type"]),
+                    notification_type=NotificationType(
+                        data["notification_type"]),
                     priority=NotificationPriority(data["priority"]),
                     timestamp=data["timestamp"],
                     duration=data["duration"],

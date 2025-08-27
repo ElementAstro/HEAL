@@ -52,7 +52,8 @@ class PerformanceMetric:
 
     def add_value(self, value: float, tags: Optional[Dict[str, str]] = None) -> None:
         """添加指标值"""
-        metric_value = MetricValue(value=value, timestamp=time.time(), tags=tags or {})
+        metric_value = MetricValue(
+            value=value, timestamp=time.time(), tags=tags or {})
         self.values.append(metric_value)
 
         # 定期清理旧数据
@@ -199,7 +200,8 @@ class PerformanceMonitor(QObject):
             from src.heal.common.memory_optimizer import global_memory_optimizer
             self.memory_optimizer: Optional[Any] = global_memory_optimizer
             # 注册性能监控器的优化策略
-            self.memory_optimizer.register_optimization_strategy(self._optimize_performance_data)
+            self.memory_optimizer.register_optimization_strategy(
+                self._optimize_performance_data)
         except ImportError:
             self.memory_optimizer = None
 
@@ -235,7 +237,8 @@ class PerformanceMonitor(QObject):
     def _init_system_metrics(self) -> None:
         """初始化系统指标"""
         self.register_metric("cpu_usage", MetricType.GAUGE, "CPU使用率", "%")
-        self.register_metric("memory_rss", MetricType.GAUGE, "内存使用量(RSS)", "MB")
+        self.register_metric(
+            "memory_rss", MetricType.GAUGE, "内存使用量(RSS)", "MB")
         self.register_metric("memory_percent", MetricType.GAUGE, "内存使用率", "%")
         self.register_metric("thread_count", MetricType.GAUGE, "线程数", "count")
         self.register_metric("uptime", MetricType.GAUGE, "运行时间", "seconds")
@@ -250,7 +253,8 @@ class PerformanceMonitor(QObject):
         self.register_metric(
             "module_error_count", MetricType.COUNTER, "模块错误次数", "count"
         )
-        self.register_metric("module_success_rate", MetricType.GAUGE, "模块成功率", "%")
+        self.register_metric("module_success_rate",
+                             MetricType.GAUGE, "模块成功率", "%")
 
     def _init_default_alerts(self) -> None:
         """初始化默认告警"""
@@ -286,7 +290,8 @@ class PerformanceMonitor(QObject):
         severity: str = "warning",
     ) -> None:
         """添加性能告警"""
-        self.alerts[name] = PerformanceAlert(name, condition, message, severity)
+        self.alerts[name] = PerformanceAlert(
+            name, condition, message, severity)
         self.logger.debug(f"添加性能告警: {name}")
 
     def record_metric(
@@ -552,7 +557,8 @@ class PerformanceMonitor(QObject):
                     # 如果数据点过多，只保留最近的数据
                     if len(metric.values) > 500:
                         # 保留最近500个数据点
-                        metric.values = deque(list(metric.values)[-500:], maxlen=1000)
+                        metric.values = deque(
+                            list(metric.values)[-500:], maxlen=1000)
 
                     # 清理过期数据
                     metric._cleanup_old_data()
@@ -579,7 +585,8 @@ class PerformanceMonitor(QObject):
         """获取内存统计信息"""
         with self._metrics_lock:
             total_metrics = len(self.metrics)
-            total_values = sum(len(metric.values) for metric in self.metrics.values())
+            total_values = sum(len(metric.values)
+                               for metric in self.metrics.values())
             estimated_memory = self._estimate_memory_usage()
 
         return {
@@ -667,7 +674,8 @@ class ModulePerformanceTracker:
 
         self.module_stats[module_name]["error_count"] += 1
         self.monitor.record_metric(
-            "module_error_count", 1, {"module": module_name, "error": error_message}
+            "module_error_count", 1, {
+                "module": module_name, "error": error_message}
         )
 
         # 更新成功率
@@ -680,7 +688,8 @@ class ModulePerformanceTracker:
         error_count = stats["error_count"]
 
         if total_operations > 0:
-            success_rate = ((total_operations - error_count) / total_operations) * 100
+            success_rate = ((total_operations - error_count) /
+                            total_operations) * 100
             self.monitor.record_metric(
                 "module_success_rate", success_rate, {"module": module_name}
             )

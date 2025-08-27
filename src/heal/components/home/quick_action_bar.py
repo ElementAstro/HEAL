@@ -58,7 +58,8 @@ class QuickActionBar(QFrame):
         self.start_all_btn.setIconSize(QSize(16, 16))
         self.start_all_btn.setFont(QFont(cfg.APP_FONT, 10))
 
-        self.stop_all_btn = PushButton(FluentIcon.PAUSE_BOLD, tr("home.stop_all"))
+        self.stop_all_btn = PushButton(
+            FluentIcon.PAUSE_BOLD, tr("home.stop_all"))
         self.stop_all_btn.setFixedSize(100, 34)
         self.stop_all_btn.setIconSize(QSize(16, 16))
         self.stop_all_btn.setFont(QFont(cfg.APP_FONT, 10))
@@ -187,7 +188,8 @@ class QuickActionBar(QFrame):
         self._update_button_states()
         self._update_button_tooltips()
 
-        self.logger.debug(f"Server counts updated: {running_count}/{total_count}")
+        self.logger.debug(
+            f"Server counts updated: {running_count}/{total_count}")
 
     def _update_button_states(self) -> None:
         """Update button enabled/disabled states based on server status."""
@@ -215,7 +217,8 @@ class QuickActionBar(QFrame):
             stop_tooltip = tr("home.no_servers_configured")
         else:
             stopped_count = self.total_servers_count - self.running_servers_count
-            start_tooltip = tr("home.start_all_tooltip").format(count=stopped_count)
+            start_tooltip = tr("home.start_all_tooltip").format(
+                count=stopped_count)
             stop_tooltip = tr("home.stop_all_tooltip").format(
                 count=self.running_servers_count
             )
@@ -272,7 +275,8 @@ class QuickActionBar(QFrame):
         # Reset after duration
         from PySide6.QtCore import QTimer
 
-        QTimer.singleShot(duration, lambda: button.setStyleSheet(original_style))
+        QTimer.singleShot(
+            duration, lambda: button.setStyleSheet(original_style))
 
         self.logger.debug(f"Highlighted action: {action}")
 

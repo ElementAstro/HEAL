@@ -211,10 +211,12 @@ class ConfigValidator:
                         result.add_warning(f"模式验证警告: {e.message}")
 
                         if auto_fix:
-                            self._fix_schema_issues(config_data, filename, result)
+                            self._fix_schema_issues(
+                                config_data, filename, result)
 
             # 自定义验证规则
-            self._validate_custom_rules(config_data, filename, result, auto_fix)
+            self._validate_custom_rules(
+                config_data, filename, result, auto_fix)
 
             # 安全性检查
             self._validate_security(config_data, filename, result)
@@ -275,7 +277,8 @@ class ConfigValidator:
                         elif isinstance(default_value, dict) and isinstance(
                             data[key], dict
                         ):
-                            fix_missing_fields(data[key], default_value, current_path)
+                            fix_missing_fields(
+                                data[key], default_value, current_path)
 
                 fix_missing_fields(config_data, defaults)
 

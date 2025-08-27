@@ -1,3 +1,5 @@
+from src.heal.common.json_utils import get_json
+from src.heal.common.config_manager import ConfigType, config_manager
 import json
 import os
 from enum import Enum
@@ -64,11 +66,7 @@ def open_file(self: Any, file_path: str) -> None:
         Info(self, "E", 3000, self.tr("找不到文件!"))
 
 
-from src.heal.common.config_manager import ConfigType, config_manager
-
 # 使用新的JSON工具替换原有实现
-from src.heal.common.json_utils import get_json
-
 logger.debug("配置模块已加载")
 
 
@@ -96,8 +94,10 @@ def get_version_type(version: Any) -> str:
 
 
 class Language(Enum):
-    CHINESE_SIMPLIFIED = QLocale(QLocale.Language.Chinese, QLocale.Country.China)
-    CHINESE_TRADITIONAL = QLocale(QLocale.Language.Chinese, QLocale.Country.Taiwan)
+    CHINESE_SIMPLIFIED = QLocale(
+        QLocale.Language.Chinese, QLocale.Country.China)
+    CHINESE_TRADITIONAL = QLocale(
+        QLocale.Language.Chinese, QLocale.Country.Taiwan)
     ENGLISH = QLocale(QLocale.Language.English)
 
 
@@ -134,7 +134,8 @@ class Config(QConfig):
     useRemote = ConfigItem("Command", "useRemote", False, BoolValidator())
 
     APP_NAME = "Hello ElementAstro Launcher"
-    APP_VERSION = get_version_type(get_json("./config/version.json", "APP_VERSION"))
+    APP_VERSION = get_version_type(
+        get_json("./config/version.json", "APP_VERSION"))
     APP_FONT = "SDK_SC_Web"
 
     ############### LINK CONFIG ###############

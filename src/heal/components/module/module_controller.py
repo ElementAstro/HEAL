@@ -236,7 +236,8 @@ class ModuleController(QObject):
         # 组件
         self.validator = ModuleValidator(ValidationLevel.STANDARD)
         self.performance_monitor = PerformanceMonitor()
-        self.performance_tracker = ModulePerformanceTracker(self.performance_monitor)
+        self.performance_tracker = ModulePerformanceTracker(
+            self.performance_monitor)
 
         # 线程池
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
@@ -437,13 +438,15 @@ class ModuleController(QObject):
                 )
 
         future = self.executor.submit(_load)
-        future.add_done_callback(lambda f: self._on_operation_completed(f.result()))
+        future.add_done_callback(
+            lambda f: self._on_operation_completed(f.result()))
         return future
 
     def _perform_module_validation(self, module_info: ModuleInfo) -> None:
         """执行模块验证"""
         if self.config["validation_on_load"]:
-            validation_report = self.validator.validate_module(module_info.path)
+            validation_report = self.validator.validate_module(
+                module_info.path)
             if not validation_report.is_valid:
                 raise ValueError(
                     f"模块验证失败: {validation_report.overall_result.message}"
@@ -466,7 +469,8 @@ class ModuleController(QObject):
             module_info.last_loaded = time.time()
             module_info.last_error = None
 
-        self.performance_tracker.track_module_operation(module_info.name, "load")
+        self.performance_tracker.track_module_operation(
+            module_info.name, "load")
 
     def _create_success_result(
         self,
@@ -536,7 +540,8 @@ class ModuleController(QObject):
                 # 更新状态
                 self._update_module_state(module_name, ModuleState.INACTIVE)
 
-                self.performance_tracker.track_module_operation(module_name, "unload")
+                self.performance_tracker.track_module_operation(
+                    module_name, "unload")
 
                 return self._create_success_result(
                     OperationType.UNLOAD, module_name, "模块卸载成功", start_time
@@ -548,7 +553,8 @@ class ModuleController(QObject):
                 )
 
         future = self.executor.submit(_unload)
-        future.add_done_callback(lambda f: self._on_operation_completed(f.result()))
+        future.add_done_callback(
+            lambda f: self._on_operation_completed(f.result()))
         return future
 
     def reload_module(self, module_name: str) -> Future[OperationResult]:
@@ -577,7 +583,8 @@ class ModuleController(QObject):
             )
 
         future = self.executor.submit(_reload)
-        future.add_done_callback(lambda f: self._on_operation_completed(f.result()))
+        future.add_done_callback(
+            lambda f: self._on_operation_completed(f.result()))
         return future
 
     def validate_module(self, module_name: str) -> Future[OperationResult]:
@@ -591,7 +598,8 @@ class ModuleController(QObject):
                     raise ValueError(f"模块未注册: {module_name}")
 
                 module_info = self.modules[module_name]
-                validation_report = self.validator.validate_module(module_info.path)
+                validation_report = self.validator.validate_module(
+                    module_info.path)
 
                 # 发送验证完成信号
                 self.validation_completed.emit(
@@ -618,7 +626,8 @@ class ModuleController(QObject):
                 )
 
         future = self.executor.submit(_validate)
-        future.add_done_callback(lambda f: self._on_operation_completed(f.result()))
+        future.add_done_callback(
+            lambda f: self._on_operation_completed(f.result()))
         return future
 
     def batch_operation(
@@ -676,7 +685,7 @@ class ModuleController(QObject):
         # 限制历史记录数量
         if len(self.operation_history) > self.config["max_operation_history"]:
             self.operation_history = self.operation_history[
-                -self.config["max_operation_history"] :
+                -self.config["max_operation_history"]:
             ]
 
         # 发送信号

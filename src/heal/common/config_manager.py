@@ -168,7 +168,8 @@ class ConfigManager:
             self._save_config_data(
                 config_path.default_path, default_configs[config_type]
             )
-            self.logger.info(f"Created default configuration: {config_path.filename}")
+            self.logger.info(
+                f"Created default configuration: {config_path.filename}")
 
     def _save_config_data(self, file_path: Path, data: Dict[str, Any]) -> None:
         """Save configuration data to file."""
@@ -187,7 +188,8 @@ class ConfigManager:
                 if isinstance(data, dict):
                     return data
                 else:
-                    raise ValueError(f"Configuration file {file_path} does not contain a JSON object")
+                    raise ValueError(
+                        f"Configuration file {file_path} does not contain a JSON object")
         except Exception as e:
             self.logger.error(f"Failed to load configuration {file_path}: {e}")
             raise
@@ -301,9 +303,11 @@ class ConfigManager:
         for config_type, config_path in self.config_paths.items():
             if config_path.default_path.exists():
                 try:
-                    config_data = self._load_config_data(config_path.default_path)
+                    config_data = self._load_config_data(
+                        config_path.default_path)
                     # Convert config_data to file path for validation
-                    result = self.validator.validate_file(str(config_path.default_path))
+                    result = self.validator.validate_file(
+                        str(config_path.default_path))
                     results[config_type] = result
 
                     if not result.is_valid:
@@ -314,7 +318,8 @@ class ConfigManager:
                             self.logger.error(f"  {error}")
 
                 except Exception as e:
-                    self.logger.error(f"Failed to validate {config_path.filename}: {e}")
+                    self.logger.error(
+                        f"Failed to validate {config_path.filename}: {e}")
                     results[config_type] = ValidationResult(
                         is_valid=False,
                         errors=[str(e)],
@@ -339,7 +344,8 @@ class ConfigManager:
                 main_config["PATHS"]["translations"] = "src/heal/resources/translations"
 
                 self.set_config(ConfigType.MAIN, main_config)
-                self.logger.info("Updated resource paths in main configuration")
+                self.logger.info(
+                    "Updated resource paths in main configuration")
 
         except Exception as e:
             self.logger.error(f"Failed to update resource paths: {e}")

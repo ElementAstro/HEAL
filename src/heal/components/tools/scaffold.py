@@ -240,8 +240,10 @@ class ScaffoldApp(QWidget):
 
     def show_summary(self) -> None:
         details = self.module_details.__dict__.copy()
-        details["additional_sources"] = ", ".join(details["additional_sources"])
-        details["additional_headers"] = ", ".join(details["additional_headers"])
+        details["additional_sources"] = ", ".join(
+            details["additional_sources"])
+        details["additional_headers"] = ", ".join(
+            details["additional_headers"])
         formatted_details = json.dumps(details, indent=4, ensure_ascii=False)
         self.summary_label.setText(formatted_details)
         self.stacked_widget.setCurrentIndex(self.stacked_widget.count() - 1)

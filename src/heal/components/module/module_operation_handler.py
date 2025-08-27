@@ -20,7 +20,8 @@ class ModuleOperationHandler(QObject):
     """模块操作处理器"""
 
     # 信号
-    operation_completed = Signal(str, str, bool)  # operation, module_name, success
+    # operation, module_name, success
+    operation_completed = Signal(str, str, bool)
     state_changed = Signal(str, str)  # module_name, new_state
 
     def __init__(
@@ -139,7 +140,8 @@ class ModuleOperationHandler(QObject):
             start_time = time.time()
 
             # 检查模块是否已加载（除非强制加载）
-            current_state = self.module_states.get(module_name, ModuleState.IDLE)
+            current_state = self.module_states.get(
+                module_name, ModuleState.IDLE)
             if current_state == ModuleState.LOADED and not force:
                 self.logger.info(f"模块 {module_name} 已加载，跳过")
                 return True
@@ -180,7 +182,8 @@ class ModuleOperationHandler(QObject):
         """卸载模块"""
         try:
             # 检查模块状态
-            current_state = self.module_states.get(module_name, ModuleState.IDLE)
+            current_state = self.module_states.get(
+                module_name, ModuleState.IDLE)
             if current_state == ModuleState.IDLE:
                 self.logger.info(f"模块 {module_name} 未加载，无需卸载")
                 return True

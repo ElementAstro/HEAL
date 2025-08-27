@@ -17,7 +17,8 @@ class HyperlinkCardLauncher(SettingCard):
 
     def __init__(self, title: str, content: Optional[str] = None, icon: Union[FluentIcon, str] = FluentIcon.LINK) -> None:
         super().__init__(icon, title, content)
-        self.logger = get_logger("launcher_card", module="HyperlinkCardLauncher")
+        self.logger = get_logger(
+            "launcher_card", module="HyperlinkCardLauncher")
         self.init_ui()
 
     def init_ui(self) -> None:
@@ -36,5 +37,6 @@ class HyperlinkCardLauncher(SettingCard):
         self.hBoxLayout.addWidget(
             self.linkButton_launcher, 0, Qt.AlignmentFlag.AlignRight
         )
-        self.hBoxLayout.addWidget(self.linkButton_audio, 0, Qt.AlignmentFlag.AlignRight)
+        self.hBoxLayout.addWidget(
+            self.linkButton_audio, 0, Qt.AlignmentFlag.AlignRight)
         self.hBoxLayout.addSpacing(16)

@@ -120,7 +120,8 @@ class MainNavigationManager(QObject):
             interface_key, icon, text, fill_icon, *position = config
             pos = position[0] if position else NavigationItemPosition.TOP
             interface = self.interfaces[interface_key]
-            self.main_window.addSubInterface(interface, icon, text, fill_icon, pos)
+            self.main_window.addSubInterface(
+                interface, icon, text, fill_icon, pos)
 
         # 添加功能按钮
         self._add_navigation_actions()

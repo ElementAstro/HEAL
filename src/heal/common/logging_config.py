@@ -1,3 +1,4 @@
+from loguru import logger
 import asyncio
 import json
 import os
@@ -16,7 +17,6 @@ from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 # Type variable for preserving function signatures in decorators
 F = TypeVar('F', bound=Callable[..., Any])
 
-from loguru import logger
 
 # 上下文变量用于log correlation
 correlation_id: ContextVar[str] = ContextVar("correlation_id", default="")
@@ -74,7 +74,8 @@ class LogMetrics:
                     op: {
                         "count": len(data),
                         "avg_duration": (
-                            sum(d["duration"] for d in data) / len(data) if data else 0
+                            sum(d["duration"]
+                                for d in data) / len(data) if data else 0
                         ),
                         "max_duration": max(d["duration"] for d in data) if data else 0,
                     }
@@ -124,12 +125,14 @@ class LoggingConfig:
     def _metrics_filter(self, record: Any) -> None:
         """记录日志统计信息"""
         module_name = record.get("name", "unknown")
-        level = record["level"].name if hasattr(record["level"], "name") else "INFO"
+        level = record["level"].name if hasattr(
+            record["level"], "name") else "INFO"
         self.metrics.record_log(level, module_name)
 
     def _alerting_filter(self, record: Any) -> None:
         """触发告警回调"""
-        level = record["level"].name if hasattr(record["level"], "name") else "INFO"
+        level = record["level"].name if hasattr(
+            record["level"], "name") else "INFO"
         if level in ["ERROR", "CRITICAL"] and self.alerting_callbacks:
             for callback in self.alerting_callbacks:
                 try:
@@ -446,7 +449,8 @@ def log_performance(operation_name: Optional[str] = None) -> Callable[[F], F]:
                 # 记录性能指标
                 global _logging_config
                 if _logging_config is not None:
-                    _logging_config.metrics.record_performance(op_name, duration)
+                    _logging_config.metrics.record_performance(
+                        op_name, duration)
 
                 logger.bind(PERFORMANCE=True, correlation_id=cid).info(
                     f"Operation {op_name} completed",
@@ -490,7 +494,8 @@ def log_performance(operation_name: Optional[str] = None) -> Callable[[F], F]:
                 # 记录性能指标
                 global _logging_config
                 if _logging_config is not None:
-                    _logging_config.metrics.record_performance(op_name, duration)
+                    _logging_config.metrics.record_performance(
+                        op_name, duration)
 
                 logger.bind(PERFORMANCE=True, correlation_id=cid).info(
                     f"Operation {op_name} completed",
@@ -518,7 +523,8 @@ def log_performance(operation_name: Optional[str] = None) -> Callable[[F], F]:
                 )
                 raise
 
-        return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper  # type: ignore
+        # type: ignore
+        return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
 
     return decorator
 
@@ -528,7 +534,8 @@ def with_correlation_id(cid: Optional[str] = None) -> Any:
 
     class CorrelationContext:
         def __init__(self, correlation_id_value: str) -> None:
-            self.correlation_id_value = correlation_id_value or str(uuid.uuid4())
+            self.correlation_id_value = correlation_id_value or str(
+                uuid.uuid4())
             self.token: Any = None
 
         def __enter__(self) -> str:

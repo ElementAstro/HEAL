@@ -61,7 +61,8 @@ class Home(QWidget):
 
         # 修复：检查是否存在 process_restarted 信号
         if hasattr(self.process_manager, "process_restarted"):
-            self.process_manager.process_restarted.connect(self.on_process_restarted)
+            self.process_manager.process_restarted.connect(
+                self.on_process_restarted)
 
         logger.debug("Home界面初始化完成")
 
@@ -153,12 +154,15 @@ class Home(QWidget):
             card.start_requested.connect(self._handle_server_start_request)
             card.stop_requested.connect(self._handle_server_stop_request)
             card.restart_requested.connect(self._handle_server_restart_request)
-            card.settings_requested.connect(self._handle_server_settings_request)
+            card.settings_requested.connect(
+                self._handle_server_settings_request)
 
         # Connect quick action bar signals
         if self.quick_action_bar:
-            self.quick_action_bar.start_all_requested.connect(self.handleServerLaunch)
-            self.quick_action_bar.stop_all_requested.connect(self.handleStopAllServers)
+            self.quick_action_bar.start_all_requested.connect(
+                self.handleServerLaunch)
+            self.quick_action_bar.stop_all_requested.connect(
+                self.handleStopAllServers)
             self.quick_action_bar.refresh_requested.connect(
                 self._handle_refresh_request
             )
@@ -171,11 +175,13 @@ class Home(QWidget):
 
         # Connect compact banner signals
         if self.compact_banner:
-            self.compact_banner.banner_clicked.connect(self._handle_banner_click)
+            self.compact_banner.banner_clicked.connect(
+                self._handle_banner_click)
 
         # Connect status overview signals
         if self.status_overview:
-            self.status_overview.refresh_requested.connect(self._handle_refresh_request)
+            self.status_overview.refresh_requested.connect(
+                self._handle_refresh_request)
 
     def _connect_legacy_signals(self) -> None:
         """Connect signals for legacy layout"""
@@ -216,7 +222,8 @@ class Home(QWidget):
                     if self.server_manager.should_launch_server(server_button):
                         server_name = server_button.objectName()
                         logger.info(f"启动服务器: {server_name}")
-                        success = self.server_manager.launch_single_server(server_button)
+                        success = self.server_manager.launch_single_server(
+                            server_button)
                         if success:
                             launched_servers_this_run.append(server_name)
                             logger.info(f"服务器 {server_name} 启动成功")
@@ -323,7 +330,8 @@ class Home(QWidget):
         # 使用批处理更新UI以提高性能
         def update_info() -> None:
             Info(
-                self, "S", 1000, self.tr(f"服务端 {', '.join(launched_servers)} 启动中...")
+                self, "S", 1000, self.tr(
+                    f"服务端 {', '.join(launched_servers)} 启动中...")
             )
 
         def update_button() -> None:
@@ -401,7 +409,8 @@ class Home(QWidget):
 
     def saveConfig(self, server_name: str, config_path: str, dialog_to_close: Any) -> None:
         """保存服务器配置"""
-        self.dialog_manager.save_config(server_name, config_path, dialog_to_close)
+        self.dialog_manager.save_config(
+            server_name, config_path, dialog_to_close)
 
     def restartServer(self, server_name: str) -> None:
         """Restart a server using ServerManager"""
@@ -434,8 +443,10 @@ class Home(QWidget):
 
                 # Update status overview
                 if self.status_overview:
-                    self.status_overview.update_server_status(process_name, "running")
-                    self.status_overview.add_activity(f"Started {process_name}")
+                    self.status_overview.update_server_status(
+                        process_name, "running")
+                    self.status_overview.add_activity(
+                        f"Started {process_name}")
 
                 # Update displays
                 self._update_optimized_status_displays()
@@ -484,15 +495,18 @@ class Home(QWidget):
 
                 # Update status overview
                 if self.status_overview:
-                    self.status_overview.update_server_status(process_name, "stopped")
-                    self.status_overview.add_activity(f"Stopped {process_name}")
+                    self.status_overview.update_server_status(
+                        process_name, "stopped")
+                    self.status_overview.add_activity(
+                        f"Stopped {process_name}")
 
                 # Update displays
                 self._update_optimized_status_displays()
 
     def on_process_crashed(self, process_name: str, exit_code: int) -> None:
         """Handle process crashed signal from ProcessManager"""
-        Info(self, "E", 3000, self.tr(f"{process_name} 异常退出 (代码: {exit_code})"))
+        Info(self, "E", 3000, self.tr(
+            f"{process_name} 异常退出 (代码: {exit_code})"))
 
         # Update button state to show error using server manager
         self.server_manager.update_button_state(process_name, "crashed")
@@ -517,7 +531,8 @@ class Home(QWidget):
         if self.quick_action_bar:
             running_count = len(self.launched_servers)
             total_count = len(cfg.SERVER)
-            self.quick_action_bar.update_server_counts(running_count, total_count)
+            self.quick_action_bar.update_server_counts(
+                running_count, total_count)
 
         # Update status overview
         if self.status_overview:

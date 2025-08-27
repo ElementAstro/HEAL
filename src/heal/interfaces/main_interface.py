@@ -54,12 +54,18 @@ class Main(MSFluentWindow):
 
         # 添加初始化步骤
         workflow.add_step("init_theme", self.theme_manager.init_theme)
-        workflow.add_step("init_window", self.window_manager.init_main_window, ["init_theme"])
-        workflow.add_step("init_navigation", self.navigation_manager.init_navigation, ["init_window"])
-        workflow.add_step("check_fonts", self.font_manager.handle_font_check, optional=True)
-        workflow.add_step("finish_splash", self.window_manager.finish_splash, ["init_navigation"])
-        workflow.add_step("connect_signals", self.connect_signals, ["init_navigation"])
-        workflow.add_step("initial_setup", self.handle_initial_setup, ["connect_signals"], optional=True)
+        workflow.add_step(
+            "init_window", self.window_manager.init_main_window, ["init_theme"])
+        workflow.add_step(
+            "init_navigation", self.navigation_manager.init_navigation, ["init_window"])
+        workflow.add_step(
+            "check_fonts", self.font_manager.handle_font_check, optional=True)
+        workflow.add_step("finish_splash", self.window_manager.finish_splash, [
+                          "init_navigation"])
+        workflow.add_step("connect_signals", self.connect_signals, [
+                          "init_navigation"])
+        workflow.add_step("initial_setup", self.handle_initial_setup, [
+                          "connect_signals"], optional=True)
 
         # 执行工作流
         try:

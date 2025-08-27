@@ -36,7 +36,8 @@ class HyperlinkCard(SettingCard):
         super().__init__(icon, title, content, parent)
         for url, text in urls:
             link_button = HyperlinkButton(url, text, self)
-            self.hBoxLayout.addWidget(link_button, 0, Qt.AlignmentFlag.AlignRight)
+            self.hBoxLayout.addWidget(
+                link_button, 0, Qt.AlignmentFlag.AlignRight)
         self.hBoxLayout.addSpacing(16)
 
 

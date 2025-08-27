@@ -193,7 +193,8 @@ class ResourceManager:
             data = json.loads(content)
 
             if not isinstance(data, dict):
-                raise ValueError(f"Expected dict from JSON file {filename}, got {type(data)}")
+                raise ValueError(
+                    f"Expected dict from JSON file {filename}, got {type(data)}")
 
             self._cache[cache_key] = data
             return data
@@ -261,7 +262,8 @@ class ResourceManager:
                     if "/" in resource_type:
                         # Handle theme-specific resources
                         base_type, theme = resource_type.split("/")
-                        path = self.get_resource_path(base_type, filename, theme)
+                        path = self.get_resource_path(
+                            base_type, filename, theme)
                     else:
                         path = self.get_resource_path(resource_type, filename)
 

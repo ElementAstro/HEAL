@@ -212,11 +212,13 @@ class ModuleValidator:
     ) -> dict[str, Any]:
         """获取验证摘要"""
         total = len(reports)
-        passed = sum(1 for r in reports if r.overall_result == ValidationResult.PASSED)
+        passed = sum(1 for r in reports if r.overall_result ==
+                     ValidationResult.PASSED)
         warnings = sum(
             1 for r in reports if r.overall_result == ValidationResult.WARNING
         )
-        failed = sum(1 for r in reports if r.overall_result == ValidationResult.FAILED)
+        failed = sum(1 for r in reports if r.overall_result ==
+                     ValidationResult.FAILED)
         critical = sum(
             1 for r in reports if r.overall_result == ValidationResult.CRITICAL
         )
@@ -310,7 +312,8 @@ class ValidationReportWidget(QScrollArea):
     def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.setWidgetResizable(True)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         self.content_widget = QWidget()
         self.content_layout = QVBoxLayout(self.content_widget)
@@ -400,7 +403,8 @@ class ValidationReportWidget(QScrollArea):
 
         info_layout.addWidget(BodyLabel("验证结果:"), 2, 0)
         result_label = BodyLabel(report.overall_result.value)
-        result_label.setStyleSheet(self._get_result_style(report.overall_result))
+        result_label.setStyleSheet(
+            self._get_result_style(report.overall_result))
         info_layout.addWidget(result_label, 2, 1)
 
         info_layout.addWidget(BodyLabel("问题数量:"), 3, 0)
@@ -411,7 +415,8 @@ class ValidationReportWidget(QScrollArea):
 
         timestamp = datetime.datetime.fromtimestamp(report.timestamp)
         info_layout.addWidget(BodyLabel("验证时间:"), 4, 0)
-        info_layout.addWidget(BodyLabel(timestamp.strftime("%Y-%m-%d %H:%M:%S")), 4, 1)
+        info_layout.addWidget(
+            BodyLabel(timestamp.strftime("%Y-%m-%d %H:%M:%S")), 4, 1)
 
         layout.addLayout(info_layout)
 
@@ -668,7 +673,8 @@ class ModuleValidationUI(QWidget):
         """连接信号"""
         self.validate_btn.clicked.connect(self._on_validate_clicked)
         self.browse_btn.clicked.connect(self._on_browse_clicked)
-        self.batch_validate_btn.clicked.connect(self._on_batch_validate_clicked)
+        self.batch_validate_btn.clicked.connect(
+            self._on_batch_validate_clicked)
         self.export_btn.clicked.connect(self._on_export_clicked)
         self.level_combo.currentTextChanged.connect(self._on_level_changed)
 

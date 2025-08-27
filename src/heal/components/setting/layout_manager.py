@@ -108,13 +108,15 @@ class SettingsLayoutManager:
 
         # Setup navigation callbacks
         stacked_widget.currentChanged.connect(
-            lambda index: self.on_current_index_changed(pivot, stacked_widget, index)
+            lambda index: self.on_current_index_changed(
+                pivot, stacked_widget, index)
         )
 
         # Set default interface to appearance (most frequently used)
         stacked_widget.setCurrentWidget(appearance_interface)
         pivot.setCurrentItem(appearance_interface.objectName())
-        qrouter.setDefaultRouteKey(stacked_widget, appearance_interface.objectName())
+        qrouter.setDefaultRouteKey(
+            stacked_widget, appearance_interface.objectName())
 
     def on_current_index_changed(
         self, pivot: Pivot, stacked_widget: QStackedWidget, index: int

@@ -192,7 +192,8 @@ class CommandCenter(QWidget):
                 input_widget.setPlaceholderText(str(param.annotation.__name__))
                 if param.default != inspect.Parameter.empty:
                     input_widget.setText(str(param.default))
-                self.param_layout.addRow(QLabel(f"{param_name}:"), input_widget)
+                self.param_layout.addRow(
+                    QLabel(f"{param_name}:"), input_widget)
                 self.param_inputs[param_name] = input_widget
 
     def show_command_description(self, item: QListWidgetItem) -> None:
@@ -219,7 +220,8 @@ class CommandCenter(QWidget):
         self.command_history.append(command_text)
         self.update_history_list()
 
-        kwargs = {key: widget.text() for key, widget in self.param_inputs.items()}
+        kwargs = {key: widget.text()
+                  for key, widget in self.param_inputs.items()}
 
         self.execution_thread = CommandExecutionThread(
             command_name, *args, user_permissions=["basic"], **kwargs
@@ -265,7 +267,8 @@ class CommandCenter(QWidget):
         )
         if file_name:
             with open(file_name, "w", encoding="utf-8") as file:
-                json.dump(self.command_history, file, ensure_ascii=False, indent=4)
+                json.dump(self.command_history, file,
+                          ensure_ascii=False, indent=4)
 
     def load_history(self) -> None:
         file_name, _ = QFileDialog.getOpenFileName(

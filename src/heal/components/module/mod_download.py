@@ -65,7 +65,8 @@ class ModDownloadThread(QThread):
 
     def run(self) -> None:
         try:
-            proxies = {"http": self.proxy, "https": self.proxy} if self.proxy else None
+            proxies = {"http": self.proxy,
+                       "https": self.proxy} if self.proxy else None
             with requests.get(self.url, stream=True, proxies=proxies) as r:
                 r.raise_for_status()
                 total_length = r.headers.get("content-length")
@@ -108,7 +109,8 @@ class SettingsWindow(QDialog):
         self.dir_display = LineEdit()
         self.dir_display.setReadOnly(True)
         self.dir_display.setText(
-            self.settings.get("download_dir", os.path.expanduser("~/Downloads"))
+            self.settings.get(
+                "download_dir", os.path.expanduser("~/Downloads"))
         )
         self.browse_button = PushButton("浏览")
         self.browse_button.clicked.connect(self.browse_directory)
@@ -122,7 +124,8 @@ class SettingsWindow(QDialog):
         self.concurrency_label = QLabel("并发下载数:")
         self.concurrency_spin = SpinBox()
         self.concurrency_spin.setRange(1, 10)
-        self.concurrency_spin.setValue(self.settings.get("concurrent_downloads", 3))
+        self.concurrency_spin.setValue(
+            self.settings.get("concurrent_downloads", 3))
         concurrency_layout.addWidget(self.concurrency_label)
         concurrency_layout.addWidget(self.concurrency_spin)
         layout.addLayout(concurrency_layout)
@@ -138,18 +141,21 @@ class SettingsWindow(QDialog):
 
         # 文件验证
         self.verify_checkbox = CheckBox("启用文件验证 (MD5)")
-        self.verify_checkbox.setChecked(self.settings.get("enable_verification", False))
+        self.verify_checkbox.setChecked(
+            self.settings.get("enable_verification", False))
         layout.addWidget(self.verify_checkbox)
 
         # 启用自动更新
         self.auto_update_checkbox = CheckBox("启用自动更新")
-        self.auto_update_checkbox.setChecked(self.settings.get("auto_update", True))
+        self.auto_update_checkbox.setChecked(
+            self.settings.get("auto_update", True))
         layout.addWidget(self.auto_update_checkbox)
 
         # 保存按钮
         self.save_button = PushButton("保存")
         self.save_button.clicked.connect(self.save_settings)
-        layout.addWidget(self.save_button, alignment=Qt.AlignmentFlag.AlignRight)
+        layout.addWidget(self.save_button,
+                         alignment=Qt.AlignmentFlag.AlignRight)
 
         self.setLayout(layout)
 
@@ -185,7 +191,8 @@ class ModDownload(ScrollArea):
         self.settings = self.load_settings()
 
         # 设置ScrollArea属性
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.enableTransparentBackground()
 
@@ -463,7 +470,8 @@ class ModDownload(ScrollArea):
     def download_mod(self, mod: Mod, button: PushButton) -> None:
         """下载模组"""
         save_path = os.path.join(
-            self.settings.get("download_dir", os.path.expanduser("~/Downloads")),
+            self.settings.get(
+                "download_dir", os.path.expanduser("~/Downloads")),
             f"{mod.name}.zip",
         )
         self.current_progress_bar.setVisible(True)
@@ -473,11 +481,13 @@ class ModDownload(ScrollArea):
         self.download_thread = ModDownloadThread(
             mod.download_url,
             save_path,
-            proxy=self.settings.get("proxy") if self.settings.get("proxy") else None,
+            proxy=self.settings.get(
+                "proxy") if self.settings.get("proxy") else None,
         )
         self.download_thread.progress_updated.connect(self.update_progress)
         self.download_thread.download_finished.connect(
-            lambda success, info: self.finish_download(mod, button, success, info)
+            lambda success, info: self.finish_download(
+                mod, button, success, info)
         )
         self.download_thread.start()
         logger.info(f"开始下载: {mod.name} 从 {mod.download_url} 到 {save_path}")

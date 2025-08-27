@@ -80,7 +80,8 @@ class Environment(ScrollArea):
         self.init_widget()
 
     def init_widget(self) -> None:
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setViewportMargins(20, 0, 20, 20)
         self.setWidget(self.scrollWidget)
         self.setWidgetResizable(True)
@@ -123,7 +124,8 @@ class Environment(ScrollArea):
 
         # 主标题
         title_label = BodyLabel("开发环境配置")
-        title_label.setStyleSheet("font-size: 20px; font-weight: bold; color: #323130;")
+        title_label.setStyleSheet(
+            "font-size: 20px; font-weight: bold; color: #323130;")
 
         # 副标题
         subtitle_label = CaptionLabel(f"当前平台: {str(self.platform_info)}")
@@ -138,7 +140,8 @@ class Environment(ScrollArea):
     def create_quick_action_panel(self) -> None:
         """创建快速操作面板"""
         self.quick_action_panel = QuickActionPanel()
-        self.quick_action_panel.action_requested.connect(self.handle_quick_action)
+        self.quick_action_panel.action_requested.connect(
+            self.handle_quick_action)
         self.vBoxLayout.addWidget(self.quick_action_panel)
 
     def create_status_overview(self) -> None:
@@ -175,8 +178,10 @@ class Environment(ScrollArea):
 
     def connect_signals(self) -> None:
         # 连接工具状态管理器信号
-        self.tool_status_manager.status_updated.connect(self.on_tool_status_updated)
-        self.tool_status_manager.all_status_updated.connect(self.on_all_status_updated)
+        self.tool_status_manager.status_updated.connect(
+            self.on_tool_status_updated)
+        self.tool_status_manager.all_status_updated.connect(
+            self.on_all_status_updated)
 
         logger.info("信号已连接到槽。")
 
@@ -293,7 +298,8 @@ class Environment(ScrollArea):
                     item.get("content", ""),
                     item.get("options", []),
                 )
-                smart_card.download_requested.connect(self.handle_download_request)
+                smart_card.download_requested.connect(
+                    self.handle_download_request)
 
                 # 根据工具类型添加到相应分类
                 tool_name = item.get("title", "").lower()

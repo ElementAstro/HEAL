@@ -23,7 +23,8 @@ class ProxySignalManager(QObject):
     def __init__(self, parent_widget: Optional[QWidget] = None) -> None:
         super().__init__(parent_widget)
         self.parent_widget = parent_widget
-        self.logger = get_logger("proxy_signal_manager", module="ProxySignalManager")
+        self.logger = get_logger(
+            "proxy_signal_manager", module="ProxySignalManager")
 
         # 初始化管理器
         self.fiddler_manager = FiddlerManager(parent_widget)
@@ -32,16 +33,19 @@ class ProxySignalManager(QObject):
 
     def connect_download_signals(self, download_card: Any) -> None:
         """连接下载信号"""
-        download_card.clicked.connect(lambda: self.handle_download_started("fiddler"))
+        download_card.clicked.connect(
+            lambda: self.handle_download_started("fiddler"))
         self.logger.debug("下载信号已连接")
 
     def connect_fiddler_signals(self, fiddler_card: PrimaryPushSettingCardFiddler) -> None:
         """连接Fiddler卡片信号"""
         fiddler_card.clicked_script.connect(
-            lambda: self.fiddler_manager.show_fiddler_tip(fiddler_card.button_script)
+            lambda: self.fiddler_manager.show_fiddler_tip(
+                fiddler_card.button_script)
         )
         fiddler_card.clicked_old.connect(self.fiddler_manager.open_fiddler)
-        fiddler_card.clicked_backup.connect(self.fiddler_manager.backup_fiddler_script)
+        fiddler_card.clicked_backup.connect(
+            self.fiddler_manager.backup_fiddler_script)
 
         self.logger.debug("Fiddler信号已连接")
 

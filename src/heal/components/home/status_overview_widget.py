@@ -32,7 +32,8 @@ class StatusOverviewWidget(QFrame):
         self.recent_activities: List[Tuple[datetime, str]] = []
         self.max_activities = 5
 
-        self.logger = get_logger("status_overview", module="StatusOverviewWidget")
+        self.logger = get_logger(
+            "status_overview", module="StatusOverviewWidget")
 
         self._init_ui()
         self._setup_styles()
@@ -53,7 +54,8 @@ class StatusOverviewWidget(QFrame):
         status_layout.setSpacing(4)
 
         self.system_status_label = QLabel(tr("home.system_status"))
-        self.system_status_label.setFont(QFont(cfg.APP_FONT, 11, QFont.Weight.Bold))
+        self.system_status_label.setFont(
+            QFont(cfg.APP_FONT, 11, QFont.Weight.Bold))
 
         self.status_summary_label = QLabel("0/0 Running")
         self.status_summary_label.setFont(QFont(cfg.APP_FONT, 10))
@@ -166,7 +168,8 @@ class StatusOverviewWidget(QFrame):
             1 for status in self.server_statuses.values() if status == "running"
         )
 
-        self.status_summary_label.setText(f"{running_servers}/{total_servers} Running")
+        self.status_summary_label.setText(
+            f"{running_servers}/{total_servers} Running")
 
         # Color code the summary
         if total_servers == 0:
@@ -178,7 +181,8 @@ class StatusOverviewWidget(QFrame):
         else:
             color = "#FF9800"  # Orange - partial
 
-        self.status_summary_label.setStyleSheet(f"QLabel {{ color: {color}; }}")
+        self.status_summary_label.setStyleSheet(
+            f"QLabel {{ color: {color}; }}")
 
     def _update_server_indicators(self) -> None:
         """Update individual server status indicators."""
@@ -268,6 +272,7 @@ class StatusOverviewWidget(QFrame):
         stopped = sum(
             1 for status in self.server_statuses.values() if status == "stopped"
         )
-        error = sum(1 for status in self.server_statuses.values() if status == "error")
+        error = sum(1 for status in self.server_statuses.values()
+                    if status == "error")
 
         return {"total": total, "running": running, "stopped": stopped, "error": error}

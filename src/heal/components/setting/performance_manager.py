@@ -88,13 +88,15 @@ class SettingsCache:
         if not self.cache:
             return
 
-        lru_key = min(self.cache.keys(), key=lambda k: self.cache[k].last_access)
+        lru_key = min(self.cache.keys(),
+                      key=lambda k: self.cache[k].last_access)
         del self.cache[lru_key]
 
     def get_stats(self) -> Dict[str, Any]:
         """Get cache statistics"""
         with QMutexLocker(self.mutex):
-            total_accesses = sum(entry.access_count for entry in self.cache.values())
+            total_accesses = sum(
+                entry.access_count for entry in self.cache.values())
             return {
                 "size": len(self.cache),
                 "max_size": self.max_size,
@@ -126,7 +128,8 @@ class LazyLoader:
 
         loader_func = self.loading_callbacks.get(setting_key)
         if not loader_func:
-            self.logger.warning(f"No loader registered for setting: {setting_key}")
+            self.logger.warning(
+                f"No loader registered for setting: {setting_key}")
             return None
 
         try:
@@ -137,7 +140,8 @@ class LazyLoader:
             self.logger.debug(f"Lazy loaded setting: {setting_key}")
             return result
         except Exception as e:
-            self.logger.error(f"Failed to lazy load setting {setting_key}: {e}")
+            self.logger.error(
+                f"Failed to lazy load setting {setting_key}: {e}")
             return None
 
     def is_loaded(self, setting_key: str) -> bool:
@@ -192,7 +196,8 @@ class SettingsPerformanceManager(QObject):
                 self.cache.set(cache_key, value)
                 return value
         except Exception as e:
-            self.logger.error(f"Failed to get setting {key} from {file_path}: {e}")
+            self.logger.error(
+                f"Failed to get setting {key} from {file_path}: {e}")
             self.error_occurred.emit("get_setting", str(e))
 
         return default_value
@@ -224,7 +229,8 @@ class SettingsPerformanceManager(QObject):
                 file_path, create_if_missing=True, default_content={}
             )
             if not result.success:
-                self.logger.error(f"Failed to load file for saving: {file_path}")
+                self.logger.error(
+                    f"Failed to load file for saving: {file_path}")
                 return False
 
             # Update data
@@ -238,12 +244,14 @@ class SettingsPerformanceManager(QObject):
                 self.logger.debug(f"Saved setting {key} to {file_path}")
             else:
                 self.setting_saved.emit(f"{file_path}:{key}", False)
-                self.logger.error(f"Failed to save setting {key} to {file_path}")
+                self.logger.error(
+                    f"Failed to save setting {key} to {file_path}")
 
             return success
 
         except Exception as e:
-            self.logger.error(f"Error saving setting {key} to {file_path}: {e}")
+            self.logger.error(
+                f"Error saving setting {key} to {file_path}: {e}")
             self.error_occurred.emit("save_setting", str(e))
             self.setting_saved.emit(f"{file_path}:{key}", False)
             return False
@@ -265,7 +273,8 @@ class SettingsPerformanceManager(QObject):
 
         # Clear pending saves
         self.pending_saves.clear()
-        self.logger.debug(f"Flushed {len(files_to_save)} files with batched saves")
+        self.logger.debug(
+            f"Flushed {len(files_to_save)} files with batched saves")
 
     def _batch_save_file(self, file_path: str, updates: Dict[str, Any]) -> None:
         """Save multiple updates to a single file"""
@@ -275,7 +284,8 @@ class SettingsPerformanceManager(QObject):
                 file_path, create_if_missing=True, default_content={}
             )
             if not result.success:
-                self.logger.error(f"Failed to load file for batch saving: {file_path}")
+                self.logger.error(
+                    f"Failed to load file for batch saving: {file_path}")
                 return
 
             # Apply all updates
@@ -290,9 +300,11 @@ class SettingsPerformanceManager(QObject):
                 self.setting_saved.emit(f"{file_path}:{key}", success)
 
             if success:
-                self.logger.debug(f"Batch saved {len(updates)} settings to {file_path}")
+                self.logger.debug(
+                    f"Batch saved {len(updates)} settings to {file_path}")
             else:
-                self.logger.error(f"Failed to batch save settings to {file_path}")
+                self.logger.error(
+                    f"Failed to batch save settings to {file_path}")
 
         except Exception as e:
             self.logger.error(f"Error in batch save to {file_path}: {e}")

@@ -22,7 +22,8 @@ class PrimaryPushSettingCardFiddler(SettingCard):
 
     def __init__(self, title: str, content: Optional[str] = None, icon: Union[FluentIcon, str] = FluentIcon.VPN) -> None:
         super().__init__(icon, title, content)
-        self.logger = get_logger("proxy_card", module="PrimaryPushSettingCardFiddler")
+        self.logger = get_logger(
+            "proxy_card", module="PrimaryPushSettingCardFiddler")
         self.init_ui()
 
     def init_ui(self) -> None:
@@ -50,7 +51,8 @@ class CustomFlyoutViewFiddler(FlyoutViewBase):
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent=parent)
         self.parent = parent
-        self.logger = get_logger("proxy_card", module="CustomFlyoutViewFiddler")
+        self.logger = get_logger(
+            "proxy_card", module="CustomFlyoutViewFiddler")
         self.init_ui()
 
     def init_ui(self) -> None:
@@ -65,7 +67,8 @@ class CustomFlyoutViewFiddler(FlyoutViewBase):
         self.gc_button.clicked.connect(
             lambda: self.handle_fiddler_button("grasscutter")
         )
-        self.ht_button.clicked.connect(lambda: self.handle_fiddler_button("hutao"))
+        self.ht_button.clicked.connect(
+            lambda: self.handle_fiddler_button("hutao"))
 
     def handle_fiddler_button(self, mode: str) -> None:
         """处理Fiddler按钮点击"""

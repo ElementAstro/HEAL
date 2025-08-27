@@ -37,7 +37,8 @@ class CompactBannerWidget(QFrame):
             tr("home.tip_keyboard_shortcuts"),
         ]
 
-        self.logger = get_logger("compact_banner", module="CompactBannerWidget")
+        self.logger = get_logger(
+            "compact_banner", module="CompactBannerWidget")
 
         self._init_ui()
         self._setup_styles()
@@ -107,7 +108,8 @@ class CompactBannerWidget(QFrame):
 
         # System status
         self.system_status_title = QLabel(tr("home.system_status"))
-        self.system_status_title.setFont(QFont(cfg.APP_FONT, 11, QFont.Weight.Bold))
+        self.system_status_title.setFont(
+            QFont(cfg.APP_FONT, 11, QFont.Weight.Bold))
         self.system_status_title.setStyleSheet("QLabel { color: #2C3E50; }")
 
         self.system_status_info = QLabel("Ready")
@@ -176,7 +178,8 @@ class CompactBannerWidget(QFrame):
     def _rotate_tip(self) -> None:
         """Rotate to the next tip."""
         if self.tips_list:
-            self.current_tip_index = (self.current_tip_index + 1) % len(self.tips_list)
+            self.current_tip_index = (
+                self.current_tip_index + 1) % len(self.tips_list)
             self._update_tip_display()
 
     def _update_tip_display(self) -> None:

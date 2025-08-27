@@ -8,7 +8,8 @@ from typing import Any, Dict  # List, Optional removed as per error
 
 from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QFont  # QColor removed as per error
-from PySide6.QtWidgets import QHBoxLayout  # QGroupBox, QLabel, removed as per error
+# QGroupBox, QLabel, removed as per error
+from PySide6.QtWidgets import QHBoxLayout
 from PySide6.QtWidgets import (  # QProgressBar, QListWidget, QListWidgetItem removed as per error
     QVBoxLayout,
     QWidget,
@@ -64,7 +65,8 @@ class DownloadItemCard(CardWidget):
         self.filename_label = StrongBodyLabel(
             Path(self.download_item.file_path).name
         )  # Use file_path
-        self.filename_label.setFont(QFont("Microsoft YaHei", 12, QFont.Weight.Bold))
+        self.filename_label.setFont(
+            QFont("Microsoft YaHei", 12, QFont.Weight.Bold))
 
         self.status_label = CaptionLabel("状态")
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -202,7 +204,8 @@ class DownloadItemCard(CardWidget):
         if download_item.file_size > 0:  # Use file_size
             total_mb = download_item.file_size / (1024 * 1024)  # Use file_size
             downloaded_mb = download_item.downloaded_size / (1024 * 1024)
-            self.size_label.setText(f"大小: {downloaded_mb:.1f}/{total_mb:.1f} MB")
+            self.size_label.setText(
+                f"大小: {downloaded_mb:.1f}/{total_mb:.1f} MB")
         else:
             downloaded_mb = download_item.downloaded_size / (1024 * 1024)
             self.size_label.setText(f"已下载: {downloaded_mb:.1f} MB")
@@ -235,9 +238,12 @@ class DownloadItemCard(CardWidget):
             self.eta_label.setText("剩余时间: --")
 
         # 根据状态更新按钮可用性
-        self.pause_btn.setVisible(download_item.status == DownloadStatus.DOWNLOADING)
-        self.resume_btn.setVisible(download_item.status == DownloadStatus.PAUSED)
-        self.retry_btn.setVisible(download_item.status == DownloadStatus.FAILED)
+        self.pause_btn.setVisible(
+            download_item.status == DownloadStatus.DOWNLOADING)
+        self.resume_btn.setVisible(
+            download_item.status == DownloadStatus.PAUSED)
+        self.retry_btn.setVisible(
+            download_item.status == DownloadStatus.FAILED)
         self.cancel_btn.setEnabled(
             download_item.status
             in [
@@ -293,7 +299,8 @@ class DownloadManagerWidget(QWidget):
 
         self.clear_completed_btn = PushButton("清除已完成")
         self.clear_completed_btn.setIcon(FluentIcon.DELETE)
-        self.clear_completed_btn.clicked.connect(self.clear_completed_downloads)
+        self.clear_completed_btn.clicked.connect(
+            self.clear_completed_downloads)
 
         header_layout.addWidget(title_label)
         header_layout.addStretch()
@@ -328,7 +335,8 @@ class DownloadManagerWidget(QWidget):
         scroll_area = ScrollArea()
         scroll_area.setWidget(self.download_container)
         scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll_area.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         # 状态栏
         self.status_label = CaptionLabel("就绪")
@@ -342,8 +350,10 @@ class DownloadManagerWidget(QWidget):
     def connect_signals(self) -> None:
         """连接信号"""
         # 连接下载管理器信号
-        self.download_manager.download_started.connect(self.on_download_started)
-        self.download_manager.download_completed.connect(self.on_download_completed)
+        self.download_manager.download_started.connect(
+            self.on_download_started)
+        self.download_manager.download_completed.connect(
+            self.on_download_completed)
         self.download_manager.download_failed.connect(self.on_download_failed)
         # Use download_status_changed for pause, resume, cancel InfoBars
         self.download_manager.download_status_changed.connect(
@@ -407,7 +417,8 @@ class DownloadManagerWidget(QWidget):
         if (
             download_item.id in self.download_cards
         ):  # Avoid duplicates if refresh logic changes
-            self.download_cards[download_item.id].update_progress(download_item)
+            self.download_cards[download_item.id].update_progress(
+                download_item)
             return
 
         # Parent to container
@@ -434,7 +445,8 @@ class DownloadManagerWidget(QWidget):
                 del self.download_cards[download_id]
                 continue
             try:
-                download_item = self.download_manager.get_download_info(download_id)
+                download_item = self.download_manager.get_download_info(
+                    download_id)
                 if download_item:
                     card.update_progress(download_item)
             except Exception:  # pylint: disable=broad-except
@@ -488,9 +500,11 @@ class DownloadManagerWidget(QWidget):
             self.status_label.setText(f"下载 {download_id} 已取消")
             # Card removal and InfoBar will be handled by on_download_cancelled via status change
             if download_id in self.download_cards:  # Ensure card still exists
-                download_info = self.download_manager.get_download_info(download_id)
+                download_info = self.download_manager.get_download_info(
+                    download_id)
                 if download_info:
-                    self.download_cards[download_id].update_progress(download_info)
+                    self.download_cards[download_id].update_progress(
+                        download_info)
 
         else:
             self.status_label.setText(f"取消下载 {download_id} 失败")

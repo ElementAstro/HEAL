@@ -29,9 +29,12 @@ def load_icons() -> dict[str, str]:
 # Create the AstroIcon class dynamically
 icons = load_icons()
 # Create a simple enum that mypy can understand
+
+
 class AstroIcon(AstroIconBase):
     """Dynamically created Astro Icons"""
     pass
+
 
 # Add icons as class attributes if they exist
 if icons:

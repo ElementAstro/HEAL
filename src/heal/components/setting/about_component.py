@@ -65,7 +65,8 @@ class About(QWidget):
         self.about_image = AboutBackground()
         self.about_image.setFixedSize(1100, 500)
 
-        self.link_writer = PushButton(FluentIcon.HOME, self.tr("about.author_homepage"))
+        self.link_writer = PushButton(
+            FluentIcon.HOME, self.tr("about.author_homepage"))
         self.link_repo = PushButton(
             FluentIcon.GITHUB, self.tr("about.project_repository")
         )

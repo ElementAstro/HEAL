@@ -70,7 +70,8 @@ class SettingsValidator:
     """Validates settings data and operations"""
 
     def __init__(self) -> None:
-        self.logger = get_logger("settings_validator", module="SettingsValidator")
+        self.logger = get_logger("settings_validator",
+                                 module="SettingsValidator")
         self.validation_rules: Dict[str, Callable] = {}
 
     def register_validation_rule(
@@ -110,7 +111,8 @@ class SettingsValidator:
             # Validate each setting
             for key, value in data.items():
                 if not self.validate_setting(key, value):
-                    errors.append(f"Invalid value for setting '{key}': {value}")
+                    errors.append(
+                        f"Invalid value for setting '{key}': {value}")
 
         except Exception as e:
             errors.append(f"Validation exception: {str(e)}")
@@ -124,7 +126,8 @@ class SettingsBackupManager:
     def __init__(self, backup_dir: str = "config/backups") -> None:
         self.backup_dir = Path(backup_dir)
         self.backup_dir.mkdir(parents=True, exist_ok=True)
-        self.logger = get_logger("settings_backup", module="SettingsBackupManager")
+        self.logger = get_logger(
+            "settings_backup", module="SettingsBackupManager")
         self.max_backups = 10
 
     def create_backup(self, file_path: str) -> Optional[str]:
@@ -177,7 +180,8 @@ class SettingsBackupManager:
 
             shutil.copy2(backup_file, source_path)
 
-            self.logger.info(f"Restored {file_path} from backup: {backup_file}")
+            self.logger.info(
+                f"Restored {file_path} from backup: {backup_file}")
             return True
 
         except Exception as e:
@@ -307,7 +311,8 @@ class SettingsErrorHandler(QObject):
         """Attempt to recover from an error"""
         strategy = self._get_recovery_strategy(error)
         if not strategy:
-            self.logger.warning(f"No recovery strategy for error: {error.error_type}")
+            self.logger.warning(
+                f"No recovery strategy for error: {error.error_type}")
             return None
 
         error.recovery_attempted = True
@@ -330,10 +335,12 @@ class SettingsErrorHandler(QObject):
             if recovery_result is not None:
                 error.recovery_successful = True
                 self.error_stats["recovered_errors"] += 1
-                self.logger.info(f"Successfully recovered from error: {error.error_id}")
+                self.logger.info(
+                    f"Successfully recovered from error: {error.error_id}")
 
         except Exception as recovery_error:
-            self.logger.error(f"Recovery failed for {error.error_id}: {recovery_error}")
+            self.logger.error(
+                f"Recovery failed for {error.error_id}: {recovery_error}")
 
         self.recovery_completed.emit(error.error_id, error.recovery_successful)
         return recovery_result
@@ -387,7 +394,8 @@ class SettingsErrorHandler(QObject):
         self, error: SettingsError, strategy: RecoveryStrategy
     ) -> Any:
         """Use default value for recovery"""
-        default_value = strategy.fallback_value or error.context.get("default_value")
+        default_value = strategy.fallback_value or error.context.get(
+            "default_value")
         self.logger.info(f"Using default value for recovery: {error.error_id}")
         return default_value
 
@@ -401,7 +409,8 @@ class SettingsErrorHandler(QObject):
 
         success = self.backup_manager.restore_backup(file_path)
         if success:
-            self.logger.info(f"Restored from backup for recovery: {error.error_id}")
+            self.logger.info(
+                f"Restored from backup for recovery: {error.error_id}")
             # Try to reload the data
             try:
                 result = JsonUtils.load_json_file(file_path)
@@ -466,7 +475,8 @@ def settings_error_handler(
             except Exception as e:
                 handler = SettingsErrorHandler()
                 recovery_context = context or {}
-                recovery_context["operation_func"] = lambda: func(*args, **kwargs)
+                recovery_context["operation_func"] = lambda: func(
+                    *args, **kwargs)
 
                 return handler.handle_error(operation, e, recovery_context, severity)
 

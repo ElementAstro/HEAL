@@ -31,7 +31,8 @@ class DraggableButtonConfig:
 class DraggableButton(QPushButton):
     def __init__(self, config: DraggableButtonConfig, parent: Optional[QWidget] = None) -> None:
         super().__init__(config.text, parent)
-        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding,
+                           QSizePolicy.Policy.Expanding)
         self.setStyleSheet(
             f"border: 1px solid gray; border-radius: 5px; background-color: {config.color};"
         )
@@ -197,7 +198,8 @@ class MainWindow(QMainWindow):
 
         # 初始化按钮
         initial_buttons = [
-            DraggableButton(DraggableButtonConfig(text=f"按钮 {i}", color="lightblue"))
+            DraggableButton(DraggableButtonConfig(
+                text=f"按钮 {i}", color="lightblue"))
             for i in range(1, 9)
         ]
         for button in initial_buttons:

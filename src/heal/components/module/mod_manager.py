@@ -157,7 +157,8 @@ class ModDetailPage(QFrame):
         total_pages = (
             self.tree_widget.topLevelItemCount() - 1
         ) // self.pages_per_view + 1
-        self.page_label.setText(f"第 {self.current_page + 1} 页 / 共 {total_pages} 页")
+        self.page_label.setText(
+            f"第 {self.current_page + 1} 页 / 共 {total_pages} 页")
 
         self.prev_button.setEnabled(self.current_page > 0)
         self.next_button.setEnabled(self.current_page < total_pages - 1)
@@ -295,7 +296,8 @@ class ModManager(ScrollArea):
     def _setup_system_connections(self) -> None:
         """Setup connections between systems"""
         # Connect workflow manager signals
-        self.workflow_manager.workflow_completed.connect(self._on_workflow_completed)
+        self.workflow_manager.workflow_completed.connect(
+            self._on_workflow_completed)
         self.workflow_manager.workflow_step_failed.connect(
             self._on_workflow_step_failed
         )
@@ -327,7 +329,8 @@ class ModManager(ScrollArea):
         self.setGeometry(100, 100, 1200, 800)
 
         # 设置ScrollArea属性
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.enableTransparentBackground()
 
@@ -416,7 +419,8 @@ class ModManager(ScrollArea):
 
         # Selection info bar
         self.selection_info = QLabel("未选择模组")
-        self.selection_info.setStyleSheet("color: #666; font-size: 12px; padding: 5px;")
+        self.selection_info.setStyleSheet(
+            "color: #666; font-size: 12px; padding: 5px;")
         main_layout.addWidget(self.selection_info)
 
         # Main content area with splitter
@@ -577,7 +581,8 @@ class ModManager(ScrollArea):
             # Enhanced status labels with loading states
             status_layout = QHBoxLayout()
             status_label = SubtitleLabel("启用" if info.enabled else "禁用")
-            status_label.setStyleSheet(f"color: {'green' if info.enabled else 'red'};")
+            status_label.setStyleSheet(
+                f"color: {'green' if info.enabled else 'red'};")
             status_layout.addWidget(status_label)
 
             usable_label = SubtitleLabel("可用" if info.usable else "不可用")
@@ -590,7 +595,8 @@ class ModManager(ScrollArea):
             workflow_status = self._get_module_workflow_status(info.name)
             if workflow_status:
                 workflow_label = SubtitleLabel(workflow_status)
-                workflow_label.setStyleSheet("color: #0078d4; font-style: italic;")
+                workflow_label.setStyleSheet(
+                    "color: #0078d4; font-style: italic;")
                 status_layout.addWidget(workflow_label)
 
             item_layout.addLayout(status_layout, 0, 3, 2, 1)
@@ -608,7 +614,8 @@ class ModManager(ScrollArea):
 
             open_folder_button = PushButton(FluentIcon.FOLDER, "")
             open_folder_button.setToolTip("打开文件夹")
-            open_folder_button.clicked.connect(partial(self.open_folder, info.path))
+            open_folder_button.clicked.connect(
+                partial(self.open_folder, info.path))
             operations_layout.addWidget(open_folder_button)
 
             copy_button = PushButton(FluentIcon.COPY, "")
@@ -621,7 +628,8 @@ class ModManager(ScrollArea):
             item_widget.setLayout(item_layout)
             item = QListWidgetItem(self.list_widget)
             item.setSizeHint(item_widget.sizeHint())
-            item.setData(Qt.ItemDataRole.UserRole, info.name)  # Store module name
+            item.setData(Qt.ItemDataRole.UserRole,
+                         info.name)  # Store module name
             self.list_widget.setItemWidget(item, item_widget)
 
         # Update selection info
@@ -658,7 +666,8 @@ class ModManager(ScrollArea):
     def confirm_delete_mod(self) -> None:
         selected_items = self.list_widget.selectedItems()
         if selected_items:
-            mod_names = [self.get_mod_name_from_item(item) for item in selected_items]
+            mod_names = [self.get_mod_name_from_item(
+                item) for item in selected_items]
             # Filter out None values before joining
             valid_mod_names = [name for name in mod_names if name is not None]
             reply = QMessageBox.warning(
@@ -877,7 +886,8 @@ class ModManager(ScrollArea):
         """Start workflow for a module"""
         try:
             workflow_id = self.workflow_manager.start_workflow(
-                module_name=module_name, metadata={"initiated_from": "module_manager"}
+                module_name=module_name, metadata={
+                    "initiated_from": "module_manager"}
             )
 
             self.notification_system.show_info(
@@ -913,7 +923,8 @@ class ModManager(ScrollArea):
         )
 
         if reply == QMessageBox.StandardButton.Yes:
-            self._save_state_for_undo("bulk_enable", list(self.selected_modules))
+            self._save_state_for_undo(
+                "bulk_enable", list(self.selected_modules))
             operation_id = self.bulk_operations.enable_selected_modules()
             self._show_bulk_operation_progress(operation_id)
 
@@ -931,7 +942,8 @@ class ModManager(ScrollArea):
         )
 
         if reply == QMessageBox.StandardButton.Yes:
-            self._save_state_for_undo("bulk_disable", list(self.selected_modules))
+            self._save_state_for_undo(
+                "bulk_disable", list(self.selected_modules))
             operation_id = self.bulk_operations.disable_selected_modules()
             self._show_bulk_operation_progress(operation_id)
 

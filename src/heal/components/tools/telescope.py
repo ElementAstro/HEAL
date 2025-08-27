@@ -69,7 +69,8 @@ class AddEditTelescopeDialog(QDialog):
         layout.addWidget(QLabel("焦距 (mm):"))
         layout.addWidget(self.focal_length_input)
 
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
@@ -102,7 +103,8 @@ class TelescopeCatalog(QWidget):
         logger.info("初始化望远镜目录")
 
         self.telescopes: List[Telescope] = [
-            Telescope(make="Zhumell", model="Z12", aperture=304.8, focal_length=1500.0),
+            Telescope(make="Zhumell", model="Z12",
+                      aperture=304.8, focal_length=1500.0),
             # 添加更多望远镜数据
         ]
         self.filtered_telescopes = self.telescopes.copy()
@@ -197,7 +199,8 @@ class TelescopeCatalog(QWidget):
         if dialog.exec() == QDialog.Accepted:
             updated_telescope = dialog.get_telescope_data()
             if updated_telescope:
-                self.telescopes[self.telescopes.index(telescope)] = updated_telescope
+                self.telescopes[self.telescopes.index(
+                    telescope)] = updated_telescope
                 self.filter_telescopes()
 
     def edit_selected_telescope(self) -> None:

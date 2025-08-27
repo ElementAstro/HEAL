@@ -101,7 +101,8 @@ class UIComponentManager(QObject):
                     if isinstance(margins, (list, tuple)):
                         layout.setContentsMargins(*margins)
                     else:
-                        layout.setContentsMargins(margins, margins, margins, margins)
+                        layout.setContentsMargins(
+                            margins, margins, margins, margins)
 
             elif layout_type == "hbox":
                 layout = QHBoxLayout(parent)
@@ -112,7 +113,8 @@ class UIComponentManager(QObject):
                     if isinstance(margins, (list, tuple)):
                         layout.setContentsMargins(*margins)
                     else:
-                        layout.setContentsMargins(margins, margins, margins, margins)
+                        layout.setContentsMargins(
+                            margins, margins, margins, margins)
 
             elif layout_type == "grid":
                 layout = QGridLayout(parent)
@@ -123,7 +125,8 @@ class UIComponentManager(QObject):
                     if isinstance(margins, (list, tuple)):
                         layout.setContentsMargins(*margins)
                     else:
-                        layout.setContentsMargins(margins, margins, margins, margins)
+                        layout.setContentsMargins(
+                            margins, margins, margins, margins)
 
             elif layout_type == "expand":
                 layout = ExpandLayout(parent)
@@ -343,7 +346,8 @@ class UIComponentManager(QObject):
                     signal_name=conn["signal"],
                     target_obj=conn["target"],
                     slot_name=conn.get("slot"),
-                    connection_type=conn.get("type", Qt.ConnectionType.AutoConnection),
+                    connection_type=conn.get(
+                        "type", Qt.ConnectionType.AutoConnection),
                 )
 
                 if result:
@@ -541,7 +545,8 @@ class ResponsiveOperation(QObject):
 
             def run(self) -> None:
                 try:
-                    result = self.operation.operation_func(*self.args, **self.kwargs)
+                    result = self.operation.operation_func(
+                        *self.args, **self.kwargs)
                     self.operation.operation_completed.emit(result)
                 except Exception as e:
                     error_msg = f"后台操作失败: {e}"

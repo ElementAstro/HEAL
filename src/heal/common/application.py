@@ -49,7 +49,8 @@ class SingletonApplication(QApplication):
     def __onNewConnection(self) -> None:
         socket = self.server.nextPendingConnection()
         if socket.waitForReadyRead(self.timeout):
-            signalBus.appMessageSig.emit(bytes(socket.readAll().data()).decode("utf-8"))
+            signalBus.appMessageSig.emit(
+                bytes(socket.readAll().data()).decode("utf-8"))
             socket.disconnectFromServer()
 
     def sendMessage(self, message: str) -> None:

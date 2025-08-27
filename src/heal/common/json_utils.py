@@ -59,7 +59,8 @@ class JsonUtils:
             if not file_path.exists():
                 if create_if_missing and default_content is not None:
                     # 创建默认文件
-                    JsonUtils.save_json_file(file_path, default_content, encoding)
+                    JsonUtils.save_json_file(
+                        file_path, default_content, encoding)
                     result.data = default_content
                     result.success = True
                     result.warnings.append(f"文件不存在，已创建默认文件: {file_path}")
@@ -82,7 +83,8 @@ class JsonUtils:
                 from .cache_manager import global_cache_manager, FileCache
                 file_cache = global_cache_manager.get_cache("file")
                 if file_cache and isinstance(file_cache, FileCache):
-                    cached_content = file_cache.get_file_content(file_path, encoding)
+                    cached_content = file_cache.get_file_content(
+                        file_path, encoding)
                     if cached_content is not None:
                         content = cached_content.strip()
                         logger.debug(f"从缓存读取JSON文件: {file_path}")
@@ -155,7 +157,8 @@ class JsonUtils:
             # 保存文件 - 使用性能监控
             with profile_io(f"json_write_{file_path.name}"):
                 with open(file_path, "w", encoding=encoding) as f:
-                    json.dump(data, f, indent=indent, ensure_ascii=ensure_ascii)
+                    json.dump(data, f, indent=indent,
+                              ensure_ascii=ensure_ascii)
 
                 # 清除相关的文件缓存
                 from .cache_manager import global_cache_manager
@@ -230,7 +233,8 @@ class JsonUtils:
         result.data[key] = value
 
         # 保存文件
-        return JsonUtils.save_json_file(file_path, result.data, encoding)  # type: ignore
+        # type: ignore
+        return JsonUtils.save_json_file(file_path, result.data, encoding)
 
     @staticmethod
     def merge_json_files(
@@ -267,12 +271,14 @@ class JsonUtils:
 
         # 合并数据
         if deep_merge:
-            merged_data = JsonUtils._deep_merge(target_result.data, source_result.data)
+            merged_data = JsonUtils._deep_merge(
+                target_result.data, source_result.data)
         else:
             merged_data = {**target_result.data, **source_result.data}
 
         # 保存合并结果
-        return JsonUtils.save_json_file(target_path, merged_data, encoding)  # type: ignore
+        # type: ignore
+        return JsonUtils.save_json_file(target_path, merged_data, encoding)
 
     @staticmethod
     def _deep_merge(dict1: Dict[str, Any], dict2: Dict[str, Any]) -> Dict[str, Any]:

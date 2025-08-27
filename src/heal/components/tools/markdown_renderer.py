@@ -17,6 +17,7 @@ class MarkdownRenderer:
     def render(self, markdown_text: str) -> None:
         """Render Markdown to HTML and display in preview widget."""
         logger.debug("Rendering markdown text.")
-        html = markdown.markdown(markdown_text, extensions=["fenced_code", "tables"])
+        html = markdown.markdown(markdown_text, extensions=[
+                                 "fenced_code", "tables"])
         self.preview.setHtml(html)
         logger.info("Markdown rendered successfully.")

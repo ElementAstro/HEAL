@@ -69,7 +69,8 @@ class ProcessStatusCard(CardWidget):
         top_layout = QHBoxLayout()
 
         self.name_label = StrongBodyLabel(self.process_info.name)
-        self.name_label.setFont(QFont("Microsoft YaHei", 12, QFont.Weight.Bold))
+        self.name_label.setFont(
+            QFont("Microsoft YaHei", 12, QFont.Weight.Bold))
 
         self.status_label = CaptionLabel("状态")
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -216,7 +217,8 @@ class ProcessMonitorWidget(QWidget):
         header_layout = QHBoxLayout()
 
         self.title_label = StrongBodyLabel(tr("process_monitor.title"))
-        self.title_label.setFont(QFont("Microsoft YaHei", 16, QFont.Weight.Bold))
+        self.title_label.setFont(
+            QFont("Microsoft YaHei", 16, QFont.Weight.Bold))
         self.i18n.register_text(self.title_label, "process_monitor.title")
 
         self.refresh_btn = tr_button(
@@ -229,7 +231,8 @@ class ProcessMonitorWidget(QWidget):
         )
         self.start_all_btn.clicked.connect(self.start_all_processes)
 
-        self.stop_all_btn = tr_button("process_monitor.stop_all", FluentIcon.PAUSE)
+        self.stop_all_btn = tr_button(
+            "process_monitor.stop_all", FluentIcon.PAUSE)
         self.stop_all_btn.clicked.connect(self.stop_all_processes)
 
         header_layout.addWidget(self.title_label)
@@ -250,7 +253,8 @@ class ProcessMonitorWidget(QWidget):
         scroll_area = ScrollArea()
         scroll_area.setWidget(self.process_container)
         scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll_area.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         # 状态栏
         self.status_label = CaptionLabel(tr("ready"))
@@ -267,7 +271,8 @@ class ProcessMonitorWidget(QWidget):
         self.process_manager.process_started.connect(self.on_process_started)
         self.process_manager.process_stopped.connect(self.on_process_stopped)
         self.process_manager.process_crashed.connect(self.on_process_crashed)
-        self.process_manager.process_restarted.connect(self.on_process_restarted)
+        self.process_manager.process_restarted.connect(
+            self.on_process_restarted)
 
         # 设置定时更新
         self.update_timer.timeout.connect(self.update_process_status)
@@ -416,7 +421,8 @@ class ProcessMonitorWidget(QWidget):
         if len(log_content) > 10000:
             log_content = log_content[-10000:] + "\n...(显示最后10000个字符)"
 
-        dialog = MessageBox(title=f"{name} 进程日志", content=log_content, parent=self)
+        dialog = MessageBox(title=f"{name} 进程日志",
+                            content=log_content, parent=self)
         dialog.contentLabel.setWordWrap(True)
         dialog.contentLabel.setTextInteractionFlags(
             Qt.TextInteractionFlag.TextSelectableByMouse

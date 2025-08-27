@@ -51,9 +51,12 @@ class HomeLayoutManager:
         flip_view = HorizontalFlipView()
         flip_view.addImages(
             [
-                str(resource_manager.get_resource_path("images", "bg_home_1.png")),
-                str(resource_manager.get_resource_path("images", "bg_home_2.png")),
-                str(resource_manager.get_resource_path("images", "bg_home_3.png")),
+                str(resource_manager.get_resource_path(
+                    "images", "bg_home_1.png")),
+                str(resource_manager.get_resource_path(
+                    "images", "bg_home_2.png")),
+                str(resource_manager.get_resource_path(
+                    "images", "bg_home_3.png")),
             ]
         )
         flip_view.setItemSize(QSize(1160, 350))
@@ -172,7 +175,8 @@ class HomeLayoutManager:
 
         # 3. 服务器状态卡片网格 (主要内容区域)
         if server_status_cards:
-            cards_scroll_area = self._create_server_cards_area(server_status_cards)
+            cards_scroll_area = self._create_server_cards_area(
+                server_status_cards)
             main_layout.addWidget(cards_scroll_area, 1)  # 给予最大空间
         else:
             # 如果没有服务器，显示占位符
@@ -193,8 +197,10 @@ class HomeLayoutManager:
         """创建服务器卡片滚动区域"""
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll_area.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scroll_area.setFrameStyle(QFrame.Shape.NoFrame)
 
         # 卡片容器

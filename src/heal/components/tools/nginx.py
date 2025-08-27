@@ -212,7 +212,8 @@ class NginxConfigurator(QFrame):
         if not path or not path.strip():
             return
 
-        target_dialog = CustomInputDialog("添加路由", "目标地址（如 http://127.0.0.1:5000）:", self)
+        target_dialog = CustomInputDialog(
+            "添加路由", "目标地址（如 http://127.0.0.1:5000）:", self)
         target = target_dialog.get_text()
         if not target or not target.strip():
             return
@@ -238,7 +239,8 @@ class NginxConfigurator(QFrame):
             logger.info(f"删除路由: {removed}")
 
     def add_upstream(self) -> None:
-        server_dialog = CustomInputDialog("添加节点", "服务器地址（如 127.0.0.1:8000）:", self)
+        server_dialog = CustomInputDialog(
+            "添加节点", "服务器地址（如 127.0.0.1:8000）:", self)
         server = server_dialog.get_text()
         if not server or not server.strip():
             return
@@ -264,10 +266,13 @@ class NginxConfigurator(QFrame):
     def update_upstream_table(self) -> None:
         self.upstream_table.setRowCount(len(self.upstreams))
         for i, upstream in enumerate(self.upstreams):
-            self.upstream_table.setItem(i, 0, QTableWidgetItem(upstream.server))
-            self.upstream_table.setItem(i, 1, QTableWidgetItem(str(upstream.weight)))
+            self.upstream_table.setItem(
+                i, 0, QTableWidgetItem(upstream.server))
+            self.upstream_table.setItem(
+                i, 1, QTableWidgetItem(str(upstream.weight)))
             delete_btn = QPushButton("删除")
-            delete_btn.clicked.connect(lambda _, idx=i: self.delete_upstream(idx))
+            delete_btn.clicked.connect(
+                lambda _, idx=i: self.delete_upstream(idx))
             self.upstream_table.setCellWidget(i, 2, delete_btn)
 
     def delete_upstream(self, index: int) -> None:

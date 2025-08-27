@@ -51,7 +51,8 @@ class LazyLoadWorker(QThread):
             result = self.loader_func()
             load_time = time.time() - start_time
 
-            self.logger.debug(f"Lazy loaded {self.setting_key} in {load_time:.3f}s")
+            self.logger.debug(
+                f"Lazy loaded {self.setting_key} in {load_time:.3f}s")
             self.finished.emit(self.setting_key, result)
 
         except Exception as e:
@@ -76,7 +77,8 @@ class LazySettingProxy(Generic[T]):
         self._loaded = False
         self._loading = False
         self._load_future: Optional[asyncio.Future[T]] = None
-        self.logger = get_logger("lazy_setting_proxy", module="LazySettingProxy")
+        self.logger = get_logger("lazy_setting_proxy",
+                                 module="LazySettingProxy")
 
     @property
     def value(self) -> Optional[T]:
@@ -128,7 +130,8 @@ class LazySettingProxy(Generic[T]):
             self.logger.error(f"Failed to async load {self.setting_key}: {e}")
             if self.fallback_value is not None:
                 return self.fallback_value
-            raise ValueError(f"No fallback value available for {self.setting_key}")
+            raise ValueError(
+                f"No fallback value available for {self.setting_key}")
 
     def is_loaded(self) -> bool:
         """Check if the setting is loaded"""
@@ -156,7 +159,8 @@ class LazySettingsManager(QObject):
         self.executor = ThreadPoolExecutor(
             max_workers=3, thread_name_prefix="lazy_settings"
         )
-        self.logger = get_logger("lazy_settings_manager", module="LazySettingsManager")
+        self.logger = get_logger(
+            "lazy_settings_manager", module="LazySettingsManager")
 
         # Preload timer for background loading
         self.preload_timer = QTimer()
@@ -235,7 +239,8 @@ class LazySettingsManager(QObject):
             proxy._loading = False
 
         self.loading_failed.emit(setting_key, error)
-        self.logger.error(f"Failed to load lazy setting {setting_key}: {error}")
+        self.logger.error(
+            f"Failed to load lazy setting {setting_key}: {error}")
 
     def _cleanup_worker(self, setting_key: str) -> None:
         """Clean up worker thread"""
@@ -273,7 +278,8 @@ class LazySettingsManager(QObject):
     def get_loading_stats(self) -> Dict[str, Any]:
         """Get loading statistics"""
         total_settings = len(self.proxies)
-        loaded_settings = sum(1 for proxy in self.proxies.values() if proxy.is_loaded())
+        loaded_settings = sum(
+            1 for proxy in self.proxies.values() if proxy.is_loaded())
         loading_settings = len(self.workers)
 
         return {

@@ -327,10 +327,12 @@ class ModuleValidator:
     ) -> Dict[str, Any]:
         """查找元数据文件"""
         metadata = {}
-        metadata_files = ["mod.json", "module.json", "metadata.json", "info.json"]
+        metadata_files = ["mod.json", "module.json",
+                          "metadata.json", "info.json"]
 
         if path.suffix.lower() in [".jar", ".zip"]:
-            metadata = self._extract_metadata_from_archive(path, metadata_files, issues)
+            metadata = self._extract_metadata_from_archive(
+                path, metadata_files, issues)
 
         return metadata
 
@@ -516,11 +518,13 @@ class ModuleValidator:
     ) -> Dict[str, Any]:
         """获取验证摘要"""
         total = len(reports)
-        passed = sum(1 for r in reports if r.overall_result == ValidationResult.PASSED)
+        passed = sum(1 for r in reports if r.overall_result ==
+                     ValidationResult.PASSED)
         warnings = sum(
             1 for r in reports if r.overall_result == ValidationResult.WARNING
         )
-        failed = sum(1 for r in reports if r.overall_result == ValidationResult.FAILED)
+        failed = sum(1 for r in reports if r.overall_result ==
+                     ValidationResult.FAILED)
         critical = sum(
             1 for r in reports if r.overall_result == ValidationResult.CRITICAL
         )

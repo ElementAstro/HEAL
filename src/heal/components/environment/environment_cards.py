@@ -29,14 +29,16 @@ class HyperlinkCardEnvironment(SettingCard):
     ) -> None:
         super().__init__(icon, title, content or "")
         self.links = links or {}
-        self.logger = get_logger("environment_card", module="HyperlinkCardEnvironment")
+        self.logger = get_logger(
+            "environment_card", module="HyperlinkCardEnvironment")
         self.init_ui()
 
     def init_ui(self) -> None:
         """初始化UI"""
         for name, url in self.links.items():
             link_button = HyperlinkButton(url, name, self)
-            self.hBoxLayout.addWidget(link_button, 0, Qt.AlignmentFlag.AlignRight)
+            self.hBoxLayout.addWidget(
+                link_button, 0, Qt.AlignmentFlag.AlignRight)
         self.hBoxLayout.addSpacing(16)
         copy_button = PrimaryPushButton("复制链接", self)
         copy_button.clicked.connect(

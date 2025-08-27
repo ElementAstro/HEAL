@@ -29,7 +29,8 @@ class EnvironmentConfigManager(QObject):
             "environment_config_manager", module="EnvironmentConfigManager"
         )
         self.config_file = Path("config") / "download.json"
-        self.config_data: List[Dict[str, Any]] = []  # Can be Any initially, validated to List[Dict[str, Any]] later
+        # Can be Any initially, validated to List[Dict[str, Any]] later
+        self.config_data: List[Dict[str, Any]] = []
 
     def load_download_config(self) -> List[SettingCard]:
         """加载下载配置 - 使用统一JSON工具"""

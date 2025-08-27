@@ -11,10 +11,13 @@ except ImportError:
     class WeakSet:  # type: ignore[no-redef]
         def __init__(self) -> None:
             self._items: Set[Any] = set()
+
         def add(self, item: Any) -> None:
             self._items.add(item)
+
         def discard(self, item: Any) -> None:
             self._items.discard(item)
+
         def __iter__(self) -> Any:
             return iter(self._items)
 
@@ -86,7 +89,8 @@ class I18nUpdater(QObject):
                     widget.repaint()
                     self.logger.debug(f"刷新Widget: {widget.__class__.__name__}")
             except Exception as e:
-                self.logger.error(f"刷新Widget失败 {widget.__class__.__name__}: {e}")
+                self.logger.error(
+                    f"刷新Widget失败 {widget.__class__.__name__}: {e}")
 
     def force_update_all(self) -> None:
         """强制更新所有组件"""

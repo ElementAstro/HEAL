@@ -96,7 +96,8 @@ class Setting(ScrollArea, SearchEnabledSettingsInterface):
         self.settings_manager.connect_signals()
 
         # Connect search signals
-        self.search_integrator.search_mode_changed.connect(self.on_search_mode_changed)
+        self.search_integrator.search_mode_changed.connect(
+            self.on_search_mode_changed)
         self.search_integrator.setting_found.connect(self.on_setting_found)
 
     def addSubInterface(self, widget: QWidget, objectName: str, text: str, icon: Any = None) -> None:
@@ -117,7 +118,8 @@ class Setting(ScrollArea, SearchEnabledSettingsInterface):
             }
 
             for name, interface in interfaces.items():
-                self.search_integrator.register_setting_interface(name, interface)
+                self.search_integrator.register_setting_interface(
+                    name, interface)
 
             logger.info(f"Registered {len(interfaces)} interfaces for search")
 

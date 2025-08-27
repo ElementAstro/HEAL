@@ -27,7 +27,8 @@ class DownloadCardManager:
     """下载卡片管理器"""
 
     def __init__(self) -> None:
-        self.logger = get_logger("download_card_manager", module="DownloadCardManager")
+        self.logger = get_logger(
+            "download_card_manager", module="DownloadCardManager")
 
     @exception_handler(
         exc_type=ExceptionType.UNKNOWN_ERROR,
@@ -67,7 +68,8 @@ class DownloadCardManager:
                     )
                 )
             except ValueError as e:
-                self.logger.error(t("download.card_creation_failed", error=str(e)))
+                self.logger.error(
+                    t("download.card_creation_failed", error=str(e)))
 
     def resolve_icon(self, icon_name: str) -> Any:
         """解析图标"""

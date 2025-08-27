@@ -116,7 +116,8 @@ class ExceptionInfo:
                 "memory_total": psutil.virtual_memory().total,
                 "memory_available": psutil.virtual_memory().available,
                 "disk_usage": {
-                    path: {"total": usage.total, "used": usage.used, "free": usage.free}
+                    path: {"total": usage.total,
+                           "used": usage.used, "free": usage.free}
                     for path, usage in [
                         (p.mountpoint, psutil.disk_usage(p.mountpoint))
                         for p in psutil.disk_partitions()
@@ -402,7 +403,8 @@ class ExceptionHandler(QObject):
 
             recovery_button = PushButton("查看解决方案")
             recovery_button.clicked.connect(
-                lambda: self._show_recovery_dialog(exception_info, parent_widget)
+                lambda: self._show_recovery_dialog(
+                    exception_info, parent_widget)
             )
             info_bar.addWidget(recovery_button)
 
@@ -454,14 +456,18 @@ class ExceptionHandler(QObject):
 
     def _attempt_recovery(self, exception_info: ExceptionInfo) -> None:
         """尝试异常恢复"""
-        recovery_callback = self.recovery_callbacks.get(exception_info.exc_type)
+        recovery_callback = self.recovery_callbacks.get(
+            exception_info.exc_type)
         if recovery_callback:
             try:
                 recovery_callback(exception_info)
-                self.recovery_attempted.emit(f"尝试恢复: {exception_info.exc_type}")
-                app_logger.info(f"Recovery attempted for {exception_info.exc_type}")
+                self.recovery_attempted.emit(
+                    f"尝试恢复: {exception_info.exc_type}")
+                app_logger.info(
+                    f"Recovery attempted for {exception_info.exc_type}")
             except Exception as e:
-                app_logger.error(f"Recovery failed for {exception_info.exc_type}: {e}")
+                app_logger.error(
+                    f"Recovery failed for {exception_info.exc_type}: {e}")
 
     def _schedule_retry(self, exception_info: ExceptionInfo) -> None:
         """安排自动重试"""
@@ -657,7 +663,8 @@ def exception_traceback_handler_legacy(log: str, *default: Any) -> Callable[[Cal
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                app_logger.error(f"{e.__class__.__name__}: {traceback.format_exc()}")
+                app_logger.error(
+                    f"{e.__class__.__name__}: {traceback.format_exc()}")
 
                 value = deepcopy(default)
                 if len(value) == 0:

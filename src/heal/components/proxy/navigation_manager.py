@@ -35,7 +35,8 @@ class ProxyNavigationManager(QObject):
         self.stacked_widget = stacked_widget
 
         # 连接信号
-        self.stacked_widget.currentChanged.connect(self.on_current_index_changed)
+        self.stacked_widget.currentChanged.connect(
+            self.on_current_index_changed)
 
         self.logger.debug("导航组件已设置")
 

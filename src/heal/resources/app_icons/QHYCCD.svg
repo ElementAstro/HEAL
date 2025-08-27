@@ -1,23 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="图层_1" data-name="图层 1"
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="图层_1"
+    data-name="图层 1"
     viewBox="0 0 1451.34 1451.34">
     <defs>
         <style>
             .cls-1,
             .cls-2,
             .cls-3 {
-                fill-rule: evenodd;
+            fill-rule: evenodd;
             }
 
             .cls-1 {
-                fill: url(#GradientFill_4);
+            fill: url(#GradientFill_4);
             }
 
             .cls-2 {
-                fill: url(#GradientFill_5);
+            fill: url(#GradientFill_5);
             }
 
             .cls-3 {
-                fill: url(#GradientFill_6);
+            fill: url(#GradientFill_6);
             }
         </style>
         <linearGradient id="GradientFill_4" x1="-1503.95" y1="1910.08" x2="2339.66" y2="-682.47"

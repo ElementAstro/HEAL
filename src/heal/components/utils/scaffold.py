@@ -47,7 +47,8 @@ def confirm_details(details: Any) -> tuple[bool, bool]:
     for key, value in details.items():
         print(f"{key}: {value}")
 
-    confirm = input("\nIs this information correct? (yes/no/edit): ").strip().lower()
+    confirm = input(
+        "\nIs this information correct? (yes/no/edit): ").strip().lower()
     if confirm == "edit":
         return False, True
     return confirm == "yes", False
@@ -408,12 +409,14 @@ def main() -> None:
     # Create _component.cpp
     component_cpp_path = os.path.join(module_dir, f"_component.cpp")
     with open(component_cpp_path, "w") as f:
-        f.write(create_component_cpp(author, description, module_name, component_name))
+        f.write(create_component_cpp(
+            author, description, module_name, component_name))
 
     # Create _component.hpp
     component_hpp_path = os.path.join(module_dir, f"_component.hpp")
     with open(component_hpp_path, "w") as f:
-        f.write(create_component_hpp(author, description, module_name, component_name))
+        f.write(create_component_hpp(
+            author, description, module_name, component_name))
 
     # Create CMakeLists.txt
     with open(os.path.join(module_dir, "CMakeLists.txt"), "w") as f:

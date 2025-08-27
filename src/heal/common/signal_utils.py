@@ -34,7 +34,8 @@ class SignalConnection:
     slot_name: Optional[str]
     connection_type: ConnectionType
     connection_id: str
-    created_at: float = field(default_factory=lambda: __import__("time").time())
+    created_at: float = field(
+        default_factory=lambda: __import__("time").time())
     is_active: bool = True
     call_count: int = 0
     last_called: Optional[float] = None
@@ -271,7 +272,8 @@ class SignalManager(QObject):
                     signal_name=conn_config["signal"],
                     target=conn_config["target"],
                     slot_name=conn_config.get("slot"),
-                    connection_type=conn_config.get("type", ConnectionType.AUTO),
+                    connection_type=conn_config.get(
+                        "type", ConnectionType.AUTO),
                     connection_id=conn_config.get("id", f"batch_conn_{i}"),
                 )
                 connection_ids.append(connection_id)
@@ -344,7 +346,8 @@ class SignalManager(QObject):
         valid_connections = sum(
             1 for conn in self.connections.values() if conn.is_valid()
         )
-        total_calls = sum(conn.call_count for conn in self.connections.values())
+        total_calls = sum(
+            conn.call_count for conn in self.connections.values())
 
         return {
             "total_connections": total_connections,

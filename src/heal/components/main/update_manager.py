@@ -62,7 +62,8 @@ class UpdateManager(QObject):
             parent=self.main_window,
         )
 
-        update_button = HyperlinkButton(cfg.URL_LATEST, self.main_window.tr("前往下载"))
+        update_button = HyperlinkButton(
+            cfg.URL_LATEST, self.main_window.tr("前往下载"))
         update_info.addWidget(update_button)
         update_info.show()
 

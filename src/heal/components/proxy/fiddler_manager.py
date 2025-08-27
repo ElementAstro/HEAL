@@ -42,7 +42,8 @@ class FiddlerManager(QObject):
         """打开Fiddler"""
         if os.path.exists(self.fiddler_path):
             try:
-                subprocess.run(["start", self.fiddler_path], shell=True, check=True)
+                subprocess.run(["start", self.fiddler_path],
+                               shell=True, check=True)
                 Info(self.parent_widget, "S", 1000, "文件已打开!")
                 self.logger.info("Fiddler 已成功打开。")
                 self.fiddler_opened.emit(True)

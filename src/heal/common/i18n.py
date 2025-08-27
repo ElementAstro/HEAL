@@ -451,7 +451,8 @@ class TranslationManager(QObject):
         translation_file = self.translation_dir / f"{language.value}.json"
         try:
             with translation_file.open("w", encoding="utf-8") as f:
-                json.dump(self.translations[language], f, ensure_ascii=False, indent=2)
+                json.dump(self.translations[language],
+                          f, ensure_ascii=False, indent=2)
             logger.debug(f"已添加翻译 {language.value}: {key} = {value}")
         except Exception as e:
             logger.error(f"保存翻译失败: {e}")

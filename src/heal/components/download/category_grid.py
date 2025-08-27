@@ -44,14 +44,16 @@ class CategoryCard(CardWidget):
     def init_ui(self) -> None:
         """Initialize UI"""
         # Set proper CardWidget properties with responsive sizing
-        self.setMinimumSize(200, 120)  # Larger minimum for better content display
+        # Larger minimum for better content display
+        self.setMinimumSize(200, 120)
         self.setMaximumSize(280, 160)  # Larger maximum for desktop
         self.setBorderRadius(8)  # Standard border radius
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         # Use proper CardWidget layout structure
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 16, 20, 16)  # Standard CardWidget margins
+        # Standard CardWidget margins
+        layout.setContentsMargins(20, 16, 20, 16)
         layout.setSpacing(12)  # Standard spacing
 
         # Icon and title row with proper spacing
@@ -156,7 +158,8 @@ class CategoryGridWidget(CardWidget):
 
     def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
-        self.logger = get_logger("category_grid_widget", module="CategoryGridWidget")
+        self.logger = get_logger(
+            "category_grid_widget", module="CategoryGridWidget")
         self.categories: list[Any] = []
         self.max_visible_categories = 8  # Show max 8 categories in grid
         self.init_ui()
@@ -168,7 +171,8 @@ class CategoryGridWidget(CardWidget):
 
         # Use proper CardWidget layout structure
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 20, 24, 20)  # Standard CardWidget margins
+        # Standard CardWidget margins
+        layout.setContentsMargins(24, 20, 24, 20)
         layout.setSpacing(20)  # Standard spacing
 
         # Header with proper spacing
@@ -374,7 +378,8 @@ class CategoryDetailView(CardWidget):
 
     def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
-        self.logger = get_logger("category_detail_view", module="CategoryDetailView")
+        self.logger = get_logger(
+            "category_detail_view", module="CategoryDetailView")
         self.current_category: Any = None
         self.init_ui()
 
@@ -399,7 +404,8 @@ class CategoryDetailView(CardWidget):
         title_layout.setSpacing(4)
 
         self.category_title = StrongBodyLabel("分类详情")
-        self.category_title.setStyleSheet("font-size: 18px; font-weight: bold;")
+        self.category_title.setStyleSheet(
+            "font-size: 18px; font-weight: bold;")
         title_layout.addWidget(self.category_title)
 
         self.category_description = CaptionLabel("")

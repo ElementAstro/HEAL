@@ -92,7 +92,8 @@ class DownloadStatsCard(CardWidget):
         # 显示总体进度
         if stats.get("active", 0) > 0:
             self.overall_progress.setVisible(True)
-            progress = stats.get("completed", 0) / max(stats.get("total", 1), 1) * 100
+            progress = stats.get("completed", 0) / \
+                max(stats.get("total", 1), 1) * 100
             self.overall_progress.setValue(int(progress))
         else:
             self.overall_progress.setVisible(False)
@@ -272,9 +273,12 @@ class DownloadPanel(QWidget):
 
         # 创建分段控件
         self.segment_widget = SegmentedWidget()
-        self.segment_widget.addItem("overview", "概览", lambda: self.switch_view(0))
-        self.segment_widget.addItem("active", "进行中", lambda: self.switch_view(1))
-        self.segment_widget.addItem("history", "历史", lambda: self.switch_view(2))
+        self.segment_widget.addItem(
+            "overview", "概览", lambda: self.switch_view(0))
+        self.segment_widget.addItem(
+            "active", "进行中", lambda: self.switch_view(1))
+        self.segment_widget.addItem(
+            "history", "历史", lambda: self.switch_view(2))
         self.segment_widget.setCurrentItem("overview")
 
         layout.addWidget(self.segment_widget)
@@ -312,7 +316,8 @@ class DownloadPanel(QWidget):
 
         # 快速下载卡片
         self.quick_download_card = QuickDownloadCard()
-        self.quick_download_card.download_requested.connect(self.download_requested)
+        self.quick_download_card.download_requested.connect(
+            self.download_requested)
         layout.addWidget(self.quick_download_card)
 
         layout.addStretch()

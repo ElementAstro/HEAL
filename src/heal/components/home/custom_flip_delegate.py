@@ -28,7 +28,8 @@ class CustomFlipItemDelegate(FlipImageDelegate):
         painter.setFont(QFont(cfg.APP_FONT, 35))
         # QRect.adjusted() 方法返回一个新的 QRect，因此 item_rect 本身不会被修改。
         painter.drawText(
-            item_rect.adjusted(0, -20, 0, 0), Qt.AlignmentFlag.AlignCenter, cfg.APP_NAME
+            item_rect.adjusted(
+                0, -20, 0, 0), Qt.AlignmentFlag.AlignCenter, cfg.APP_NAME
         )
 
         # 绘制应用程序版本

@@ -155,7 +155,8 @@ class ResourceManager(QObject):
                     self.logger.debug(
                         f"清理资源: {resource_id} ({resource_info.resource_type})"
                     )
-                    self.resource_cleaned.emit(resource_id, resource_info.resource_type)
+                    self.resource_cleaned.emit(
+                        resource_id, resource_info.resource_type)
                     return True
 
                 except Exception as cleanup_error:

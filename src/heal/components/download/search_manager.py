@@ -147,7 +147,8 @@ class DownloadSearchManager(QObject):
 
         # 创建自动完成器
         self.search_completer = QCompleter()
-        self.search_completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        self.search_completer.setCaseSensitivity(
+            Qt.CaseSensitivity.CaseInsensitive)
         self.search_box.setCompleter(self.search_completer)
 
     def _update_search_completer(self) -> None:
@@ -292,7 +293,8 @@ class DownloadSearchManager(QObject):
 
         # 发出导航信号（由父组件处理）
         self.section_found.emit(section_title)
-        self.logger.debug(t("download.navigate_to_section", title=section_title))
+        self.logger.debug(
+            t("download.navigate_to_section", title=section_title))
 
     def get_current_section_index(self) -> int:
         """获取当前选中的部分索引"""

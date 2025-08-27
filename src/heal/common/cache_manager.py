@@ -211,7 +211,8 @@ class LRUCache:
             return False
 
         # 找到最近最少使用的条目
-        lru_key = min(self.cache.keys(), key=lambda k: self.cache[k].last_accessed)
+        lru_key = min(self.cache.keys(),
+                      key=lambda k: self.cache[k].last_accessed)
 
         self._remove_entry(lru_key)
         return True

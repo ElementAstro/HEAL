@@ -197,7 +197,8 @@ class ModuleErrorHandler(QObject):
 
         # Create synthetic exception for validation errors
         issue_count = len(validation_issues)
-        critical_issues = [i for i in validation_issues if i.get("level") == "CRITICAL"]
+        critical_issues = [
+            i for i in validation_issues if i.get("level") == "CRITICAL"]
 
         if critical_issues:
             severity = ErrorSeverity.CRITICAL
@@ -242,12 +243,14 @@ class ModuleErrorHandler(QObject):
         try:
             # Execute recovery action
             if recovery_action.handler:
-                success = recovery_action.handler(error, recovery_action.parameters)
+                success = recovery_action.handler(
+                    error, recovery_action.parameters)
             elif action_id in self.recovery_handlers:
                 handler = self.recovery_handlers[action_id]
                 success = handler(error, recovery_action.parameters)
             else:
-                self.logger.error(f"No handler found for recovery action {action_id}")
+                self.logger.error(
+                    f"No handler found for recovery action {action_id}")
                 return False
 
             if success:
@@ -263,7 +266,8 @@ class ModuleErrorHandler(QObject):
                 return False
 
         except Exception as e:
-            self.logger.error(f"Error executing recovery action {action_id}: {e}")
+            self.logger.error(
+                f"Error executing recovery action {action_id}: {e}")
             return False
 
     def resolve_error(self, error_id: str, resolution_notes: str = "") -> None:
@@ -322,7 +326,8 @@ class ModuleErrorHandler(QObject):
         try:
             errors_to_export = list(self.errors.values())
             if not include_resolved:
-                errors_to_export = [e for e in errors_to_export if not e.resolved]
+                errors_to_export = [
+                    e for e in errors_to_export if not e.resolved]
 
             report_data: Dict[str, Any] = {
                 "generated_at": time.time(),

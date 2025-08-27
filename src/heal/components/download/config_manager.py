@@ -42,7 +42,8 @@ class DownloadConfigManager(QObject):
         )
 
         if not result.success:
-            error_msg = t("download.config_not_found", path=str(self.config_path))
+            error_msg = t("download.config_not_found",
+                          path=str(self.config_path))
             self.logger.error(f"配置加载失败: {result.error}")
             self._show_error_dialog(t("common.error"), error_msg)
             self.config_load_failed.emit(error_msg)

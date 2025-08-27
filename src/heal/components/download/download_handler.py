@@ -117,14 +117,16 @@ class DownloadHandler(QObject):
                 MessageLunarCore,
                 "git",
                 getattr(cfg, "DOWNLOAD_COMMANDS_LUNARCORE", default_url),
-                getattr(cfg, "DOWNLOAD_COMMANDS_LUNARCORE_MIRROR", default_mirror),
+                getattr(cfg, "DOWNLOAD_COMMANDS_LUNARCORE_MIRROR",
+                        default_mirror),
                 "--branch lunarcore",
             ),
             "lunarcoreres": (
                 MessageLunarCoreRes,
                 "git",
                 getattr(cfg, "DOWNLOAD_COMMANDS_LUNARCORE_RES", default_url),
-                getattr(cfg, "DOWNLOAD_COMMANDS_LUNARCORE_RES_MIRROR", default_mirror),
+                getattr(cfg, "DOWNLOAD_COMMANDS_LUNARCORE_RES_MIRROR",
+                        default_mirror),
                 "--branch lunarcoreres",
             ),
             "fiddler": (

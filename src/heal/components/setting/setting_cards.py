@@ -30,8 +30,10 @@ class LineEditSettingCardPort(SettingCard):
         self.i18n.register_placeholder(self.port_edit, "setting_cards.port")
         self.i18n.register_text(self.set_port_button, "setting_cards.set")
 
-        self.hBoxLayout.addWidget(self.port_edit, 0, Qt.AlignmentFlag.AlignRight)
+        self.hBoxLayout.addWidget(
+            self.port_edit, 0, Qt.AlignmentFlag.AlignRight)
         self.hBoxLayout.addSpacing(10)
-        self.hBoxLayout.addWidget(self.set_port_button, 0, Qt.AlignmentFlag.AlignRight)
+        self.hBoxLayout.addWidget(
+            self.set_port_button, 0, Qt.AlignmentFlag.AlignRight)
         self.hBoxLayout.addSpacing(16)
         self.set_port_button.clicked.connect(self.set_port.emit)

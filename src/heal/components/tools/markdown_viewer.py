@@ -1,4 +1,5 @@
 # markdown_viewer.py
+from .markdown_renderer import MarkdownRenderer  # Import the new renderer
 import os
 import sys
 from dataclasses import dataclass
@@ -32,8 +33,6 @@ from qfluentwidgets import (
 from src.heal.common.logging_config import get_logger
 
 logger = get_logger(__name__)
-
-from .markdown_renderer import MarkdownRenderer  # Import the new renderer
 
 
 @dataclass
@@ -71,7 +70,8 @@ class TitleBar(QWidget):
         self.minimize_button = ToolButton()
         self.minimize_button.setIcon(FluentIcon.MINIMIZE)
         if self.parent_widget:
-            self.minimize_button.clicked.connect(self.parent_widget.showMinimized)
+            self.minimize_button.clicked.connect(
+                self.parent_widget.showMinimized)
         layout.addWidget(self.minimize_button)
 
         # Maximize/Restore Button
@@ -189,17 +189,20 @@ class MarkdownEditor(QMainWindow):
         toolbar_layout.setContentsMargins(10, 10, 10, 10)
 
         # Load Button
-        self.load_button = PushButton(text="Load Markdown", icon=FluentIcon.ADD_TO)
+        self.load_button = PushButton(
+            text="Load Markdown", icon=FluentIcon.ADD_TO)
         self.load_button.clicked.connect(self.load_markdown_file)
         toolbar_layout.addWidget(self.load_button)
 
         # Save Button
-        self.save_button = PushButton(text="Save as Markdown", icon=FluentIcon.SAVE)
+        self.save_button = PushButton(
+            text="Save as Markdown", icon=FluentIcon.SAVE)
         self.save_button.clicked.connect(self.save_markdown_file)
         toolbar_layout.addWidget(self.save_button)
 
         # Export to HTML Button
-        self.export_button = PushButton(text="Export to HTML", icon=FluentIcon.CLOUD)
+        self.export_button = PushButton(
+            text="Export to HTML", icon=FluentIcon.CLOUD)
         self.export_button.clicked.connect(self.export_to_html)
         toolbar_layout.addWidget(self.export_button)
 
@@ -211,7 +214,8 @@ class MarkdownEditor(QMainWindow):
         toolbar_layout.addWidget(self.export_pdf_button)
 
         # Copy Content Button
-        self.copy_button = PushButton(text="Copy Content", icon=FluentIcon.COPY)
+        self.copy_button = PushButton(
+            text="Copy Content", icon=FluentIcon.COPY)
         self.copy_button.clicked.connect(self.copy_content)
         toolbar_layout.addWidget(self.copy_button)
 
@@ -334,13 +338,15 @@ class MarkdownEditor(QMainWindow):
         self.editor.setPlainText(markdown_text)
         self.progress_bar.setVisible(False)
         logger.info("Markdown file loaded successfully.")
-        MessageBox.information(self, "Success", "Markdown file loaded successfully.")
+        MessageBox.information(
+            self, "Success", "Markdown file loaded successfully.")
 
     def on_load_error(self, error_message: str) -> None:
         """Handle the file load error."""
         self.progress_bar.setVisible(False)
         logger.error(f"Failed to load file: {error_message}")
-        MessageBox.warning(self, "Error", f"Failed to load file: {error_message}")
+        MessageBox.warning(
+            self, "Error", f"Failed to load file: {error_message}")
 
     def save_markdown_file(self) -> None:
         """Save the current markdown content."""
@@ -377,7 +383,8 @@ class MarkdownEditor(QMainWindow):
                 )
             except Exception as e:
                 logger.error(f"Failed to export HTML {file_path}: {e}")
-                MessageBox.warning(self, "Error", f"Failed to export HTML: {e}")
+                MessageBox.warning(
+                    self, "Error", f"Failed to export HTML: {e}")
 
     def export_to_pdf(self) -> None:
         """Export markdown content to PDF."""
@@ -399,7 +406,8 @@ class MarkdownEditor(QMainWindow):
                 doc.print(printer)
 
                 logger.info(f"Exported PDF file: {file_path}")
-                MessageBox.information(self, "Success", "Exported to PDF successfully.")
+                MessageBox.information(
+                    self, "Success", "Exported to PDF successfully.")
             except Exception as e:
                 logger.error(f"Failed to export PDF {file_path}: {e}")
                 MessageBox.warning(self, "Error", f"Failed to export PDF: {e}")
@@ -462,11 +470,13 @@ class MarkdownEditor(QMainWindow):
             import re
 
             pattern = re.compile(keyword, flags)
-            highlighted_text = pattern.sub(lambda m: f"**{m.group(0)}**", markdown_text)
+            highlighted_text = pattern.sub(
+                lambda m: f"**{m.group(0)}**", markdown_text)
         except re.error:
             highlighted_text = markdown_text  # If regex is invalid, skip highlighting
 
-        html = markdown.markdown(highlighted_text, extensions=["fenced_code", "tables"])
+        html = markdown.markdown(highlighted_text, extensions=[
+                                 "fenced_code", "tables"])
         self.preview.setHtml(html)
         logger.info(f"Highlighted search keyword: {keyword}")
 

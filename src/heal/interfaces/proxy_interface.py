@@ -72,7 +72,8 @@ class Proxy(ScrollArea):
         self.__initWidget()
 
     def __initWidget(self) -> None:
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setViewportMargins(20, 0, 20, 20)
         self.setWidget(self.scrollWidget)
         self.setWidgetResizable(True)
@@ -91,7 +92,8 @@ class Proxy(ScrollArea):
         self.ProxyToolInterface.addSettingCard(self.noproxyCard)
 
         # 设置导航管理器
-        self.navigation_manager.setup_navigation(self.pivot, self.stackedWidget)
+        self.navigation_manager.setup_navigation(
+            self.pivot, self.stackedWidget)
 
         # 栏绑定界面
         self.navigation_manager.add_sub_interface(
@@ -114,7 +116,8 @@ class Proxy(ScrollArea):
         self.vBoxLayout.setContentsMargins(0, 10, 10, 0)
 
         # 设置默认界面
-        self.navigation_manager.set_default_interface(self.ProxyDownloadInterface)
+        self.navigation_manager.set_default_interface(
+            self.ProxyDownloadInterface)
 
     def __connectSignalToSlot(self) -> None:
         # 使用信号管理器连接信号

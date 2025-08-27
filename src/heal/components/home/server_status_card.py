@@ -198,7 +198,8 @@ class ServerStatusCard(QFrame):
 
         color = status_colors.get(self.current_status, "#9E9E9E")
         self.status_indicator.setStyleSheet(f"QLabel {{ color: {color}; }}")
-        self.status_indicator.setToolTip(f"Status: {self.current_status.title()}")
+        self.status_indicator.setToolTip(
+            f"Status: {self.current_status.title()}")
 
     def _update_button_states(self) -> None:
         """Update button enabled/disabled states based on current status."""
@@ -236,7 +237,8 @@ class ServerStatusCard(QFrame):
         menu.addAction(copy_info_action)
 
         # Connect actions (placeholder implementations)
-        open_folder_action.triggered.connect(lambda: self._open_server_folder())
+        open_folder_action.triggered.connect(
+            lambda: self._open_server_folder())
         view_logs_action.triggered.connect(lambda: self._view_server_logs())
         copy_info_action.triggered.connect(lambda: self._copy_server_info())
 

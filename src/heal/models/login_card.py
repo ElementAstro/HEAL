@@ -53,7 +53,8 @@ class MessageBoxBase(MaskDialogBase):
 
         # 使用正确的枚举类型
         self.yesButton.setAttribute(Qt.WidgetAttribute.WA_LayoutUsesWidgetRect)
-        self.cancelButton.setAttribute(Qt.WidgetAttribute.WA_LayoutUsesWidgetRect)
+        self.cancelButton.setAttribute(
+            Qt.WidgetAttribute.WA_LayoutUsesWidgetRect)
 
         self.yesButton.setFocus()
         self.buttonGroup.setFixedHeight(81)
@@ -64,13 +65,15 @@ class MessageBoxBase(MaskDialogBase):
     def __initLayout(self) -> None:
         self._hBoxLayout.removeWidget(self.widget)
         # 使用正确的枚举类型
-        self._hBoxLayout.addWidget(self.widget, 1, Qt.AlignmentFlag.AlignCenter)
+        self._hBoxLayout.addWidget(
+            self.widget, 1, Qt.AlignmentFlag.AlignCenter)
 
         self.vBoxLayout.setSpacing(0)
         self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
         self.vBoxLayout.addLayout(self.viewLayout, 1)
         # 使用正确的枚举类型
-        self.vBoxLayout.addWidget(self.buttonGroup, 0, Qt.AlignmentFlag.AlignBottom)
+        self.vBoxLayout.addWidget(
+            self.buttonGroup, 0, Qt.AlignmentFlag.AlignBottom)
 
         self.viewLayout.setSpacing(12)
         self.viewLayout.setContentsMargins(24, 24, 24, 24)
@@ -78,8 +81,10 @@ class MessageBoxBase(MaskDialogBase):
         self.buttonLayout.setSpacing(12)
         self.buttonLayout.setContentsMargins(24, 24, 24, 24)
         # 使用正确的枚举类型
-        self.buttonLayout.addWidget(self.yesButton, 1, Qt.AlignmentFlag.AlignVCenter)
-        self.buttonLayout.addWidget(self.cancelButton, 1, Qt.AlignmentFlag.AlignVCenter)
+        self.buttonLayout.addWidget(
+            self.yesButton, 1, Qt.AlignmentFlag.AlignVCenter)
+        self.buttonLayout.addWidget(
+            self.cancelButton, 1, Qt.AlignmentFlag.AlignVCenter)
 
     def __onCancelButtonClicked(self) -> None:
         self.reject()

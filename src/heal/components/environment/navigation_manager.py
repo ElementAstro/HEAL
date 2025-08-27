@@ -36,7 +36,8 @@ class EnvironmentNavigationManager(QObject):
 
         # 连接信号
         if self.stacked_widget:
-            self.stacked_widget.currentChanged.connect(self.on_current_index_changed)
+            self.stacked_widget.currentChanged.connect(
+                self.on_current_index_changed)
 
     def add_sub_interface(
         self,
@@ -106,7 +107,8 @@ class EnvironmentNavigationManager(QObject):
         if self.stacked_widget and self.pivot:
             self.stacked_widget.setCurrentWidget(widget)
             self.pivot.setCurrentItem(widget.objectName())
-            qrouter.setDefaultRouteKey(self.stacked_widget, widget.objectName())
+            qrouter.setDefaultRouteKey(
+                self.stacked_widget, widget.objectName())
 
     def get_current_widget(self) -> Optional[QWidget]:
         """获取当前组件"""

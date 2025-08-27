@@ -68,5 +68,6 @@ class SystemTray(QSystemTrayIcon):
     def update_icon(self) -> None:
         # 动态更新图标
         # Corrected path assuming it's relative to execution dir or use absolute
-        new_icon_path = str(resource_manager.get_resource_path("images", "atom.png"))
+        new_icon_path = str(
+            resource_manager.get_resource_path("images", "atom.png"))
         self.setIcon(QIcon(new_icon_path))

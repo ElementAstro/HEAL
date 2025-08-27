@@ -94,11 +94,14 @@ class EnvironmentStatusCard(SettingCard):
         self.progress_bar.setFixedHeight(4)
 
         # 布局
-        self.hBoxLayout.addWidget(self.status_badge, 0, Qt.AlignmentFlag.AlignRight)
+        self.hBoxLayout.addWidget(
+            self.status_badge, 0, Qt.AlignmentFlag.AlignRight)
         self.hBoxLayout.addSpacing(10)
-        self.hBoxLayout.addWidget(self.secondary_button, 0, Qt.AlignmentFlag.AlignRight)
+        self.hBoxLayout.addWidget(
+            self.secondary_button, 0, Qt.AlignmentFlag.AlignRight)
         self.hBoxLayout.addSpacing(5)
-        self.hBoxLayout.addWidget(self.primary_button, 0, Qt.AlignmentFlag.AlignRight)
+        self.hBoxLayout.addWidget(
+            self.primary_button, 0, Qt.AlignmentFlag.AlignRight)
         self.hBoxLayout.addSpacing(16)
 
         # 在卡片底部添加进度条
@@ -242,9 +245,11 @@ class SmartToolCard(SettingCard):
         self.download_button.clicked.connect(self._on_download_clicked)
 
         # 布局
-        self.hBoxLayout.addWidget(self.platform_combo, 0, Qt.AlignmentFlag.AlignRight)
+        self.hBoxLayout.addWidget(
+            self.platform_combo, 0, Qt.AlignmentFlag.AlignRight)
         self.hBoxLayout.addSpacing(10)
-        self.hBoxLayout.addWidget(self.download_button, 0, Qt.AlignmentFlag.AlignRight)
+        self.hBoxLayout.addWidget(
+            self.download_button, 0, Qt.AlignmentFlag.AlignRight)
         self.hBoxLayout.addSpacing(16)
 
     def _populate_options(self) -> None:
@@ -285,7 +290,8 @@ class ToolCategorySection(SettingCardGroup):
         super().__init__(parent)
         self.title = title
         self.description = description
-        self.logger = get_logger("tool_category_section", module="ToolCategorySection")
+        self.logger = get_logger(
+            "tool_category_section", module="ToolCategorySection")
 
         self.init_ui()
 
@@ -336,7 +342,8 @@ class QuickActionPanel(QWidget):
 
     def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
-        self.logger = get_logger("quick_action_panel", module="QuickActionPanel")
+        self.logger = get_logger("quick_action_panel",
+                                 module="QuickActionPanel")
         self.init_ui()
 
     def init_ui(self) -> None:

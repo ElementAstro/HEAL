@@ -60,7 +60,8 @@ class PlatformDetector:
     """平台检测器"""
 
     def __init__(self) -> None:
-        self.logger = get_logger("platform_detector", module="PlatformDetector")
+        self.logger = get_logger(
+            "platform_detector", module="PlatformDetector")
         self._platform_info: Optional[PlatformInfo] = None
         self._detect_platform()
 

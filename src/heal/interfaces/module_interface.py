@@ -79,7 +79,8 @@ class Module(ScrollArea):
 
         # 性能监控定时器
         self.performance_timer = QTimer()
-        self.performance_timer.timeout.connect(self._update_performance_metrics)
+        self.performance_timer.timeout.connect(
+            self._update_performance_metrics)
         self.performance_timer.start(5000)  # 5秒更新一次
 
         # 初始化刷新时间记录
@@ -129,7 +130,8 @@ class Module(ScrollArea):
 
     def _initWidget(self) -> None:
         """初始化增强的界面组件"""
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setViewportMargins(20, 0, 20, 20)
         self.setWidget(self.scrollWidget)
         self.setWidgetResizable(True)
@@ -144,7 +146,8 @@ class Module(ScrollArea):
     def _initLayout(self) -> None:
         """初始化增强的布局"""
         # 设置ScrollArea属性
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.enableTransparentBackground()
 
@@ -193,7 +196,8 @@ class Module(ScrollArea):
         self.pivot.setCurrentItem("ModuleManagerInterface")
 
         # 设置路由
-        qrouter.setDefaultRouteKey(self.stackedWidget, "ModuleManagerInterface")
+        qrouter.setDefaultRouteKey(
+            self.stackedWidget, "ModuleManagerInterface")
 
     def _connectSignalToSlot(self) -> None:
         """连接信号到槽函数"""
@@ -216,8 +220,10 @@ class Module(ScrollArea):
         self.event_manager.module_loaded.connect(self._on_module_loaded)
         self.event_manager.module_unloaded.connect(self._on_module_unloaded)
         self.event_manager.module_error.connect(self._on_module_error)
-        self.event_manager.performance_updated.connect(self._on_performance_updated)
-        self.event_manager.validation_completed.connect(self._on_validation_event)
+        self.event_manager.performance_updated.connect(
+            self._on_performance_updated)
+        self.event_manager.validation_completed.connect(
+            self._on_validation_event)
 
     def _load_module_configurations(self) -> None:
         """加载模块配置"""
@@ -288,7 +294,8 @@ class Module(ScrollArea):
                 self.metrics_manager.initialize_metrics(module_name)
 
                 # 更新一些基本指标
-                self.metrics_manager.update_resource_usage(module_name, 0.0, 0.0)
+                self.metrics_manager.update_resource_usage(
+                    module_name, 0.0, 0.0)
 
         except Exception as e:
             self.logger.error(f"更新性能指标失败: {e}")

@@ -279,7 +279,8 @@ class EnhancedModuleInterface(QMainWindow):
             self.workflow_manager.save_workflows()  # Save current state first
 
             # Clean up old error logs
-            old_errors = self.error_handler.get_recent_errors(hours=168)  # 1 week
+            old_errors = self.error_handler.get_recent_errors(
+                hours=168)  # 1 week
             if len(old_errors) > 100:
                 self.error_handler.clear_resolved_errors()
                 cleaned_files += len(old_errors) - 100
@@ -288,7 +289,8 @@ class EnhancedModuleInterface(QMainWindow):
             self.notification_system.clear_read_notifications()
 
             # Clean up completed bulk operations
-            self.bulk_operations.cleanup_completed_operations(older_than_hours=24)
+            self.bulk_operations.cleanup_completed_operations(
+                older_than_hours=24)
 
             self.notification_system.show_success(
                 "清理完成", f"已清理 {cleaned_files} 个临时文件"
@@ -336,9 +338,11 @@ class EnhancedModuleInterface(QMainWindow):
         """Handle download workflow step"""
         try:
             # Simulate download process
-            self.workflow_manager.update_step_progress(workflow_id, 50, "正在下载...")
+            self.workflow_manager.update_step_progress(
+                workflow_id, 50, "正在下载...")
             # In real implementation, integrate with mod_download component
-            self.workflow_manager.update_step_progress(workflow_id, 100, "下载完成")
+            self.workflow_manager.update_step_progress(
+                workflow_id, 100, "下载完成")
             return True
         except Exception as e:
             logger.error(f"Download step failed for {module_name}: {e}")
@@ -364,9 +368,12 @@ class EnhancedModuleInterface(QMainWindow):
         """Handle installation workflow step"""
         try:
             # Simulate installation
-            self.workflow_manager.update_step_progress(workflow_id, 30, "准备安装...")
-            self.workflow_manager.update_step_progress(workflow_id, 70, "安装中...")
-            self.workflow_manager.update_step_progress(workflow_id, 100, "安装完成")
+            self.workflow_manager.update_step_progress(
+                workflow_id, 30, "准备安装...")
+            self.workflow_manager.update_step_progress(
+                workflow_id, 70, "安装中...")
+            self.workflow_manager.update_step_progress(
+                workflow_id, 100, "安装完成")
             return True
         except Exception as e:
             logger.error(f"Install step failed for {module_name}: {e}")

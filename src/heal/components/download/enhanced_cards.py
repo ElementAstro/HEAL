@@ -177,7 +177,8 @@ class EnhancedPrimaryPushSettingCard(PrimaryPushSettingCard):
         self.options_btn.clicked.connect(self._show_options)
 
         # 插入到按钮前面
-        button_layout.insertWidget(button_layout.count() - 1, self.favorite_btn)
+        button_layout.insertWidget(
+            button_layout.count() - 1, self.favorite_btn)
         button_layout.insertWidget(button_layout.count() - 1, self.options_btn)
 
     def _toggle_favorite(self) -> None:
@@ -295,7 +296,8 @@ class FavoriteCard(CardWidget):
 
         remove_btn = ToolButton(FluentIcon.DELETE)
         remove_btn.setToolTip("移除收藏")
-        remove_btn.clicked.connect(lambda: self.favorite_removed.emit(self.title))
+        remove_btn.clicked.connect(
+            lambda: self.favorite_removed.emit(self.title))
 
         layout.addWidget(open_btn)
         layout.addWidget(remove_btn)

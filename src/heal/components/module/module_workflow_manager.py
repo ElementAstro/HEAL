@@ -152,7 +152,8 @@ class ModuleWorkflowManager(QObject):
         self.active_workflows[workflow_id] = workflow
         self.workflow_started.emit(workflow_id, module_name)
 
-        self.logger.info(f"Started workflow {workflow_id} for module {module_name}")
+        self.logger.info(
+            f"Started workflow {workflow_id} for module {module_name}")
         return workflow_id
 
     def execute_next_step(self, workflow_id: str) -> bool:
@@ -178,8 +179,10 @@ class ModuleWorkflowManager(QObject):
 
         # Check if handler exists
         if current_step not in self.step_handlers:
-            self.logger.error(f"No handler registered for step {current_step.value}")
-            self._fail_workflow_step(workflow_id, current_step, "No handler registered")
+            self.logger.error(
+                f"No handler registered for step {current_step.value}")
+            self._fail_workflow_step(
+                workflow_id, current_step, "No handler registered")
             return False
 
         # Execute step
@@ -200,7 +203,8 @@ class ModuleWorkflowManager(QObject):
                 step_info.progress = 100.0
                 step_info.message = f"{current_step.value} completed successfully"
 
-                self.workflow_step_completed.emit(workflow_id, current_step.value)
+                self.workflow_step_completed.emit(
+                    workflow_id, current_step.value)
 
                 # Advance to next step
                 return self._advance_to_next_step(workflow_id)
@@ -211,7 +215,8 @@ class ModuleWorkflowManager(QObject):
                 return False
 
         except Exception as e:
-            self.logger.error(f"Error executing step {current_step.value}: {e}")
+            self.logger.error(
+                f"Error executing step {current_step.value}: {e}")
             self._fail_workflow_step(workflow_id, current_step, str(e))
             return False
 
@@ -300,7 +305,8 @@ class ModuleWorkflowManager(QObject):
                         step_info.error = None
 
                     except Exception as e:
-                        self.logger.error(f"Error rolling back step {step.value}: {e}")
+                        self.logger.error(
+                            f"Error rolling back step {step.value}: {e}")
 
             # Reset workflow to target step
             workflow.current_step = to_step
@@ -313,7 +319,8 @@ class ModuleWorkflowManager(QObject):
             return True
 
         except Exception as e:
-            self.logger.error(f"Error rolling back workflow {workflow_id}: {e}")
+            self.logger.error(
+                f"Error rolling back workflow {workflow_id}: {e}")
             return False
 
     def get_workflow(self, workflow_id: str) -> Optional[ModuleWorkflow]:
@@ -409,7 +416,8 @@ class ModuleWorkflowManager(QObject):
 
                 self.active_workflows[workflow_id] = workflow
 
-            self.logger.info(f"Loaded {len(workflows_data)} workflows from disk")
+            self.logger.info(
+                f"Loaded {len(workflows_data)} workflows from disk")
 
         except Exception as e:
             self.logger.error(f"Error loading workflows: {e}")
@@ -432,7 +440,8 @@ class ModuleWorkflowManager(QObject):
 
             if next_step == WorkflowStep.COMPLETE:
                 self.workflow_completed.emit(workflow_id)
-                self.logger.info(f"Workflow {workflow_id} completed successfully")
+                self.logger.info(
+                    f"Workflow {workflow_id} completed successfully")
 
             return True
 
@@ -451,16 +460,19 @@ class ModuleWorkflowManager(QObject):
         workflow.updated_at = time.time()
 
         self.workflow_step_failed.emit(workflow_id, step.value, error)
-        self.logger.error(f"Workflow {workflow_id} step {step.value} failed: {error}")
+        self.logger.error(
+            f"Workflow {workflow_id} step {step.value} failed: {error}")
 
     def _update_overall_progress(self, workflow_id: str) -> None:
         """Update overall workflow progress"""
         workflow = self.active_workflows[workflow_id]
 
         # Calculate progress based on completed steps
-        total_steps = len([s for s in WorkflowStep if s != WorkflowStep.COMPLETE])
+        total_steps = len(
+            [s for s in WorkflowStep if s != WorkflowStep.COMPLETE])
         completed_steps = len(
-            [s for s in workflow.steps.values() if s.status == WorkflowStatus.COMPLETED]
+            [s for s in workflow.steps.values() if s.status ==
+             WorkflowStatus.COMPLETED]
         )
 
         # Add partial progress from current step
@@ -475,4 +487,5 @@ class ModuleWorkflowManager(QObject):
         )
         workflow.overall_progress = min(100.0, overall_progress)
 
-        self.workflow_progress_updated.emit(workflow_id, workflow.overall_progress)
+        self.workflow_progress_updated.emit(
+            workflow_id, workflow.overall_progress)

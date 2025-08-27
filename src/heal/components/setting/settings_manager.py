@@ -267,9 +267,12 @@ class SettingsManager(QObject):
     def connect_signals(self) -> None:
         """Connect all setting card signals."""
         # Personal interface signals
-        self.themeColorCard.colorChanged.connect(lambda c: setThemeColor(c, lazy=True))
-        self.zoomCard.comboBox.currentIndexChanged.connect(self.restart_application)
-        self.languageCard.comboBox.currentIndexChanged.connect(self.restart_application)
+        self.themeColorCard.colorChanged.connect(
+            lambda c: setThemeColor(c, lazy=True))
+        self.zoomCard.comboBox.currentIndexChanged.connect(
+            self.restart_application)
+        self.languageCard.comboBox.currentIndexChanged.connect(
+            self.restart_application)
         self.updateOnStartUpCard.clicked.connect(
             lambda: check_update() if self.parent.parent_widget else check_update()
         )

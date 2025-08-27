@@ -2,7 +2,8 @@
 <svg height="128px" viewBox="0 0 128 128" width="128px" xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink">
     <linearGradient id="a" gradientTransform="matrix(0 -2.279452 2.279452 0 -468.790131 458.137573)"
-        gradientUnits="userSpaceOnUse" x1="165.663925" x2="191.967026" y1="233.736115" y2="233.736115">
+        gradientUnits="userSpaceOnUse" x1="165.663925" x2="191.967026" y1="233.736115"
+        y2="233.736115">
         <stop offset="0.0306" stop-color="#8765a9" />
         <stop offset="0.5153" stop-color="#485ba6" />
         <stop offset="1" stop-color="#003952" />
@@ -67,7 +68,8 @@
         <stop offset="0" stop-color="#deddda" />
         <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
     </linearGradient>
-    <linearGradient id="s" gradientTransform="matrix(0 1 -1 0 322 58.107422)" x1="35.892578" x2="47.892578"
+    <linearGradient id="s" gradientTransform="matrix(0 1 -1 0 322 58.107422)" x1="35.892578"
+        x2="47.892578"
         xlink:href="#r" y1="274" y2="274" />
     <clipPath id="t">
         <path d="m 82 88 h 26 v 26 h -26 z m 0 0" />
@@ -76,7 +78,8 @@
         <path
             d="m 64 123 c -33.136719 0 -60 -26.863281 -60 -60 s 26.863281 -60 60 -60 s 60 26.863281 60 60 s -26.863281 60 -60 60 z m 0 0" />
     </clipPath>
-    <linearGradient id="v" gradientTransform="matrix(0 0.722222 -0.722222 0 292.888885 62.077576)" x1="35.892578"
+    <linearGradient id="v" gradientTransform="matrix(0 0.722222 -0.722222 0 292.888885 62.077576)"
+        x1="35.892578"
         x2="46.969505" xlink:href="#r" y1="274" y2="274" />
     <clipPath id="w">
         <path d="m 18 87 h 20 v 19 h -20 z m 0 0" />
@@ -85,7 +88,8 @@
         <path
             d="m 64 123 c -33.136719 0 -60 -26.863281 -60 -60 s 26.863281 -60 60 -60 s 60 26.863281 60 60 s -26.863281 60 -60 60 z m 0 0" />
     </clipPath>
-    <linearGradient id="y" gradientTransform="matrix(0 0.527778 -0.527778 0 172.611115 68.056686)" x1="35.892578"
+    <linearGradient id="y" gradientTransform="matrix(0 0.527778 -0.527778 0 172.611115 68.056686)"
+        x1="35.892578"
         x2="46.969505" xlink:href="#r" y1="274" y2="274" />
     <clipPath id="z">
         <path d="m 53 85 h 20 v 19 h -20 z m 0 0" />
@@ -94,7 +98,8 @@
         <path
             d="m 64 123 c -33.136719 0 -60 -26.863281 -60 -60 s 26.863281 -60 60 -60 s 60 26.863281 60 60 s -26.863281 60 -60 60 z m 0 0" />
     </clipPath>
-    <linearGradient id="B" gradientTransform="matrix(0 0.527778 -0.527778 0 207.611115 66.056686)" x1="35.892578"
+    <linearGradient id="B" gradientTransform="matrix(0 0.527778 -0.527778 0 207.611115 66.056686)"
+        x1="35.892578"
         x2="46.969505" xlink:href="#r" y1="274" y2="274" />
     <clipPath id="C">
         <path d="m 66 103 h 26 v 20 h -26 z m 0 0" />
@@ -103,7 +108,8 @@
         <path
             d="m 64 123 c -33.136719 0 -60 -26.863281 -60 -60 s 26.863281 -60 60 -60 s 60 26.863281 60 60 s -26.863281 60 -60 60 z m 0 0" />
     </clipPath>
-    <linearGradient id="E" gradientTransform="matrix(0 0.722222 -0.722222 0 276.888885 77.077576)" x1="35.892578"
+    <linearGradient id="E" gradientTransform="matrix(0 0.722222 -0.722222 0 276.888885 77.077576)"
+        x1="35.892578"
         x2="46.969505" xlink:href="#r" y1="274" y2="274" />
     <path
         d="m 64 5 c 33.136719 0 60 26.863281 60 60 s -26.863281 60 -60 60 s -60 -26.863281 -60 -60 s 26.863281 -60 60 -60 z m 0 0"
@@ -122,7 +128,8 @@
         fill="#ffffff" />
     <g clip-path="url(#b)">
         <g clip-path="url(#c)">
-            <path d="m 22 91 c 0 4.96875 -4.03125 9 -9 9 s -9 -4.03125 -9 -9 s 4.03125 -9 9 -9 s 9 4.03125 9 9 z m 0 0"
+            <path
+                d="m 22 91 c 0 4.96875 -4.03125 9 -9 9 s -9 -4.03125 -9 -9 s 4.03125 -9 9 -9 s 9 4.03125 9 9 z m 0 0"
                 fill="#ffffff" />
         </g>
     </g>
@@ -163,7 +170,8 @@
     </g>
     <g clip-path="url(#n)">
         <g clip-path="url(#o)">
-            <path d="m 6.457031 92 c 7.535157 25.5 30.953125 43 57.542969 43 s 50.007812 -17.5 57.542969 -43 z m 0 0"
+            <path
+                d="m 6.457031 92 c 7.535157 25.5 30.953125 43 57.542969 43 s 50.007812 -17.5 57.542969 -43 z m 0 0"
                 fill="#ffffff" />
         </g>
     </g>

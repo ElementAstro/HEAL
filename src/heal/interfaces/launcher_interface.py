@@ -88,7 +88,8 @@ class Launcher(ScrollArea):
         self.ConfigInterface.addSettingCard(self.settingConfigCard)
 
         # 设置导航管理器
-        self.navigation_manager.setup_navigation(self.pivot, self.stackedWidget)
+        self.navigation_manager.setup_navigation(
+            self.pivot, self.stackedWidget)
 
         # 栏绑定界面
         self.navigation_manager.add_sub_interface(
@@ -111,9 +112,11 @@ class Launcher(ScrollArea):
         self.vBoxLayout.setContentsMargins(0, 10, 10, 0)
 
         # 设置默认界面
-        self.navigation_manager.set_default_interface(self.LauncherDownloadInterface)
+        self.navigation_manager.set_default_interface(
+            self.LauncherDownloadInterface)
 
     def __connectSignalToSlot(self) -> None:
         # 使用信号管理器连接信号
-        self.signal_manager.connect_audio_download_signal(self.AudioDownloadCard)
+        self.signal_manager.connect_audio_download_signal(
+            self.AudioDownloadCard)
         self.signal_manager.connect_config_signal(self.settingConfigCard)

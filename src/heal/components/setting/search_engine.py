@@ -112,12 +112,15 @@ class SettingsSearchEngine(QObject):
 
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
-        self.logger = get_logger("settings_search", module="SettingsSearchEngine")
+        self.logger = get_logger(
+            "settings_search", module="SettingsSearchEngine")
 
         # Search index
         self.items: Dict[str, SettingItem] = {}
-        self.keyword_index: Dict[str, Set[str]] = {}  # keyword -> set of item keys
-        self.category_index: Dict[str, Set[str]] = {}  # category -> set of item keys
+        # keyword -> set of item keys
+        self.keyword_index: Dict[str, Set[str]] = {}
+        # category -> set of item keys
+        self.category_index: Dict[str, Set[str]] = {}
         self.type_index: Dict[str, Set[str]] = {}  # type -> set of item keys
 
         # Search configuration
@@ -326,7 +329,8 @@ class SettingsSearchEngine(QObject):
             elif search_type == SearchType.REGEX:
                 result = self._regex_search(item, query)
             else:
-                result = self._fuzzy_search(item, query_lower)  # Default to fuzzy
+                result = self._fuzzy_search(
+                    item, query_lower)  # Default to fuzzy
 
             if result:
                 results.append(result)
@@ -379,7 +383,8 @@ class SettingsSearchEngine(QObject):
             matched_fields.append("title")
 
         # Check description
-        desc_ratio = SequenceMatcher(None, query, item.description.lower()).ratio()
+        desc_ratio = SequenceMatcher(
+            None, query, item.description.lower()).ratio()
         if desc_ratio >= self.fuzzy_threshold:
             score += self.search_weights["description"] * desc_ratio
             matched_fields.append("description")

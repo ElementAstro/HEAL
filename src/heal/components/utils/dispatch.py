@@ -100,12 +100,14 @@ class CommandDispatcher:
         for alias in aliases:
             self._commands[alias] = command
 
-        logger.info(f"Registered command: '{command_name}' with aliases: {aliases}")
+        logger.info(
+            f"Registered command: '{command_name}' with aliases: {aliases}")
 
     def unregister_command(self, command_name: str) -> None:
         if command_name not in self._commands:
             logger.error(f"Command '{command_name}' is not registered.")
-            raise CommandNotFound(f"Command '{command_name}' is not registered.")
+            raise CommandNotFound(
+                f"Command '{command_name}' is not registered.")
 
         command = self._commands.pop(command_name)
         for alias in command.aliases:
@@ -124,7 +126,8 @@ class CommandDispatcher:
 
         if command_name not in self._commands:
             logger.error(f"Command '{command_name}' is not registered.")
-            raise CommandNotFound(f"Command '{command_name}' is not registered.")
+            raise CommandNotFound(
+                f"Command '{command_name}' is not registered.")
 
         command = self._commands[command_name]
 
@@ -152,7 +155,8 @@ class CommandDispatcher:
 
             result = await self._execute_callable(command.handler, *args, **kwargs)
             command.last_used = time.time()
-            logger.info(f"Executed command: '{command_name}' with result: {result}")
+            logger.info(
+                f"Executed command: '{command_name}' with result: {result}")
             await self.dispatch_event(f"{command_name}_executed", *args, **kwargs)
             return result
         except Exception as e:
@@ -254,12 +258,14 @@ class CommandDispatcher:
             logger.debug(f"No listeners for event: '{event_name}'")
             return
 
-        logger.info(f"Dispatching event: '{event_name}' to {len(listeners)} listeners.")
+        logger.info(
+            f"Dispatching event: '{event_name}' to {len(listeners)} listeners.")
         for listener in listeners:
             try:
                 await listener(*args, **kwargs)
             except Exception as e:
-                logger.exception(f"Error in event listener for '{event_name}': {e}")
+                logger.exception(
+                    f"Error in event listener for '{event_name}': {e}")
 
     def batch_execute(
         self, commands: List[Dict[str, Any]]
@@ -282,7 +288,8 @@ class CommandDispatcher:
             results: List[Any] = asyncio.run(execute_all())
             for idx, result in enumerate(results):
                 if isinstance(result, Exception):
-                    cmd_name = commands[idx].get('name', 'unknown') if idx < len(commands) else 'unknown'
+                    cmd_name = commands[idx].get(
+                        'name', 'unknown') if idx < len(commands) else 'unknown'
                     logger.error(
                         f"Error executing command '{cmd_name}': {result}"
                     )
@@ -345,7 +352,8 @@ command_dispatcher.add_middleware(logging_middleware)
 
 # Example event listener
 async def on_hello_executed(name: str) -> None:
-    logger.info(f"Event Listener: 'hello_executed' event triggered with name: {name}")
+    logger.info(
+        f"Event Listener: 'hello_executed' event triggered with name: {name}")
 
 
 command_dispatcher.add_event_listener("hello_executed", on_hello_executed)

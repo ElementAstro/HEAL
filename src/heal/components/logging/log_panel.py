@@ -101,7 +101,8 @@ class LogPanel(ScrollArea):
         # 主布局
         main_layout = QVBoxLayout(self.scroll_widget)
         main_layout.setContentsMargins(20, 20, 20, 20)
-        main_layout.setSpacing(20)  # Increased spacing for better visual separation
+        # Increased spacing for better visual separation
+        main_layout.setSpacing(20)
 
         # 标题区域
         self._create_header_section(main_layout)
@@ -217,7 +218,8 @@ class LogPanel(ScrollArea):
         # 进度条显示磁盘使用率
         self.disk_progress = QProgressBar()
         self.disk_progress.setMaximum(100)
-        self.disk_progress.setMinimumHeight(8)  # Set a proper height for the progress bar
+        # Set a proper height for the progress bar
+        self.disk_progress.setMinimumHeight(8)
 
         layout.addWidget(self.disk_usage_label)
         layout.addWidget(self.available_space_label)
@@ -232,7 +234,8 @@ class LogPanel(ScrollArea):
         """创建主要内容区域"""
         # 创建分割器
         splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.setChildrenCollapsible(False)  # Prevent panels from collapsing completely
+        # Prevent panels from collapsing completely
+        splitter.setChildrenCollapsible(False)
 
         # 左侧：日志查看器
         self.log_viewer = LogViewer()
@@ -308,11 +311,13 @@ class LogPanel(ScrollArea):
 
         # 连接过滤器和查看器
         if self.log_filter and self.log_viewer:
-            self.log_filter.filter_changed.connect(self.log_viewer.apply_filter)
+            self.log_filter.filter_changed.connect(
+                self.log_viewer.apply_filter)
 
         # 连接导出器
         if self.log_exporter and self.log_viewer:
-            self.log_exporter.export_requested.connect(self.log_viewer.export_logs)
+            self.log_exporter.export_requested.connect(
+                self.log_viewer.export_logs)
 
     def _start_monitoring(self) -> None:
         """启动监控定时器"""
@@ -378,7 +383,8 @@ class LogPanel(ScrollArea):
                 self.available_space_label.setText(f"可用空间: {free_mb:.1f} MB")
 
                 # 计算使用率（假设总空间为可用空间+已用空间的估算）
-                usage_percent = min(int((size_mb / (size_mb + free_mb)) * 100), 100)
+                usage_percent = min(
+                    int((size_mb / (size_mb + free_mb)) * 100), 100)
                 self.disk_progress.setValue(usage_percent)
 
         except Exception as e:

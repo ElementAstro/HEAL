@@ -56,7 +56,8 @@ class ToolStatusManager(QObject):
 
     def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
-        self.logger = get_logger("tool_status_manager", module="ToolStatusManager")
+        self.logger = get_logger(
+            "tool_status_manager", module="ToolStatusManager")
         self.platform_info = get_current_platform_info()
 
         # 工具状态缓存
@@ -189,7 +190,8 @@ class ToolStatusManager(QObject):
                 version_line = lines[0]
                 if "version" in version_line:
                     version = (
-                        version_line.split('"')[1] if '"' in version_line else "Unknown"
+                        version_line.split(
+                            '"')[1] if '"' in version_line else "Unknown"
                     )
                     return ToolInfo(
                         name="Java",
@@ -239,7 +241,8 @@ class ToolStatusManager(QObject):
             )
             if version_line:
                 version = (
-                    version_line.split()[-1] if version_line.split() else "Unknown"
+                    version_line.split(
+                    )[-1] if version_line.split() else "Unknown"
                 )
                 return ToolInfo(
                     name="MongoDB",

@@ -39,7 +39,8 @@ class LauncherSignalManager(QObject):
 
     def connect_config_signal(self, config_card: Any) -> None:
         """连接配置文件信号"""
-        config_card.clicked.connect(lambda: self.handle_file_open("config/config.json"))
+        config_card.clicked.connect(
+            lambda: self.handle_file_open("config/config.json"))
         self.logger.debug("配置文件信号已连接")
 
     def handle_download_started(self, download_key: str) -> None:

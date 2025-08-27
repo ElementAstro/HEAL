@@ -270,7 +270,8 @@ class EnhancedSettingsManager(QObject):
             )
 
             # Proxy port card
-            self.proxyPortCard = LineEditSettingCardPort(self.parent.tr("代理端口"))
+            self.proxyPortCard = LineEditSettingCardPort(
+                self.parent.tr("代理端口"))
 
             # China mirror card
             self.chinaCard = SwitchSettingCard(
@@ -351,7 +352,8 @@ class EnhancedSettingsManager(QObject):
             self.themeColorCard.colorChanged.connect(
                 lambda c: setThemeColor(c, lazy=True)
             )
-            self.zoomCard.comboBox.currentIndexChanged.connect(self.restart_application)
+            self.zoomCard.comboBox.currentIndexChanged.connect(
+                self.restart_application)
             self.languageCard.comboBox.currentIndexChanged.connect(
                 self.restart_application
             )
@@ -428,7 +430,8 @@ class EnhancedSettingsManager(QObject):
     def _handle_config_editor(self) -> None:
         """Handle config editor with lazy loading"""
         try:
-            config_editor = self.performance_manager.load_lazy_setting("config_editor")
+            config_editor = self.performance_manager.load_lazy_setting(
+                "config_editor")
             if config_editor:
                 self.config_editor_dialog = CustomDialog(config_editor)
                 self.config_editor_dialog.show()

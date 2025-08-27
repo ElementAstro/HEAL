@@ -53,7 +53,8 @@ class QuickDownloadSection(CardWidget):
 
         # Use proper CardWidget layout structure
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 20, 24, 20)  # Standard CardWidget margins
+        # Standard CardWidget margins
+        layout.setContentsMargins(24, 20, 24, 20)
         layout.setSpacing(16)  # Standard spacing
 
         # Title with proper styling
@@ -65,13 +66,15 @@ class QuickDownloadSection(CardWidget):
         buttons_widget = QWidget()
         buttons_widget.setObjectName("quickDownloadButtons")
         buttons_layout = QGridLayout(buttons_widget)
-        buttons_layout.setSpacing(12)  # Increased spacing for better touch targets
+        # Increased spacing for better touch targets
+        buttons_layout.setSpacing(12)
         buttons_layout.setContentsMargins(0, 0, 0, 0)
 
         # Popular download buttons
         self.download_buttons = [
             ("Git", "https://git-scm.com/download/win", FluentIcon.CODE),
-            ("Python", "https://www.python.org/downloads/", FluentIcon.DEVELOPER_TOOLS),
+            ("Python", "https://www.python.org/downloads/",
+             FluentIcon.DEVELOPER_TOOLS),
             ("Node.js", "https://nodejs.org/en/download/", FluentIcon.GLOBE),
             ("VS Code", "https://code.visualstudio.com/download", FluentIcon.EDIT),
             (
@@ -86,11 +89,13 @@ class QuickDownloadSection(CardWidget):
         for i, (name, url, icon) in enumerate(self.download_buttons):
             btn = PushButton(name)
             btn.setIcon(icon)
-            btn.setMinimumSize(120, 40)  # Larger minimum size for better usability
+            # Larger minimum size for better usability
+            btn.setMinimumSize(120, 40)
             btn.setMaximumSize(160, 40)  # Maximum size to prevent stretching
             btn.setObjectName(f"quickDownloadBtn_{name.lower()}")
             btn.clicked.connect(
-                lambda checked, n=name, u=url: self.download_requested.emit(n, u)
+                lambda checked, n=name, u=url: self.download_requested.emit(
+                    n, u)
             )
 
             # Responsive grid: 3 columns on desktop, 2 on tablet, 1 on mobile
@@ -132,7 +137,8 @@ class SearchSection(CardWidget):
 
         # Use proper CardWidget layout structure
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(24, 20, 24, 20)  # Standard CardWidget margins
+        # Standard CardWidget margins
+        layout.setContentsMargins(24, 20, 24, 20)
         layout.setSpacing(16)  # Standard spacing
 
         # Search icon and label
@@ -158,11 +164,13 @@ class SearchSection(CardWidget):
         layout.addWidget(category_label)
 
         self.category_combo = ComboBox()
-        self.category_combo.setMinimumSize(160, 40)  # Larger for better usability
+        self.category_combo.setMinimumSize(
+            160, 40)  # Larger for better usability
         self.category_combo.setMaximumSize(200, 40)
         self.category_combo.setObjectName("categoryCombo")
         self.category_combo.addItem("全部分类", "all")
-        self.category_combo.currentTextChanged.connect(self._on_category_changed)
+        self.category_combo.currentTextChanged.connect(
+            self._on_category_changed)
         layout.addWidget(self.category_combo)
 
         # Search button with proper sizing
@@ -243,7 +251,8 @@ class DownloadStatusIndicator(CardWidget):
 
         # Use proper CardWidget layout structure
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(20, 16, 20, 16)  # Standard CardWidget margins
+        # Standard CardWidget margins
+        layout.setContentsMargins(20, 16, 20, 16)
         layout.setSpacing(16)  # Standard spacing
 
         # Download icon with proper sizing
@@ -337,7 +346,8 @@ class DownloadHeaderSection(QWidget):
         """Initialize UI"""
         # Use proper container layout with standard spacing
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 20)  # Bottom margin for section separation
+        # Bottom margin for section separation
+        layout.setContentsMargins(0, 0, 0, 20)
         layout.setSpacing(16)  # Standard spacing between sections
 
         # Top row: Search and Status with responsive behavior
@@ -354,14 +364,16 @@ class DownloadHeaderSection(QWidget):
         self.status_indicator = DownloadStatusIndicator()
         self.status_indicator.status_clicked.connect(self.status_clicked)
         self.status_indicator.setMinimumWidth(280)  # Minimum width for content
-        self.status_indicator.setMaximumWidth(350)  # Maximum width to prevent stretching
+        # Maximum width to prevent stretching
+        self.status_indicator.setMaximumWidth(350)
         top_row.addWidget(self.status_indicator, 0)  # Fixed size
 
         layout.addLayout(top_row)
 
         # Quick download section
         self.quick_download_section = QuickDownloadSection()
-        self.quick_download_section.download_requested.connect(self.download_requested)
+        self.quick_download_section.download_requested.connect(
+            self.download_requested)
         layout.addWidget(self.quick_download_section)
 
     def set_categories(self, categories: List[Dict[str, Any]]) -> None:

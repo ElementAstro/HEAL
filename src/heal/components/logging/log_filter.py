@@ -138,7 +138,8 @@ class LogFilter(CardWidget):
 
         # 开始时间
         self.start_time_edit = QDateTimeEdit()
-        self.start_time_edit.setDateTime(QDateTime.currentDateTime().addDays(-1))
+        self.start_time_edit.setDateTime(
+            QDateTime.currentDateTime().addDays(-1))
         self.start_time_edit.setEnabled(False)
         self.start_time_edit.dateTimeChanged.connect(self._on_time_changed)
         layout.addRow("开始时间:", self.start_time_edit)
@@ -154,7 +155,8 @@ class LogFilter(CardWidget):
         quick_layout = QHBoxLayout()
 
         self.last_hour_btn = PushButton("最近1小时")
-        self.last_hour_btn.clicked.connect(lambda: self._set_quick_time(hours=1))
+        self.last_hour_btn.clicked.connect(
+            lambda: self._set_quick_time(hours=1))
         quick_layout.addWidget(self.last_hour_btn)
 
         self.last_day_btn = PushButton("最近1天")
@@ -209,7 +211,8 @@ class LogFilter(CardWidget):
         options_layout = QHBoxLayout()
 
         self.case_sensitive_check = CheckBox("区分大小写")
-        self.case_sensitive_check.toggled.connect(self._on_search_option_changed)
+        self.case_sensitive_check.toggled.connect(
+            self._on_search_option_changed)
         options_layout.addWidget(self.case_sensitive_check)
 
         self.regex_check = CheckBox("正则表达式")
@@ -282,7 +285,8 @@ class LogFilter(CardWidget):
         self.regex_input.setEnabled(use_regex)
         self.keyword_input.setEnabled(not use_regex)
 
-        self.current_filters["case_sensitive"] = self.case_sensitive_check.isChecked()
+        self.current_filters["case_sensitive"] = self.case_sensitive_check.isChecked(
+        )
         self.current_filters["use_regex"] = use_regex
 
     def _on_regex_changed(self) -> None:
@@ -325,7 +329,8 @@ class LogFilter(CardWidget):
             self.current_filters["start_time"] = (
                 self.start_time_edit.dateTime().toPython()
             )
-            self.current_filters["end_time"] = self.end_time_edit.dateTime().toPython()
+            self.current_filters["end_time"] = self.end_time_edit.dateTime(
+            ).toPython()
         else:
             self.current_filters["start_time"] = None
             self.current_filters["end_time"] = None
@@ -334,7 +339,8 @@ class LogFilter(CardWidget):
         """更新模块过滤"""
         module_text = self.module_input.text().strip()
         if module_text:
-            modules = set(m.strip() for m in module_text.split(",") if m.strip())
+            modules = set(m.strip()
+                          for m in module_text.split(",") if m.strip())
         else:
             modules = set()
         self.current_filters["modules"] = modules

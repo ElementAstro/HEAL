@@ -113,7 +113,8 @@ class BulkOperation:
 
     def __post_init__(self) -> None:
         if self.progress is None:
-            self.progress = BulkOperationProgress(total_modules=len(self.module_names))
+            self.progress = BulkOperationProgress(
+                total_modules=len(self.module_names))
 
 
 class BulkOperationWorker(QThread):
@@ -219,7 +220,8 @@ class BulkOperationWorker(QThread):
                             )
 
                     except Exception as e:
-                        logger.error(f"Error processing module {module_name}: {e}")
+                        logger.error(
+                            f"Error processing module {module_name}: {e}")
 
                         # Create failed result
                         failed_result = ModuleOperationResult(
@@ -249,10 +251,12 @@ class BulkOperationWorker(QThread):
                 BulkOperationStatus.COMPLETED,
                 BulkOperationStatus.PARTIAL,
             ]
-            self.operation_completed.emit(self.operation.operation_id, overall_success)
+            self.operation_completed.emit(
+                self.operation.operation_id, overall_success)
 
         except Exception as e:
-            logger.error(f"Bulk operation {self.operation.operation_id} failed: {e}")
+            logger.error(
+                f"Bulk operation {self.operation.operation_id} failed: {e}")
             self.operation.status = BulkOperationStatus.FAILED
             self.operation.completed_at = time.time()
             self.operation_completed.emit(self.operation.operation_id, False)
@@ -326,12 +330,14 @@ class ModuleBulkOperations(QObject):
     ) -> None:
         """Register handler for bulk operation type"""
         self.operation_handlers[operation_type] = handler
-        self.logger.debug(f"Registered handler for operation: {operation_type.value}")
+        self.logger.debug(
+            f"Registered handler for operation: {operation_type.value}")
 
     def set_selected_modules(self, module_names: List[str]) -> None:
         """Set the currently selected modules"""
         self.selected_modules = set(module_names)
-        self.logger.debug(f"Selected {len(module_names)} modules for bulk operations")
+        self.logger.debug(
+            f"Selected {len(module_names)} modules for bulk operations")
 
     def add_to_selection(self, module_name: str) -> None:
         """Add module to selection"""
@@ -428,7 +434,8 @@ class ModuleBulkOperations(QObject):
                 operation.progress.overall_progress,
                 "Operation cancelled by user",
             )
-            self.notification_system.dismiss_notification(operation.notification_id)
+            self.notification_system.dismiss_notification(
+                operation.notification_id)
 
         self.logger.info(f"Cancelled bulk operation {operation_id}")
         return True
@@ -484,7 +491,8 @@ class ModuleBulkOperations(QObject):
                 del self.operation_workers[operation_id]
 
         if operations_to_remove:
-            self.logger.info(f"Cleaned up {len(operations_to_remove)} old operations")
+            self.logger.info(
+                f"Cleaned up {len(operations_to_remove)} old operations")
 
     def _on_progress_updated(self, operation_id: str, progress_data: Dict[str, Any]) -> None:
         """Handle progress updates"""
@@ -558,7 +566,8 @@ class ModuleBulkOperations(QObject):
                     notification_type = NotificationType.WARNING
 
                 # Dismiss progress notification and show result
-                self.notification_system.dismiss_notification(operation.notification_id)
+                self.notification_system.dismiss_notification(
+                    operation.notification_id)
                 self.notification_system.add_notification(
                     title=title,
                     message=message,
@@ -568,7 +577,8 @@ class ModuleBulkOperations(QObject):
                 )
             else:
                 # Show error notification
-                self.notification_system.dismiss_notification(operation.notification_id)
+                self.notification_system.dismiss_notification(
+                    operation.notification_id)
                 failed_modules = operation.progress.failed_modules if operation.progress else 0
                 self.notification_system.show_error(
                     title=f"Bulk {operation.operation_type.value.title()} Failed",

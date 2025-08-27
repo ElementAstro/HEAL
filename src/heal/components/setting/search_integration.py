@@ -32,7 +32,8 @@ class SettingsSearchIntegrator(QObject):
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.logger = get_logger("search_integrator", module="SettingsSearchIntegrator")
+        self.logger = get_logger(
+            "search_integrator", module="SettingsSearchIntegrator")
 
         # Search components
         self.search_engine = SettingsSearchEngine()
@@ -48,7 +49,8 @@ class SettingsSearchIntegrator(QObject):
 
         # Connect signals
         self.search_widget.setting_selected.connect(self.on_setting_selected)
-        self.search_widget.search_mode_changed.connect(self.search_mode_changed)
+        self.search_widget.search_mode_changed.connect(
+            self.search_mode_changed)
 
         self.logger.info("Settings search integrator initialized")
 
@@ -58,7 +60,8 @@ class SettingsSearchIntegrator(QObject):
         """Register a settings interface for search indexing"""
         try:
             # Extract settings from the interface
-            settings = self._extract_settings_from_interface(interface, interface_name)
+            settings = self._extract_settings_from_interface(
+                interface, interface_name)
 
             # Add to search index
             for setting in settings:
@@ -70,7 +73,8 @@ class SettingsSearchIntegrator(QObject):
             )
 
         except Exception as e:
-            self.logger.error(f"Failed to register interface {interface_name}: {e}")
+            self.logger.error(
+                f"Failed to register interface {interface_name}: {e}")
 
     def _extract_settings_from_interface(
         self, interface: SettingCardGroup, category: str
@@ -83,7 +87,8 @@ class SettingsSearchIntegrator(QObject):
             item = interface.cardLayout.itemAt(i)
             if item and item.widget():
                 widget = item.widget()
-                setting_item = self._create_setting_item_from_widget(widget, category)
+                setting_item = self._create_setting_item_from_widget(
+                    widget, category)
                 if setting_item:
                     settings.append(setting_item)
                     # Store widget reference for navigation
@@ -140,7 +145,8 @@ class SettingsSearchIntegrator(QObject):
             return setting_item
 
         except Exception as e:
-            self.logger.error(f"Failed to create setting item from widget: {e}")
+            self.logger.error(
+                f"Failed to create setting item from widget: {e}")
             return None
 
     def register_custom_setting(
@@ -195,7 +201,8 @@ class SettingsSearchIntegrator(QObject):
             # Update in search engine
             self.search_engine.update_setting(setting_item)
 
-            self.logger.debug(f"Marked setting as favorite: {key} = {is_favorite}")
+            self.logger.debug(
+                f"Marked setting as favorite: {key} = {is_favorite}")
 
     def on_setting_selected(self, setting_item: SettingItem) -> None:
         """Handle setting selection from search results"""
@@ -214,7 +221,8 @@ class SettingsSearchIntegrator(QObject):
 
                 self.logger.info(f"Navigated to setting: {setting_item.title}")
             else:
-                self.logger.warning(f"Widget not found for setting: {setting_item.key}")
+                self.logger.warning(
+                    f"Widget not found for setting: {setting_item.key}")
 
         except Exception as e:
             self.logger.error(f"Failed to navigate to setting: {e}")
@@ -247,7 +255,8 @@ class SettingsSearchIntegrator(QObject):
             widget.setStyleSheet(original_style + highlight_style)
 
             # Remove highlight after delay
-            QTimer.singleShot(2000, lambda: widget.setStyleSheet(original_style))
+            QTimer.singleShot(
+                2000, lambda: widget.setStyleSheet(original_style))
 
         except Exception as e:
             self.logger.debug(f"Could not highlight widget: {e}")
@@ -307,7 +316,8 @@ class SettingsSearchIntegrator(QObject):
         for name, interface in interfaces.items():
             self.register_setting_interface(name, interface)
 
-        self.logger.info(f"Rebuilt search index with {len(interfaces)} interfaces")
+        self.logger.info(
+            f"Rebuilt search index with {len(interfaces)} interfaces")
 
 
 class SearchEnabledSettingsInterface:
@@ -320,7 +330,8 @@ class SearchEnabledSettingsInterface:
         self.original_interfaces: dict[str, Any] = {}
 
         # Connect search signals
-        self.search_integrator.search_mode_changed.connect(self.on_search_mode_changed)
+        self.search_integrator.search_mode_changed.connect(
+            self.on_search_mode_changed)
         self.search_integrator.setting_found.connect(self.on_setting_found)
 
     def add_search_to_layout(self, layout: QVBoxLayout) -> None:
