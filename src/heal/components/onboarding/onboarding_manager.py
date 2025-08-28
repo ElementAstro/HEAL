@@ -6,6 +6,7 @@ welcome wizard, tutorials, and progressive feature discovery.
 """
 
 from typing import Any, Dict, List, Optional
+from datetime import datetime
 
 from PySide6.QtCore import QObject, QTimer, Signal
 from PySide6.QtWidgets import QWidget
@@ -15,6 +16,11 @@ from .user_state_tracker import OnboardingStep, UserLevel, UserStateTracker
 from .advanced_config_integration import (
     get_configuration_integrator, ConfigurationIntegrator
 )
+from .user_journey_tracker import (
+    get_journey_tracker, UserJourneyTracker, EventType
+)
+from .documentation_integration import DocumentationIntegration
+from .enhanced_help_system import show_help_system
 
 
 class OnboardingManager(QObject):
@@ -35,6 +41,14 @@ class OnboardingManager(QObject):
         # Initialize configuration integration
         self.config_integrator = get_configuration_integrator()
         self.config_manager = self.config_integrator.config_manager
+
+        # Initialize journey tracking
+        self.journey_tracker = get_journey_tracker()
+        self.user_session_id = None
+
+        # Initialize documentation system
+        self.documentation_integration = DocumentationIntegration(self)
+        self.help_system_window = None
         
         # Initialize components
         self.user_tracker = UserStateTracker(self)
@@ -61,6 +75,9 @@ class OnboardingManager(QObject):
 
         # Register this manager with configuration integrator
         self.config_integrator.register_onboarding_component("onboarding_manager", self)
+
+        # Start journey tracking session
+        self._start_journey_tracking()
     
     def _connect_signals(self) -> None:
         """Connect internal signals"""
@@ -473,6 +490,188 @@ class OnboardingManager(QObject):
         """Get configuration summary"""
         return self.config_integrator.get_configuration_summary()
 
+    # Journey Tracking Methods
+
+    def _start_journey_tracking(self):
+        """Start journey tracking session"""
+        try:
+            # Generate user ID (could be based on system info, user profile, etc.)
+            user_id = f"user_{hash(str(self.main_window))}"  # Simple user ID for demo
+            self.user_session_id = self.journey_tracker.start_session(user_id)
+
+            # Track onboarding system initialization
+            self.journey_tracker.track_event(
+                EventType.ONBOARDING_STARTED,
+                context={
+                    "system_version": "1.0.0",
+                    "user_level": self.user_tracker.get_user_level().value,
+                    "is_first_time": self.user_tracker.is_first_time_user()
+                }
+            )
+
+            self.logger.info(f"Journey tracking started: session {self.user_session_id}")
+
+        except Exception as e:
+            self.logger.error(f"Failed to start journey tracking: {e}")
+
+    def track_onboarding_event(self, event_type: EventType, context: Optional[Dict[str, Any]] = None):
+        """Track an onboarding event"""
+        try:
+            self.journey_tracker.track_event(event_type, context or {})
+        except Exception as e:
+            self.logger.error(f"Failed to track event {event_type}: {e}")
+
+    def track_step_completion(self, step: OnboardingStep):
+        """Track onboarding step completion"""
+        self.track_onboarding_event(
+            EventType.ONBOARDING_STEP_COMPLETED,
+            context={
+                "step": step.value,
+                "step_index": list(OnboardingStep).index(step),
+                "completion_time": datetime.now().isoformat()
+            }
+        )
+
+    def track_step_skip(self, step: OnboardingStep, reason: str = ""):
+        """Track onboarding step skip"""
+        self.track_onboarding_event(
+            EventType.ONBOARDING_STEP_SKIPPED,
+            context={
+                "step": step.value,
+                "step_index": list(OnboardingStep).index(step),
+                "reason": reason
+            }
+        )
+
+    def track_feature_discovery(self, feature_name: str, context: Optional[Dict[str, Any]] = None):
+        """Track feature discovery"""
+        self.track_onboarding_event(
+            EventType.FEATURE_DISCOVERED,
+            context={
+                "feature_name": feature_name,
+                **(context or {})
+            }
+        )
+
+    def track_help_access(self, help_type: str, context: Optional[Dict[str, Any]] = None):
+        """Track help access"""
+        self.track_onboarding_event(
+            EventType.HELP_ACCESSED,
+            context={
+                "help_type": help_type,
+                **(context or {})
+            }
+        )
+
+    def get_journey_insights(self, days: int = 30) -> List[Any]:
+        """Get journey insights"""
+        try:
+            return self.journey_tracker.get_insights(days)
+        except Exception as e:
+            self.logger.error(f"Failed to get journey insights: {e}")
+            return []
+
+    def show_analytics_dashboard(self):
+        """Show journey analytics dashboard"""
+        try:
+            from .journey_analytics_dashboard import show_analytics_dashboard
+            return show_analytics_dashboard(self.main_window)
+        except Exception as e:
+            self.logger.error(f"Failed to show analytics dashboard: {e}")
+            return None
+
+    # Enhanced Documentation Methods
+
+    def show_help_system(self):
+        """Show the enhanced help system"""
+        try:
+            if not self.help_system_window:
+                self.help_system_window = show_help_system(
+                    self.documentation_integration,
+                    self.user_tracker,
+                    self.main_window
+                )
+            else:
+                self.help_system_window.show()
+                self.help_system_window.raise_()
+                self.help_system_window.activateWindow()
+
+            # Track help access
+            self.track_help_access("help_system")
+
+            return self.help_system_window
+
+        except Exception as e:
+            self.logger.error(f"Failed to show help system: {e}")
+            return None
+
+    def show_contextual_help(self, context: str):
+        """Show contextual help for a specific context"""
+        try:
+            help_items = self.documentation_integration.get_contextual_help(
+                context,
+                self.user_tracker.get_user_level()
+            )
+
+            if help_items:
+                # Show help system with contextual content
+                help_system = self.show_help_system()
+                if help_system and help_items:
+                    help_system.display_content(help_items[0])
+
+                # Track contextual help access
+                self.track_help_access("contextual_help", {"context": context})
+
+                return help_system
+            else:
+                self.logger.info(f"No contextual help found for: {context}")
+                return None
+
+        except Exception as e:
+            self.logger.error(f"Failed to show contextual help: {e}")
+            return None
+
+    def search_help(self, query: str):
+        """Search help content and show results"""
+        try:
+            results = self.documentation_integration.search_documentation(
+                query,
+                user_level=self.user_tracker.get_user_level()
+            )
+
+            # Show help system with search results
+            help_system = self.show_help_system()
+            if help_system:
+                help_system.perform_search(query, None, self.user_tracker.get_user_level())
+
+            # Track help search
+            self.track_help_access("help_search", {"query": query, "results_count": len(results)})
+
+            return help_system
+
+        except Exception as e:
+            self.logger.error(f"Failed to search help: {e}")
+            return None
+
+    def get_help_suggestions(self, context: str = None) -> List[Any]:
+        """Get help suggestions for current context"""
+        try:
+            if context:
+                return self.documentation_integration.get_contextual_help(
+                    context,
+                    self.user_tracker.get_user_level()
+                )
+            else:
+                # Get general suggestions based on user level and progress
+                return self.documentation_integration.get_smart_suggestions(
+                    self.user_tracker.get_user_level(),
+                    self.user_tracker.get_completed_steps()
+                )
+
+        except Exception as e:
+            self.logger.error(f"Failed to get help suggestions: {e}")
+            return []
+
     def initialize_all_systems(self) -> None:
         """Initialize all onboarding systems (for testing or full setup)"""
         self.logger.info("Initializing all onboarding systems")
@@ -505,5 +704,13 @@ class OnboardingManager(QObject):
             self.config_integrator.shutdown()
         except Exception as e:
             self.logger.error(f"Error shutting down configuration system: {e}")
+
+        # End journey tracking session
+        try:
+            if self.user_session_id:
+                self.journey_tracker.end_session()
+                self.logger.info("Journey tracking session ended")
+        except Exception as e:
+            self.logger.error(f"Error ending journey tracking session: {e}")
 
         self.logger.info("Onboarding systems shutdown complete")

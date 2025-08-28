@@ -1,9 +1,12 @@
 """
 Workflow Optimizer - 工作流优化工具
 简化复杂的初始化流程和操作序列
+Enhanced with detailed performance tracking and memory monitoring
 """
 
 import time
+import psutil
+import threading
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from enum import Enum
@@ -24,8 +27,22 @@ class StepStatus(Enum):
 
 
 @dataclass
+class PerformanceMetrics:
+    """性能指标"""
+    cpu_usage_before: float = 0.0
+    cpu_usage_after: float = 0.0
+    memory_usage_before: float = 0.0  # MB
+    memory_usage_after: float = 0.0   # MB
+    memory_delta: float = 0.0         # MB
+    peak_memory: float = 0.0          # MB
+    execution_time: float = 0.0       # seconds
+    thread_count_before: int = 0
+    thread_count_after: int = 0
+
+
+@dataclass
 class WorkflowStep:
-    """工作流步骤"""
+    """工作流步骤 - Enhanced with performance tracking"""
     name: str
     func: Callable
     dependencies: List[str] = field(default_factory=list)
@@ -36,6 +53,9 @@ class WorkflowStep:
     result: Any = None
     error: Optional[Exception] = None
     execution_time: float = 0.0
+    performance_metrics: Optional[PerformanceMetrics] = None
+    start_timestamp: float = 0.0
+    end_timestamp: float = 0.0
 
     def reset(self) -> None:
         """重置步骤状态"""
@@ -43,24 +63,34 @@ class WorkflowStep:
         self.result = None
         self.error = None
         self.execution_time = 0.0
+        self.performance_metrics = None
+        self.start_timestamp = 0.0
+        self.end_timestamp = 0.0
 
 
 class WorkflowOptimizer:
-    """工作流优化器 - 简化复杂的操作序列"""
+    """工作流优化器 - Enhanced with detailed performance monitoring"""
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, enable_performance_tracking: bool = True) -> None:
         self.name = name
         self.steps: Dict[str, WorkflowStep] = {}
         self.execution_order: List[str] = []
         self.logger = logger.bind(component="WorkflowOptimizer", workflow=name)
+        self.enable_performance_tracking = enable_performance_tracking
+        self._performance_lock = threading.Lock()
 
-        # 执行统计
+        # Enhanced execution statistics
         self.execution_stats: Dict[str, Any] = {
             "total_executions": 0,
             "successful_executions": 0,
             "failed_executions": 0,
             "average_execution_time": 0.0,
-            "step_success_rates": defaultdict(float)
+            "step_success_rates": defaultdict(float),
+            "performance_history": [],
+            "memory_usage_history": [],
+            "cpu_usage_history": [],
+            "bottleneck_steps": [],
+            "optimization_suggestions": []
         }
 
     def add_step(
@@ -216,30 +246,120 @@ class WorkflowOptimizer:
         return True
 
     def _execute_step(self, step: WorkflowStep) -> bool:
-        """执行单个步骤"""
+        """执行单个步骤 - Enhanced with performance monitoring"""
         step.status = StepStatus.RUNNING
-        start_time = time.time()
+        step.start_timestamp = time.time()
+
+        # Initialize performance metrics if tracking is enabled
+        if self.enable_performance_tracking:
+            step.performance_metrics = PerformanceMetrics()
+            self._capture_pre_execution_metrics(step)
 
         try:
             self.logger.debug(f"执行步骤: {step.name}")
             step.result = step.func()
             step.status = StepStatus.COMPLETED
-            step.execution_time = time.time() - start_time
+            step.end_timestamp = time.time()
+            step.execution_time = step.end_timestamp - step.start_timestamp
+
+            # Capture post-execution metrics
+            if self.enable_performance_tracking:
+                self._capture_post_execution_metrics(step)
+                self._analyze_step_performance(step)
 
             self.logger.debug(
                 f"步骤 {step.name} 执行成功，耗时 {step.execution_time:.3f}s")
+
+            if step.performance_metrics:
+                self.logger.debug(
+                    f"步骤 {step.name} 性能指标: "
+                    f"内存增量={step.performance_metrics.memory_delta:.1f}MB, "
+                    f"峰值内存={step.performance_metrics.peak_memory:.1f}MB"
+                )
+
             return True
 
         except Exception as e:
             step.status = StepStatus.FAILED
             step.error = e
-            step.execution_time = time.time() - start_time
+            step.end_timestamp = time.time()
+            step.execution_time = step.end_timestamp - step.start_timestamp
+
+            # Still capture metrics for failed steps
+            if self.enable_performance_tracking and step.performance_metrics:
+                self._capture_post_execution_metrics(step)
 
             self.logger.error(f"步骤 {step.name} 执行失败: {e}")
             return False
 
+    def _capture_pre_execution_metrics(self, step: WorkflowStep) -> None:
+        """捕获执行前的性能指标"""
+        if not step.performance_metrics:
+            return
+
+        try:
+            process = psutil.Process()
+            step.performance_metrics.cpu_usage_before = process.cpu_percent()
+            step.performance_metrics.memory_usage_before = process.memory_info().rss / 1024 / 1024  # MB
+            step.performance_metrics.thread_count_before = process.num_threads()
+        except Exception as e:
+            self.logger.warning(f"无法捕获步骤 {step.name} 的执行前指标: {e}")
+
+    def _capture_post_execution_metrics(self, step: WorkflowStep) -> None:
+        """捕获执行后的性能指标"""
+        if not step.performance_metrics:
+            return
+
+        try:
+            process = psutil.Process()
+            step.performance_metrics.cpu_usage_after = process.cpu_percent()
+            step.performance_metrics.memory_usage_after = process.memory_info().rss / 1024 / 1024  # MB
+            step.performance_metrics.thread_count_after = process.num_threads()
+            step.performance_metrics.execution_time = step.execution_time
+
+            # Calculate memory delta
+            step.performance_metrics.memory_delta = (
+                step.performance_metrics.memory_usage_after -
+                step.performance_metrics.memory_usage_before
+            )
+
+            # Peak memory is the higher of before/after
+            step.performance_metrics.peak_memory = max(
+                step.performance_metrics.memory_usage_before,
+                step.performance_metrics.memory_usage_after
+            )
+
+        except Exception as e:
+            self.logger.warning(f"无法捕获步骤 {step.name} 的执行后指标: {e}")
+
+    def _analyze_step_performance(self, step: WorkflowStep) -> None:
+        """分析步骤性能并生成建议"""
+        if not step.performance_metrics:
+            return
+
+        metrics = step.performance_metrics
+        suggestions = []
+
+        # Memory usage analysis
+        if metrics.memory_delta > 50:  # More than 50MB increase
+            suggestions.append(f"步骤 {step.name} 内存使用量增加 {metrics.memory_delta:.1f}MB，考虑优化内存使用")
+
+        # Execution time analysis
+        if metrics.execution_time > 5.0:  # More than 5 seconds
+            suggestions.append(f"步骤 {step.name} 执行时间 {metrics.execution_time:.2f}s 较长，考虑优化算法或异步处理")
+
+        # Thread count analysis
+        thread_delta = metrics.thread_count_after - metrics.thread_count_before
+        if thread_delta > 5:
+            suggestions.append(f"步骤 {step.name} 创建了 {thread_delta} 个线程，注意线程管理")
+
+        # Store suggestions
+        if suggestions:
+            with self._performance_lock:
+                self.execution_stats["optimization_suggestions"].extend(suggestions)
+
     def _update_stats(self, execution_result: Dict[str, Any]) -> None:
-        """更新执行统计"""
+        """更新执行统计 - Enhanced with performance data"""
         self.execution_stats["total_executions"] += 1
 
         if execution_result["success"]:
@@ -263,9 +383,101 @@ class WorkflowOptimizer:
                 (current_rate * (total_executions - 1) + 1.0) / total_executions
             )
 
+        # Update performance history
+        if self.enable_performance_tracking:
+            self._update_performance_history(execution_result)
+
+    def _update_performance_history(self, execution_result: Dict[str, Any]) -> None:
+        """更新性能历史记录"""
+        performance_snapshot = {
+            "timestamp": time.time(),
+            "total_time": execution_result["total_time"],
+            "success": execution_result["success"],
+            "step_metrics": {}
+        }
+
+        # Collect step-level metrics
+        for step_name in execution_result["completed_steps"] + execution_result["failed_steps"]:
+            step = self.steps.get(step_name)
+            if step and step.performance_metrics:
+                performance_snapshot["step_metrics"][step_name] = {
+                    "execution_time": step.execution_time,
+                    "memory_delta": step.performance_metrics.memory_delta,
+                    "peak_memory": step.performance_metrics.peak_memory,
+                    "cpu_usage_before": step.performance_metrics.cpu_usage_before,
+                    "cpu_usage_after": step.performance_metrics.cpu_usage_after
+                }
+
+        # Store in history (keep last 100 executions)
+        with self._performance_lock:
+            self.execution_stats["performance_history"].append(performance_snapshot)
+            if len(self.execution_stats["performance_history"]) > 100:
+                self.execution_stats["performance_history"].pop(0)
+
+        # Identify bottleneck steps
+        self._identify_bottlenecks()
+
+    def _identify_bottlenecks(self) -> None:
+        """识别性能瓶颈步骤"""
+        if not self.execution_stats["performance_history"]:
+            return
+
+        # Analyze recent performance data
+        recent_history = self.execution_stats["performance_history"][-10:]  # Last 10 executions
+        step_times = defaultdict(list)
+
+        for snapshot in recent_history:
+            for step_name, metrics in snapshot["step_metrics"].items():
+                step_times[step_name].append(metrics["execution_time"])
+
+        # Find steps with consistently high execution times
+        bottlenecks = []
+        for step_name, times in step_times.items():
+            if times and sum(times) / len(times) > 2.0:  # Average > 2 seconds
+                bottlenecks.append({
+                    "step_name": step_name,
+                    "average_time": sum(times) / len(times),
+                    "max_time": max(times),
+                    "executions": len(times)
+                })
+
+        # Sort by average time
+        bottlenecks.sort(key=lambda x: x["average_time"], reverse=True)
+
+        with self._performance_lock:
+            self.execution_stats["bottleneck_steps"] = bottlenecks[:5]  # Top 5 bottlenecks
+
     def get_stats(self) -> Dict[str, Any]:
-        """获取执行统计"""
-        return dict(self.execution_stats)
+        """获取执行统计 - Enhanced with performance data"""
+        with self._performance_lock:
+            return dict(self.execution_stats)
+
+    def get_performance_report(self) -> Dict[str, Any]:
+        """获取详细的性能报告"""
+        if not self.enable_performance_tracking:
+            return {"error": "Performance tracking is disabled"}
+
+        with self._performance_lock:
+            recent_history = self.execution_stats["performance_history"][-10:]
+
+            if not recent_history:
+                return {"error": "No performance data available"}
+
+            # Calculate aggregate metrics
+            total_times = [h["total_time"] for h in recent_history]
+            success_rate = sum(1 for h in recent_history if h["success"]) / len(recent_history)
+
+            return {
+                "workflow_name": self.name,
+                "recent_executions": len(recent_history),
+                "average_total_time": sum(total_times) / len(total_times),
+                "min_total_time": min(total_times),
+                "max_total_time": max(total_times),
+                "success_rate": success_rate,
+                "bottleneck_steps": self.execution_stats["bottleneck_steps"],
+                "optimization_suggestions": self.execution_stats["optimization_suggestions"][-10:],  # Last 10 suggestions
+                "performance_trend": "improving" if len(total_times) >= 2 and total_times[-1] < total_times[0] else "stable"
+            }
 
     def optimize(self) -> Dict[str, Any]:
         """优化工作流"""
@@ -294,14 +506,39 @@ class WorkflowOptimizer:
 _workflow_registry: Dict[str, WorkflowOptimizer] = {}
 
 
-def create_workflow(name: str) -> WorkflowOptimizer:
-    """创建工作流"""
+def create_workflow(name: str, enable_performance_tracking: bool = True) -> WorkflowOptimizer:
+    """创建工作流 - Enhanced with performance tracking option"""
     if name in _workflow_registry:
         logger.warning(f"工作流 {name} 已存在，将被覆盖")
 
-    workflow = WorkflowOptimizer(name)
+    workflow = WorkflowOptimizer(name, enable_performance_tracking)
     _workflow_registry[name] = workflow
     return workflow
+
+
+def get_workflow_performance_report(name: str) -> Dict[str, Any]:
+    """获取工作流性能报告"""
+    workflow = _workflow_registry.get(name)
+    if not workflow:
+        return {"error": f"工作流 {name} 不存在"}
+
+    return workflow.get_performance_report()
+
+
+def get_all_workflow_performance() -> Dict[str, Any]:
+    """获取所有工作流的性能概览"""
+    performance_overview = {
+        "total_workflows": len(_workflow_registry),
+        "workflows": {}
+    }
+
+    for name, workflow in _workflow_registry.items():
+        try:
+            performance_overview["workflows"][name] = workflow.get_performance_report()
+        except Exception as e:
+            performance_overview["workflows"][name] = {"error": str(e)}
+
+    return performance_overview
 
 
 def get_workflow(name: str) -> Optional[WorkflowOptimizer]:

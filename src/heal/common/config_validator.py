@@ -1,14 +1,17 @@
 """
 Configuration Validator - 配置文件验证器
 提供配置文件的完整验证机制，确保配置的正确性和安全性
+Enhanced with performance optimizations and caching
 """
 
 import json
 import os
-from dataclasses import dataclass
+import time
+import hashlib
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Tuple
 
 import jsonschema
 
@@ -34,14 +37,26 @@ class ValidationSeverity(Enum):
 
 
 @dataclass
+class ValidationCacheEntry:
+    """验证缓存条目"""
+
+    result: 'ValidationResult'
+    file_hash: str
+    validation_time: float
+    cache_time: float = field(default_factory=time.time)
+
+
+@dataclass
 class ValidationResult:
-    """验证结果"""
+    """验证结果 - Enhanced with performance metrics"""
 
     is_valid: bool
     errors: List[str]
     warnings: List[str]
     info: List[str]
     fixed_issues: List[str]
+    validation_time: float = 0.0
+    cache_hit: bool = False
 
     @property
     def has_errors(self) -> bool:
@@ -66,10 +81,12 @@ class ValidationResult:
 
 
 class ConfigValidator:
-    """配置验证器"""
+    """配置验证器 - Enhanced with performance optimizations"""
 
-    def __init__(self, validation_level: ValidationLevel = ValidationLevel.NORMAL) -> None:
+    def __init__(self, validation_level: ValidationLevel = ValidationLevel.NORMAL,
+                 enable_cache: bool = True) -> None:
         self.validation_level = validation_level
+        self.enable_cache = enable_cache
         self.logger = logger.bind(component="ConfigValidator")
 
         # 配置文件模式定义
@@ -77,6 +94,20 @@ class ConfigValidator:
 
         # 默认值
         self.default_values = self._load_default_values()
+
+        # Validation cache
+        self.validation_cache: Dict[str, ValidationCacheEntry] = {}
+        self.cache_ttl = 300.0  # 5 minutes
+        self.max_cache_size = 100
+
+        # Performance tracking
+        self.validation_stats = {
+            "total_validations": 0,
+            "cache_hits": 0,
+            "cache_misses": 0,
+            "total_validation_time": 0.0,
+            "average_validation_time": 0.0
+        }
 
     def _load_schemas(self) -> Dict[str, Dict[str, Any]]:
         """加载配置文件模式"""
@@ -166,8 +197,86 @@ class ConfigValidator:
             },
         }
 
+    def _calculate_file_hash(self, file_path: str) -> str:
+        """计算文件哈希值"""
+        try:
+            with open(file_path, 'rb') as f:
+                content = f.read()
+                return hashlib.md5(content).hexdigest()
+        except Exception:
+            return ""
+
+    def _is_cache_valid(self, file_path: str) -> bool:
+        """检查缓存是否有效"""
+        if not self.enable_cache or file_path not in self.validation_cache:
+            return False
+
+        cache_entry = self.validation_cache[file_path]
+        current_time = time.time()
+
+        # Check TTL
+        if current_time - cache_entry.cache_time > self.cache_ttl:
+            return False
+
+        # Check file hash
+        current_hash = self._calculate_file_hash(file_path)
+        if current_hash != cache_entry.file_hash:
+            return False
+
+        return True
+
+    def _update_cache(self, file_path: str, result: ValidationResult) -> None:
+        """更新验证缓存"""
+        if not self.enable_cache:
+            return
+
+        try:
+            file_hash = self._calculate_file_hash(file_path)
+
+            # Clean cache if full
+            if len(self.validation_cache) >= self.max_cache_size:
+                self._cleanup_cache()
+
+            self.validation_cache[file_path] = ValidationCacheEntry(
+                result=result,
+                file_hash=file_hash,
+                validation_time=result.validation_time
+            )
+
+            self.logger.debug(f"Updated validation cache for {file_path}")
+
+        except Exception as e:
+            self.logger.warning(f"Failed to update validation cache: {e}")
+
+    def _cleanup_cache(self) -> None:
+        """清理过期缓存"""
+        current_time = time.time()
+        expired_keys = []
+
+        for file_path, cache_entry in self.validation_cache.items():
+            if current_time - cache_entry.cache_time > self.cache_ttl:
+                expired_keys.append(file_path)
+
+        for key in expired_keys:
+            del self.validation_cache[key]
+
+        self.logger.debug(f"Cleaned up {len(expired_keys)} expired cache entries")
+
     def validate_file(self, file_path: str, auto_fix: bool = False) -> ValidationResult:
-        """验证单个配置文件"""
+        """验证单个配置文件 - Enhanced with caching"""
+        start_time = time.time()
+
+        # Check cache first
+        if self._is_cache_valid(file_path):
+            cache_entry = self.validation_cache[file_path]
+            cached_result = cache_entry.result
+            cached_result.cache_hit = True
+            self.validation_stats["cache_hits"] += 1
+            self.logger.debug(f"Cache hit for validation of {file_path}")
+            return cached_result
+
+        self.validation_stats["cache_misses"] += 1
+
         result = ValidationResult(True, [], [], [], [])
 
         try:
@@ -178,11 +287,14 @@ class ConfigValidator:
                 if auto_fix:
                     self._create_default_config(file_path, result)
 
+                result.validation_time = time.time() - start_time
+                self._update_cache(file_path, result)
                 return result
 
             # 检查文件权限
             if not os.access(file_path, os.R_OK):
                 result.add_error(f"无法读取配置文件: {file_path}")
+                result.validation_time = time.time() - start_time
                 return result
 
             # 加载JSON文件
@@ -226,6 +338,20 @@ class ConfigValidator:
         except Exception as e:
             result.add_error(f"验证过程中发生错误: {e}")
             self.logger.error(f"验证配置文件时发生错误 {file_path}: {e}")
+
+        # Update performance stats
+        validation_time = time.time() - start_time
+        result.validation_time = validation_time
+
+        self.validation_stats["total_validations"] += 1
+        self.validation_stats["total_validation_time"] += validation_time
+        self.validation_stats["average_validation_time"] = (
+            self.validation_stats["total_validation_time"] /
+            self.validation_stats["total_validations"]
+        )
+
+        # Update cache
+        self._update_cache(file_path, result)
 
         return result
 
@@ -388,9 +514,39 @@ class ConfigValidator:
             "validation_level": self.validation_level.value,
         }
 
+    def clear_cache(self, file_path: Optional[str] = None) -> None:
+        """清除验证缓存"""
+        if file_path:
+            if file_path in self.validation_cache:
+                del self.validation_cache[file_path]
+                self.logger.debug(f"Cleared validation cache for {file_path}")
+        else:
+            self.validation_cache.clear()
+            self.logger.debug("Cleared all validation cache")
 
-# 全局配置验证器实例
-config_validator = ConfigValidator()
+    def get_validation_stats(self) -> Dict[str, Any]:
+        """获取验证统计信息"""
+        cache_entries = []
+        for file_path, cache_entry in self.validation_cache.items():
+            cache_entries.append({
+                "file_path": file_path,
+                "validation_time": cache_entry.validation_time,
+                "cache_age": time.time() - cache_entry.cache_time,
+                "file_hash": cache_entry.file_hash[:8]  # First 8 chars
+            })
+
+        return {
+            **self.validation_stats,
+            "cache_enabled": self.enable_cache,
+            "cache_entries": len(self.validation_cache),
+            "max_cache_size": self.max_cache_size,
+            "cache_ttl": self.cache_ttl,
+            "cache_details": cache_entries
+        }
+
+
+# 全局配置验证器实例 - 启用缓存
+config_validator = ConfigValidator(enable_cache=True)
 
 
 def validate_config_file(file_path: str, auto_fix: bool = False) -> ValidationResult:

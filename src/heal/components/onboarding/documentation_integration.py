@@ -481,3 +481,106 @@ class DocumentationIntegration(QObject):
                 suggestions.append(self.documentation_items[doc_id])
         
         return suggestions
+
+    def get_contextual_help(self, context: str, user_level: UserLevel = None) -> List[DocumentationItem]:
+        """Get contextual help items for a specific context"""
+        contextual_items = []
+
+        for item in self.documentation_items.values():
+            # Check if item is relevant to context
+            if context.lower() in [tag.lower() for tag in item.tags]:
+                # Check user level compatibility
+                if user_level is None or not item.user_levels or user_level in item.user_levels:
+                    contextual_items.append(item)
+
+        # Sort by relevance (items with more matching tags first)
+        def relevance_score(item):
+            score = 0
+            context_lower = context.lower()
+
+            # Exact tag match
+            if context_lower in [tag.lower() for tag in item.tags]:
+                score += 10
+
+            # Title match
+            if context_lower in item.title.lower():
+                score += 5
+
+            # Content match
+            if context_lower in item.content.lower():
+                score += 1
+
+            return score
+
+        contextual_items.sort(key=relevance_score, reverse=True)
+        return contextual_items[:5]  # Return top 5 most relevant
+
+    def search_documentation(self, query: str, doc_type: DocumentationType = None,
+                           user_level: UserLevel = None) -> List[DocumentationItem]:
+        """Search documentation with filters"""
+        results = []
+        query_lower = query.lower()
+
+        for item in self.documentation_items.values():
+            # Apply filters
+            if doc_type and item.doc_type != doc_type:
+                continue
+
+            if user_level and item.user_levels and user_level not in item.user_levels:
+                continue
+
+            # Check if query matches
+            if (query_lower in item.title.lower() or
+                query_lower in item.content.lower() or
+                any(query_lower in tag.lower() for tag in item.tags)):
+                results.append(item)
+
+        # Sort by relevance
+        def search_relevance(item):
+            score = 0
+
+            # Title match gets highest score
+            if query_lower in item.title.lower():
+                score += 20
+
+            # Tag match gets medium score
+            for tag in item.tags:
+                if query_lower in tag.lower():
+                    score += 10
+
+            # Content match gets lower score
+            if query_lower in item.content.lower():
+                score += 5
+
+            return score
+
+        results.sort(key=search_relevance, reverse=True)
+        return results
+
+    def get_related_documentation(self, doc_id: str) -> List[DocumentationItem]:
+        """Get related documentation items"""
+        item = self.get_documentation_item(doc_id)
+        if not item:
+            return []
+
+        related = []
+        item_tags = set(tag.lower() for tag in item.tags)
+
+        for other_item in self.documentation_items.values():
+            if other_item.doc_id == doc_id:
+                continue
+
+            # Check for tag overlap
+            other_tags = set(tag.lower() for tag in other_item.tags)
+            common_tags = item_tags.intersection(other_tags)
+
+            if len(common_tags) >= 1:  # At least one common tag
+                related.append((other_item, len(common_tags)))
+
+        # Sort by number of common tags
+        related.sort(key=lambda x: x[1], reverse=True)
+        return [item for item, _ in related[:5]]  # Return top 5
+
+    def get_documentation_item(self, doc_id: str) -> Optional[DocumentationItem]:
+        """Get a specific documentation item"""
+        return self.documentation_items.get(doc_id)

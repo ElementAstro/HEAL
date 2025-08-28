@@ -7,15 +7,18 @@ Provides centralized configuration management with:
 - Configuration migration and upgrade support
 - Environment-specific configuration handling
 - Configuration backup and recovery
+- Configuration caching for improved performance
 """
 
 import json
 import os
 import shutil
-from dataclasses import dataclass
+import time
+import hashlib
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Tuple
 
 from ..resources import resource_manager
 from .config_validator import ConfigValidator, ValidationLevel, ValidationResult
@@ -35,6 +38,18 @@ class ConfigType(Enum):
 
 
 @dataclass
+class ConfigCacheEntry:
+    """Configuration cache entry."""
+
+    data: Dict[str, Any]
+    file_hash: str
+    last_modified: float
+    cache_time: float
+    access_count: int = 0
+    last_access: float = field(default_factory=time.time)
+
+
+@dataclass
 class ConfigPath:
     """Configuration path information."""
 
@@ -50,15 +65,16 @@ class ConfigManager:
     Enhanced configuration manager for HEAL application.
 
     Manages all configuration files with automatic path resolution,
-    validation, and migration support.
+    validation, migration support, and performance caching.
     """
 
-    def __init__(self, config_dir: Optional[Path] = None) -> None:
+    def __init__(self, config_dir: Optional[Path] = None, enable_cache: bool = True) -> None:
         """
         Initialize the configuration manager.
 
         Args:
             config_dir: Optional custom configuration directory
+            enable_cache: Whether to enable configuration caching
         """
         self.logger = get_logger(self.__class__.__name__)
 
@@ -74,6 +90,12 @@ class ConfigManager:
         # Set up backup directory
         self.backup_dir = self.config_dir / "backups"
         self.backup_dir.mkdir(exist_ok=True)
+
+        # Cache configuration
+        self.enable_cache = enable_cache
+        self.config_cache: Dict[ConfigType, ConfigCacheEntry] = {}
+        self.cache_ttl = 300.0  # 5 minutes cache TTL
+        self.max_cache_size = 50  # Maximum number of cached configs
 
         # Configuration file definitions
         self.config_paths = {
@@ -196,8 +218,89 @@ class ConfigManager:
             self.logger.error(f"Failed to save configuration {file_path}: {e}")
             raise
 
+    def _calculate_file_hash(self, file_path: Path) -> str:
+        """Calculate MD5 hash of file content."""
+        try:
+            with open(file_path, 'rb') as f:
+                content = f.read()
+                return hashlib.md5(content).hexdigest()
+        except Exception:
+            return ""
+
+    def _is_cache_valid(self, config_type: ConfigType, file_path: Path) -> bool:
+        """Check if cached configuration is still valid."""
+        if not self.enable_cache or config_type not in self.config_cache:
+            return False
+
+        cache_entry = self.config_cache[config_type]
+        current_time = time.time()
+
+        # Check TTL
+        if current_time - cache_entry.cache_time > self.cache_ttl:
+            return False
+
+        # Check file modification
+        try:
+            file_stat = file_path.stat()
+            if file_stat.st_mtime != cache_entry.last_modified:
+                return False
+        except Exception:
+            return False
+
+        # Check file hash for extra safety
+        current_hash = self._calculate_file_hash(file_path)
+        if current_hash != cache_entry.file_hash:
+            return False
+
+        return True
+
+    def _update_cache(self, config_type: ConfigType, file_path: Path, data: Dict[str, Any]) -> None:
+        """Update configuration cache."""
+        if not self.enable_cache:
+            return
+
+        try:
+            file_stat = file_path.stat()
+            file_hash = self._calculate_file_hash(file_path)
+            current_time = time.time()
+
+            # Clean old cache entries if cache is full
+            if len(self.config_cache) >= self.max_cache_size:
+                self._cleanup_cache()
+
+            self.config_cache[config_type] = ConfigCacheEntry(
+                data=data.copy(),
+                file_hash=file_hash,
+                last_modified=file_stat.st_mtime,
+                cache_time=current_time,
+                access_count=1,
+                last_access=current_time
+            )
+
+            self.logger.debug(f"Updated cache for {config_type.value}")
+
+        except Exception as e:
+            self.logger.warning(f"Failed to update cache for {config_type.value}: {e}")
+
+    def _cleanup_cache(self) -> None:
+        """Clean up old cache entries."""
+        if len(self.config_cache) < self.max_cache_size:
+            return
+
+        # Remove entries that haven't been accessed recently
+        current_time = time.time()
+        entries_to_remove = []
+
+        for config_type, cache_entry in self.config_cache.items():
+            if current_time - cache_entry.last_access > self.cache_ttl * 2:
+                entries_to_remove.append(config_type)
+
+        for config_type in entries_to_remove:
+            del self.config_cache[config_type]
+            self.logger.debug(f"Removed stale cache entry for {config_type.value}")
+
     def _load_config_data(self, file_path: Path) -> Dict[str, Any]:
-        """Load configuration data from file."""
+        """Load configuration data from file with caching support."""
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -212,7 +315,7 @@ class ConfigManager:
 
     def get_config(self, config_type: ConfigType) -> Dict[str, Any]:
         """
-        Get configuration data.
+        Get configuration data with caching support.
 
         Args:
             config_type: Type of configuration to retrieve
@@ -221,13 +324,28 @@ class ConfigManager:
             Configuration data dictionary
         """
         config_path = self.config_paths[config_type]
-        return self._load_config_data(config_path.default_path)
+        file_path = config_path.default_path
+
+        # Check cache first
+        if self._is_cache_valid(config_type, file_path):
+            cache_entry = self.config_cache[config_type]
+            cache_entry.access_count += 1
+            cache_entry.last_access = time.time()
+            self.logger.debug(f"Cache hit for {config_type.value}")
+            return cache_entry.data.copy()
+
+        # Load from file and update cache
+        self.logger.debug(f"Cache miss for {config_type.value}, loading from file")
+        data = self._load_config_data(file_path)
+        self._update_cache(config_type, file_path, data)
+
+        return data
 
     def set_config(
         self, config_type: ConfigType, data: Dict[str, Any], backup: bool = True
     ) -> None:
         """
-        Set configuration data.
+        Set configuration data and update cache.
 
         Args:
             config_type: Type of configuration to set
@@ -242,6 +360,10 @@ class ConfigManager:
 
         # Save new configuration
         self._save_config_data(config_path.default_path, data)
+
+        # Update cache with new data
+        self._update_cache(config_type, config_path.default_path, data)
+
         self.logger.info(f"Updated configuration: {config_path.filename}")
 
     def get_config_value(
@@ -366,6 +488,75 @@ class ConfigManager:
         except Exception as e:
             self.logger.error(f"Failed to update resource paths: {e}")
 
+    def clear_cache(self, config_type: Optional[ConfigType] = None) -> None:
+        """
+        Clear configuration cache.
 
-# Global configuration manager instance
-config_manager = ConfigManager()
+        Args:
+            config_type: Specific config type to clear, or None to clear all
+        """
+        if config_type:
+            if config_type in self.config_cache:
+                del self.config_cache[config_type]
+                self.logger.debug(f"Cleared cache for {config_type.value}")
+        else:
+            self.config_cache.clear()
+            self.logger.debug("Cleared all configuration cache")
+
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Get configuration cache statistics."""
+        if not self.enable_cache:
+            return {"cache_enabled": False}
+
+        total_access_count = sum(entry.access_count for entry in self.config_cache.values())
+        cache_entries = []
+
+        for config_type, entry in self.config_cache.items():
+            cache_entries.append({
+                "config_type": config_type.value,
+                "access_count": entry.access_count,
+                "last_access": entry.last_access,
+                "cache_age": time.time() - entry.cache_time,
+                "file_hash": entry.file_hash[:8]  # First 8 chars for display
+            })
+
+        return {
+            "cache_enabled": True,
+            "total_entries": len(self.config_cache),
+            "max_cache_size": self.max_cache_size,
+            "cache_ttl": self.cache_ttl,
+            "total_access_count": total_access_count,
+            "cache_entries": cache_entries
+        }
+
+    def preload_configs(self, config_types: Optional[List[ConfigType]] = None) -> Dict[ConfigType, bool]:
+        """
+        Preload configurations into cache.
+
+        Args:
+            config_types: List of config types to preload, or None for all
+
+        Returns:
+            Dictionary mapping config types to success status
+        """
+        if not self.enable_cache:
+            return {}
+
+        if config_types is None:
+            config_types = list(ConfigType)
+
+        results = {}
+        for config_type in config_types:
+            try:
+                self.get_config(config_type)  # This will load and cache the config
+                results[config_type] = True
+                self.logger.debug(f"Preloaded config {config_type.value}")
+            except Exception as e:
+                results[config_type] = False
+                self.logger.warning(f"Failed to preload config {config_type.value}: {e}")
+
+        return results
+
+
+# Global configuration manager instance with caching enabled
+config_manager = ConfigManager(enable_cache=True)
