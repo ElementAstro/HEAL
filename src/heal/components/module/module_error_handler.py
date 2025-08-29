@@ -15,7 +15,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from PySide6.QtCore import QObject, Signal
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 
 logger = get_logger(__name__)
 

@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 from .module_models import ModuleConfig
 
 

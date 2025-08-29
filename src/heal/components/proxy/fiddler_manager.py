@@ -19,8 +19,8 @@ from qfluentwidgets import (
     TeachingTipTailPosition,
 )
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.config import Info, cfg, get_json
+from ...common.logging_config import get_logger
+from ...models.config import Info, cfg, get_json
 from .proxy_cards import CustomFlyoutViewFiddler
 
 

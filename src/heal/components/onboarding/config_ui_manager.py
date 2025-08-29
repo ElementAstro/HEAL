@@ -21,7 +21,7 @@ from PySide6.QtGui import QFont, QIcon, QPalette
 
 from .config_system import AdvancedConfigurationManager, ConfigScope, ConfigurationProfile
 from .config_templates import ConfigurationTemplates, UserType, OnboardingPreset
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 
 logger = get_logger(__name__)
 

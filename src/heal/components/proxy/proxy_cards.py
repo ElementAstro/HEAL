@@ -9,8 +9,8 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QWidget
 from qfluentwidgets import FluentIcon, FlyoutViewBase, PrimaryPushButton
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.setting_card import SettingCard
+from ...common.logging_config import get_logger
+from ...models.setting_card import SettingCard
 
 
 class PrimaryPushSettingCardFiddler(SettingCard):
@@ -78,7 +78,7 @@ class CustomFlyoutViewFiddler(FlyoutViewBase):
 
             import requests
 
-            from src.heal.models.config import Info
+            from ...models.config import Info
 
             url_mapping = {
                 "grasscutter": "https://raw.githubusercontent.com/letheriver2007/Firefly-Launcher/master/resource/gc_scripts.js",

@@ -9,9 +9,9 @@ from typing import Any, Dict, List
 
 from PySide6.QtCore import QObject, Signal
 
-from src.heal.common.json_utils import JsonUtils
-from src.heal.common.logging_config import get_logger
-from src.heal.models.setting_card import SettingCard
+from ...common.json_utils import JsonUtils
+from ...common.logging_config import get_logger
+from ...models.setting_card import SettingCard
 from .environment_cards import HyperlinkCardEnvironment, PrimaryPushSettingCardDownload
 
 

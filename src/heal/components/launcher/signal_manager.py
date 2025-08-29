@@ -8,9 +8,9 @@ from typing import Any, Optional
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QWidget
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.config import open_file
-from src.heal.models.download_process import SubDownloadCMD
+from ...common.logging_config import get_logger
+from ...models.config import open_file
+from ...models.download_process import SubDownloadCMD
 
 
 class LauncherSignalManager(QObject):

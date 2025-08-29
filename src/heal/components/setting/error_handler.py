@@ -15,9 +15,9 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from PySide6.QtCore import QObject, QTimer, Signal
 from PySide6.QtWidgets import QMessageBox, QWidget
 
-from src.heal.common.json_utils import JsonUtils
-from src.heal.common.logging_config import get_logger
-from src.heal.models.config import Info
+from ...common.json_utils import JsonUtils
+from ...common.logging_config import get_logger
+from ...models.config import Info
 
 
 class ErrorSeverity(Enum):

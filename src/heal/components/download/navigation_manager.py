@@ -9,8 +9,8 @@ from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtWidgets import QHBoxLayout, QStackedWidget, QVBoxLayout, QWidget
 from qfluentwidgets import Pivot, qrouter
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.setting_card import SettingCardGroup
+from ...common.logging_config import get_logger
+from ...models.setting_card import SettingCardGroup
 
 
 class DownloadNavigationManager(QObject):

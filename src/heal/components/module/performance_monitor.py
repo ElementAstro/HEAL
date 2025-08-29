@@ -14,8 +14,8 @@ from typing import Any, Callable, Dict, Optional
 import psutil
 from PySide6.QtCore import QObject, QTimer, Signal
 
-from src.heal.common.logging_config import get_logger
-from src.heal.common.resource_manager import register_timer
+from ...common.logging_config import get_logger
+from ...common.resource_manager import register_timer
 
 logger = get_logger(__name__)
 
@@ -197,7 +197,7 @@ class PerformanceMonitor(QObject):
 
         # 集成内存优化器
         try:
-            from src.heal.common.memory_optimizer import global_memory_optimizer
+            from ...common.memory_optimizer import global_memory_optimizer
             self.memory_optimizer: Optional[Any] = global_memory_optimizer
             # 注册性能监控器的优化策略
             self.memory_optimizer.register_optimization_strategy(

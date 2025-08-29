@@ -18,8 +18,8 @@ from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import QWidget
 from qfluentwidgets import InfoBar, InfoBarPosition, MessageBox, TeachingTip
 
-from src.heal.common.i18n_ui import tr
-from src.heal.common.logging_config import get_logger
+from ...common.i18n_ui import tr
+from ...common.logging_config import get_logger
 from .user_state_tracker import UserLevel, UserStateTracker
 
 

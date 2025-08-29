@@ -22,7 +22,7 @@ from PySide6.QtGui import QFont, QIcon, QPixmap, QDesktopServices, QKeySequence,
 
 from .documentation_integration import DocumentationIntegration, DocumentationType, DocumentationItem
 from .user_state_tracker import UserLevel, UserStateTracker
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 
 logger = get_logger(__name__)
 

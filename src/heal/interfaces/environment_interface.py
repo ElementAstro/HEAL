@@ -25,11 +25,11 @@ from qfluentwidgets import (
 
 from .setting_interface import Setting
 
-from src.heal.common.logging_config import get_logger, log_performance, with_correlation_id
-from src.heal.components.environment.config_manager import EnvironmentConfigManager
+from ..common.logging_config import get_logger, log_performance, with_correlation_id
+from ..components.environment.config_manager import EnvironmentConfigManager
 
 # Import new enhanced components
-from src.heal.components.environment.enhanced_cards import (
+from ..components.environment.enhanced_cards import (
     EnvironmentStatusCard,
     QuickActionPanel,
     SmartToolCard,
@@ -37,17 +37,17 @@ from src.heal.components.environment.enhanced_cards import (
 )
 
 # Import environment components
-from src.heal.components.environment.environment_cards import (
+from ..components.environment.environment_cards import (
     HyperlinkCardEnvironment,
     PrimaryPushSettingCardDownload,
 )
-from src.heal.components.environment.platform_detector import get_current_platform_info
-from src.heal.components.environment.signal_manager import EnvironmentSignalManager
-from src.heal.components.environment.tool_status_manager import ToolStatus, ToolStatusManager
-from src.heal.models.config import Info
-from src.heal.models.download_process import SubDownloadCMD
-from src.heal.models.setting_card import SettingCard, SettingCardGroup
-from src.heal.models.style_sheet import StyleSheet
+from ..components.environment.platform_detector import get_current_platform_info
+from ..components.environment.signal_manager import EnvironmentSignalManager
+from ..components.environment.tool_status_manager import ToolStatus, ToolStatusManager
+from ..models.config import Info
+from ..models.download_process import SubDownloadCMD
+from ..models.setting_card import SettingCard, SettingCardGroup
+from ..models.style_sheet import StyleSheet
 
 # 使用统一日志配置
 logger = get_logger("environment_interface")

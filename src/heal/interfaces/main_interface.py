@@ -4,12 +4,12 @@ import time
 from PySide6.QtCore import Signal
 from qfluentwidgets import MSFluentWindow
 
-from src.heal.common.logging_config import get_logger
+from ..common.logging_config import get_logger
 
 from typing import Any, Optional, Callable
 
 # Import main components
-from src.heal.components.main import (
+from ..components.main import (
     AudioManager,
     AuthenticationManager,
     FontManager,
@@ -18,7 +18,7 @@ from src.heal.components.main import (
     UpdateManager,
     WindowManager,
 )
-from src.heal.models.config import cfg
+from ..models.config import cfg
 
 # 使用统一日志配置
 logger = get_logger("main_interface")
@@ -51,8 +51,8 @@ class Main(MSFluentWindow):
 
     def init_application(self) -> None:
         """初始化应用程序 - Enhanced with performance monitoring"""
-        from src.heal.common.workflow_optimizer import create_workflow
-        from src.heal.common.startup_performance_monitor import record_startup_phase
+        from ..common.workflow_optimizer import create_workflow
+        from ..common.startup_performance_monitor import record_startup_phase
 
         # 创建应用初始化工作流 - 启用性能跟踪
         workflow = create_workflow("main_app_initialization", enable_performance_tracking=True)
@@ -100,7 +100,7 @@ class Main(MSFluentWindow):
 
     def _wrap_with_monitoring(self, func: Callable[[], Any], phase_name: str) -> Callable[[], Any]:
         """包装函数以添加性能监控"""
-        from src.heal.common.startup_performance_monitor import record_startup_phase
+        from ..common.startup_performance_monitor import record_startup_phase
 
         def wrapped_func() -> Any:
             record_startup_phase(phase_name, start=True)
@@ -116,11 +116,11 @@ class Main(MSFluentWindow):
 
     def init_progressive_loading(self) -> None:
         """初始化渐进式加载系统"""
-        from src.heal.common.progressive_loader import (
+        from ..common.progressive_loader import (
             progressive_loading_manager, register_progressive_component,
             LoadingPhase, start_progressive_loading
         )
-        from src.heal.common.deferred_initializer import (
+        from ..common.deferred_initializer import (
             deferred_initializer, InitializationTrigger, initialize_deferred_features
         )
 
@@ -144,7 +144,7 @@ class Main(MSFluentWindow):
 
     def _register_progressive_components(self) -> None:
         """注册渐进式加载组件"""
-        from src.heal.common.progressive_loader import (
+        from ..common.progressive_loader import (
             register_progressive_component, LoadingPhase
         )
 
@@ -191,7 +191,7 @@ class Main(MSFluentWindow):
 
     def _register_deferred_features(self) -> None:
         """注册延迟初始化功能"""
-        from src.heal.common.deferred_initializer import (
+        from ..common.deferred_initializer import (
             register_deferred_feature, InitializationTrigger
         )
 
@@ -303,7 +303,7 @@ class Main(MSFluentWindow):
 
     def _fallback_initialization(self) -> None:
         """回退初始化方式 - Enhanced with recovery strategies"""
-        from src.heal.common.fallback_initializer import (
+        from ..common.fallback_initializer import (
             attempt_component_recovery, get_fallback_recovery_report
         )
 
@@ -334,7 +334,7 @@ class Main(MSFluentWindow):
 
                 # Attempt recovery using fallback system
                 try:
-                    from src.heal.common.fallback_initializer import RecoveryResult
+                    from ..common.fallback_initializer import RecoveryResult
                     recovery_result = attempt_component_recovery(component_id, e)
 
                     if recovery_result in [RecoveryResult.SUCCESS, RecoveryResult.PARTIAL_SUCCESS]:
@@ -410,7 +410,7 @@ class Main(MSFluentWindow):
     def init_onboarding_system(self) -> None:
         """初始化用户引导系统"""
         try:
-            from src.heal.components.onboarding import OnboardingManager
+            from ..components.onboarding import OnboardingManager
 
             self.onboarding_manager = OnboardingManager(self)
 

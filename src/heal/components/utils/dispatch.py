@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Protocol, Union
 
-from src.heal.common.logging_config import get_logger, log_performance
+from ...common.logging_config import get_logger, log_performance
 
 # 使用统一日志配置
 logger = get_logger("dispatch")

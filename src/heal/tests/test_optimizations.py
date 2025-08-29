@@ -12,9 +12,9 @@ from typing import Any
 
 import pytest
 
-from src.heal.common.optimization_validator import global_optimization_validator, benchmark_function
-from src.heal.common.memory_optimizer import global_memory_optimizer, optimize_memory
-from src.heal.common.workflow_optimizer import create_workflow
+from ..common.optimization_validator import global_optimization_validator, benchmark_function
+from ..common.memory_optimizer import global_memory_optimizer, optimize_memory
+from ..common.workflow_optimizer import create_workflow
 
 
 class TestPerformanceOptimizations:
@@ -32,7 +32,7 @@ class TestPerformanceOptimizations:
         try:
             # 基准测试同步加载
             def sync_load() -> Any:
-                from src.heal.common.json_utils import JsonUtils
+                from ..common.json_utils import JsonUtils
                 result = JsonUtils.load_json_file(temp_path)
                 return result.data
 
@@ -41,7 +41,7 @@ class TestPerformanceOptimizations:
 
             # 基准测试异步加载
             async def async_load() -> Any:
-                from src.heal.common.json_utils import AsyncJsonUtils
+                from ..common.json_utils import AsyncJsonUtils
                 result = await AsyncJsonUtils.load_json_file_async(temp_path)
                 return result.data
 
@@ -66,11 +66,11 @@ class TestPerformanceOptimizations:
 
     def test_cache_performance(self) -> None:
         """测试缓存性能"""
-        from src.heal.common.cache_manager import global_cache_manager
+        from ..common.cache_manager import global_cache_manager
 
         cache = global_cache_manager.get_cache("test")
         if not cache:
-            from src.heal.common.cache_manager import LRUCache
+            from ..common.cache_manager import LRUCache
             cache = LRUCache(max_size=100)
             global_cache_manager.register_cache("test", cache)
 
@@ -171,7 +171,7 @@ class TestPerformanceOptimizations:
 
     def test_ui_responsiveness(self) -> None:
         """测试UI响应性优化"""
-        from src.heal.common.ui_utils import create_responsive_operation, UIBatchProcessor
+        from ..common.ui_utils import create_responsive_operation, UIBatchProcessor
 
         # 测试响应式操作
         def heavy_operation() -> int:
@@ -259,10 +259,10 @@ class TestOptimizationIntegration:
         assert isinstance(memory_result, dict), "内存优化结果格式错误"
 
         # 2. 测试缓存系统
-        from src.heal.common.cache_manager import global_cache_manager
+        from ..common.cache_manager import global_cache_manager
         test_cache = global_cache_manager.get_cache("integration_test")
         if not test_cache:
-            from src.heal.common.cache_manager import LRUCache
+            from ..common.cache_manager import LRUCache
             test_cache = LRUCache()
             global_cache_manager.register_cache("integration_test", test_cache)
 

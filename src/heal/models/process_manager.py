@@ -13,7 +13,7 @@ import psutil
 from PySide6.QtCore import QObject, QThread, QTimer, Signal
 from PySide6.QtWidgets import QMessageBox
 
-from src.heal.common.logging_config import get_logger, log_exception, log_performance
+from ..common.logging_config import get_logger, log_exception, log_performance
 
 # 使用统一日志配置
 logger = get_logger("process_manager")

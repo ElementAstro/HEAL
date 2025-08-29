@@ -14,12 +14,12 @@ from qfluentwidgets import (
     setThemeColor,
 )
 
-from src.heal.common.logging_config import get_logger
-from src.heal.components.setting.error_handler import settings_error_handler, ErrorSeverity
-from src.heal.components.setting.performance_manager import performance_optimized
-from src.heal.models.check_update import check_update
-from src.heal.models.config import Info, cfg, get_json
-from src.heal.models.setting_card import CustomDialog, SettingCardGroup
+from ...common.logging_config import get_logger
+from .error_handler import settings_error_handler, ErrorSeverity
+from .performance_manager import performance_optimized
+from ...models.check_update import check_update
+from ...models.config import Info, cfg, get_json
+from ...models.setting_card import CustomDialog, SettingCardGroup
 from .error_handler import (
     ErrorSeverity,
     get_error_handler,
@@ -31,7 +31,7 @@ from .performance_manager import (
     performance_optimized,
 )
 from .setting_cards import LineEditSettingCardPort
-from src.heal.components.tools.editor import JsonEditor
+from ..tools.editor import JsonEditor
 
 if TYPE_CHECKING:
     from ...interfaces.setting_interface import Setting

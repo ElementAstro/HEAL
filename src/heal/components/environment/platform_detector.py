@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 
 
 class PlatformType(Enum):

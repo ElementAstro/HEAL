@@ -15,9 +15,9 @@ from typing import Any, Callable, Dict, Generic, Optional, TypeVar
 from PySide6.QtCore import QObject, QThread, QTimer, Signal
 from PySide6.QtWidgets import QWidget
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.check_update import check_update
-from src.heal.components.tools.editor import JsonEditor
+from ...common.logging_config import get_logger
+from ...models.check_update import check_update
+from ..tools.editor import JsonEditor
 
 T = TypeVar("T")
 

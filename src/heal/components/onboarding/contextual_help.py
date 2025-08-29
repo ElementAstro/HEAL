@@ -8,13 +8,13 @@ behavior and experience level.
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set
 
-from PySide6.QtCore import QObject, QPoint, QTimer, Signal
+from PySide6.QtCore import QObject, QPoint, QTimer, Signal, Qt
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QApplication, QLabel, QToolTip, QWidget
 from qfluentwidgets import InfoBar, InfoBarPosition, TeachingTip, TeachingTipTailPosition
 
-from src.heal.common.i18n_ui import tr
-from src.heal.common.logging_config import get_logger
+from ...common.i18n_ui import tr
+from ...common.logging_config import get_logger
 from .user_state_tracker import UserLevel, UserStateTracker
 
 

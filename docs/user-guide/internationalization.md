@@ -12,19 +12,19 @@ HEAL 项目支持多语言国际化，目前支持：
 
 ## 核心组件
 
-### 1. 翻译管理器 (`app/common/i18n.py`)
+### 1. 翻译管理器 (`src/heal/common/i18n.py`)
 
 - 管理所有翻译文件
 - 提供翻译函数 `tr()` 和 `t()`
 - 支持语言切换和动态更新
 
-### 2. UI国际化工具 (`app/common/i18n_ui.py`)
+### 2. UI国际化工具 (`src/heal/common/i18n_ui.py`)
 
 - 为UI组件提供国际化支持
 - 自动响应语言切换
 - 提供便捷的创建函数
 
-### 3. 国际化更新器 (`app/common/i18n_updater.py`)
+### 3. 国际化更新器 (`src/heal/common/i18n_updater.py`)
 
 - 管理语言切换时的UI更新
 - 提供混入类和装饰器
@@ -35,7 +35,7 @@ HEAL 项目支持多语言国际化，目前支持：
 ### 基本翻译
 
 ```python
-from app.common.i18n import tr, t
+from src.heal.common.i18n import tr, t
 
 # 基本翻译
 text = tr("hello")  # 或 t("hello")
@@ -50,7 +50,7 @@ text = tr("unknown_key", default="Default Text")
 ### UI组件国际化
 
 ```python
-from app.common.i18n_ui import setup_component_i18n, tr_button, tr_label
+from src.heal.common.i18n_ui import setup_component_i18n, tr_button, tr_label
 
 class MyWidget(QWidget):
     def __init__(self):
@@ -104,10 +104,10 @@ class MyWidget(QWidget):
 
 ## 翻译文件结构
 
-翻译文件位于 `src/data/translations/` 目录：
+翻译文件位于 `src/heal/resources/translations/` 目录：
 
-```
-src/data/translations/
+```text
+src/heal/resources/translations/
 ├── en_US.json    # 英文翻译
 ├── zh_CN.json    # 简体中文翻译
 └── zh_TW.json    # 繁体中文翻译
@@ -242,7 +242,7 @@ tr("new_feature.title", default="New Feature")
 ### 程序化切换
 
 ```python
-from app.common.i18n import set_language, Language
+from src.heal.common.i18n import set_language, Language
 
 # 切换到中文
 set_language(Language.CHINESE_SIMPLIFIED)
@@ -254,7 +254,7 @@ set_language(Language.ENGLISH)
 ### 响应语言切换
 
 ```python
-from app.common.i18n import translation_manager
+from src.heal.common.i18n import translation_manager
 
 class MyWidget(QWidget):
     def __init__(self):
@@ -294,11 +294,11 @@ import logging
 logging.getLogger('i18n').setLevel(logging.DEBUG)
 
 # 检查当前语言
-from app.common.i18n import get_current_language
+from src.heal.common.i18n import get_current_language
 print(f"Current language: {get_current_language()}")
 
 # 强制重新加载翻译
-from app.common.i18n import translation_manager
+from src.heal.common.i18n import translation_manager
 translation_manager.reload_translations()
 ```
 

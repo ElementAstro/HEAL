@@ -13,8 +13,8 @@ from typing import Any, Dict, List, Optional, Set
 
 from PySide6.QtCore import QObject, Signal
 
-from src.heal.common.config_manager import ConfigManager, ConfigType
-from src.heal.common.logging_config import get_logger
+from ...common.config_manager import ConfigManager, ConfigType
+from ...common.logging_config import get_logger
 
 
 class UserLevel(Enum):

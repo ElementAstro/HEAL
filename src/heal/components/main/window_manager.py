@@ -12,9 +12,9 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QWidget
 from qfluentwidgets import SplashScreen
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.config import cfg
-from src.heal.resources import resource_manager
+from ...common.logging_config import get_logger
+from ...models.config import cfg
+from ...resources import resource_manager
 
 
 class WindowManager(QObject):

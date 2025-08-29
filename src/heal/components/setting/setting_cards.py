@@ -5,8 +5,8 @@ from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import QWidget
 from qfluentwidgets import FluentIcon, LineEdit, PrimaryPushButton
 
-from src.heal.common.i18n_ui import setup_component_i18n, tr
-from src.heal.models.setting_card import SettingCard
+from ...common.i18n_ui import setup_component_i18n, tr
+from ...models.setting_card import SettingCard
 
 
 class LineEditSettingCardPort(SettingCard):

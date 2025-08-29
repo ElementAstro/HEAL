@@ -383,7 +383,7 @@ class ProcessMonitorWidget(QWidget):
         """显示进程日志 - 现在使用统一日志面板"""
         try:
             # 尝试使用统一日志面板
-            from src.heal.components.logging import show_process_log
+            from ..logging import show_process_log
 
             show_process_log(name)
         except ImportError:

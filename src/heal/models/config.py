@@ -1,5 +1,5 @@
-from src.heal.common.json_utils import get_json
-from src.heal.common.config_manager import ConfigType, config_manager
+from ..common.json_utils import get_json
+from ..common.config_manager import ConfigType, config_manager
 import json
 import os
 from enum import Enum
@@ -19,7 +19,7 @@ from qfluentwidgets import (
     qconfig,
 )
 
-from src.heal.common.logging_config import get_logger
+from ..common.logging_config import get_logger
 
 # 使用统一日志配置
 logger = get_logger("config")

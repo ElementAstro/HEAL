@@ -351,12 +351,9 @@ class TestComponentIntegration:
         """Test that all components can be imported together"""
         try:
             from src.heal.components.onboarding.user_state_tracker import UserStateTracker
-            from src.heal.components.onboarding.smart_tip_system import SmartTipSystem
-            from src.heal.components.onboarding.recommendation_engine import RecommendationEngine
+            from src.heal.components.onboarding.smart_features import SmartTipSystem, RecommendationEngine, ProgressiveFeatureDiscovery
             from src.heal.components.onboarding.tutorial_system import TutorialSystem
-            from src.heal.components.onboarding.contextual_help import ContextualHelp
-            from src.heal.components.onboarding.feature_discovery import FeatureDiscovery
-            from src.heal.components.onboarding.documentation_integration import DocumentationIntegration
+            from src.heal.components.onboarding.help_system import ContextualHelpSystem, DocumentationIntegration
             from src.heal.components.onboarding.onboarding_manager import OnboardingManager
             from src.heal.components.onboarding.welcome_wizard import WelcomeWizard
             

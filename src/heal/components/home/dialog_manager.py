@@ -14,7 +14,7 @@ from qfluentwidgets import (
     TextEdit,
 )
 
-from src.heal.models.config import Info
+from ...models.config import Info
 
 
 class DialogManager:
@@ -28,7 +28,7 @@ class DialogManager:
         """显示服务器日志对话框 - 现在使用统一日志面板"""
         try:
             # 尝试使用统一日志面板
-            from src.heal.components.logging import show_server_log
+            from ..logging import show_server_log
 
             show_server_log(server_name)
         except ImportError:

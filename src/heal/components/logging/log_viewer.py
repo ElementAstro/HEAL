@@ -37,7 +37,7 @@ from PySide6.QtWidgets import (
 from qfluentwidgets import BodyLabel, CardWidget, CheckBox, ComboBox
 from qfluentwidgets import FluentIcon as FIF
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 
 logger = get_logger(__name__)
 

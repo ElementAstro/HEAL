@@ -20,7 +20,7 @@ from ...interfaces.proxy_interface import Proxy
 from ...interfaces.setting_interface import Setting
 from ...interfaces.tool_interface import Tools
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 
 
 class MainNavigationManager(QObject):

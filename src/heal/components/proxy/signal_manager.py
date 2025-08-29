@@ -8,8 +8,8 @@ from typing import Any, Optional
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QWidget
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.download_process import SubDownloadCMD
+from ...common.logging_config import get_logger
+from ...models.download_process import SubDownloadCMD
 from .fiddler_manager import FiddlerManager, ProxyManager
 from .proxy_cards import PrimaryPushSettingCardFiddler
 

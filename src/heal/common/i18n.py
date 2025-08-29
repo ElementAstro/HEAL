@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from PySide6.QtCore import QCoreApplication, QObject, QTranslator, Signal
 
-from src.heal.resources import resource_manager
+from ..resources import resource_manager
 
 from .logging_config import get_logger
 

@@ -9,7 +9,7 @@ from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtWidgets import QStackedWidget, QVBoxLayout, QWidget
 from qfluentwidgets import FluentIcon, Pivot, qrouter
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 
 
 class EnvironmentNavigationManager(QObject):

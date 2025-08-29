@@ -19,14 +19,14 @@ from qfluentwidgets import (
     InfoBar, InfoBarPosition, FluentIcon
 )
 
-from src.heal.common.logging_config import get_logger
-from src.heal.common.startup_performance_monitor import (
+from ...common.logging_config import get_logger
+from ...common.startup_performance_monitor import (
     startup_performance_monitor, get_startup_performance_summary
 )
-from src.heal.common.startup_benchmarking import (
+from ...common.startup_benchmarking import (
     startup_benchmarking_system, get_performance_report
 )
-from src.heal.common.workflow_optimizer import (
+from ...common.workflow_optimizer import (
     get_all_workflow_performance, get_workflow_performance_report
 )
 

@@ -5,7 +5,8 @@ import traceback
 from copy import deepcopy
 from datetime import datetime
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Type
+from types import TracebackType
 
 import psutil
 from PySide6.QtCore import QObject, Qt, QTimer, Signal
@@ -181,7 +182,7 @@ class ExceptionHandler(QObject):
         """注册异常恢复回调函数"""
         self.recovery_callbacks[exc_type] = callback
 
-    def handle_exception(self, exc_type: type, exc_value: Exception, exc_traceback: Any) -> None:
+    def handle_exception(self, exc_type: Type[BaseException], exc_value: BaseException, exc_traceback: Optional[TracebackType]) -> None:
         """处理未捕获的异常"""
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_value, exc_traceback)

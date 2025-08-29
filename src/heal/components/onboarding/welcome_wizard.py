@@ -30,9 +30,9 @@ from qfluentwidgets import (
     WizardPage,
 )
 
-from src.heal.common.i18n_ui import tr
-from src.heal.common.logging_config import get_logger
-from src.heal.models.config import cfg
+from ...common.i18n_ui import tr
+from ...common.logging_config import get_logger
+from ...models.config import cfg
 from .user_state_tracker import OnboardingStep, UserLevel
 
 

@@ -20,7 +20,7 @@ from collections import defaultdict, Counter
 from PySide6.QtCore import QObject, Signal, QTimer
 from PySide6.QtWidgets import QApplication
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -149,7 +149,7 @@ class UserJourneyDatabase:
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_database()
     
-    def _init_database(self):
+    def _init_database(self) -> None:
         """Initialize database schema"""
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
@@ -197,7 +197,7 @@ class UserJourneyDatabase:
             conn.execute("CREATE INDEX IF NOT EXISTS idx_events_timestamp ON journey_events(timestamp)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_events_type ON journey_events(event_type)")
     
-    def store_event(self, event: JourneyEvent):
+    def store_event(self, event: JourneyEvent) -> None:
         """Store a journey event"""
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
@@ -214,7 +214,7 @@ class UserJourneyDatabase:
                 json.dumps(event.metadata)
             ))
     
-    def store_session(self, session: UserSession):
+    def store_session(self, session: UserSession) -> None:
         """Store a user session"""
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""

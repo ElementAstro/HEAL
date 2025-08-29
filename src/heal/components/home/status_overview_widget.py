@@ -13,9 +13,9 @@ from PySide6.QtWidgets import (
 )
 from qfluentwidgets import setCustomStyleSheet
 
-from src.heal.common.i18n_ui import tr
-from src.heal.common.logging_config import get_logger
-from src.heal.models.config import cfg
+from ...common.i18n_ui import tr
+from ...common.logging_config import get_logger
+from ...models.config import cfg
 
 logger = get_logger(__name__)
 

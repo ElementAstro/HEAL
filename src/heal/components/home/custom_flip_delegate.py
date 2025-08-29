@@ -3,7 +3,7 @@ from PySide6.QtGui import QFont, QPainter
 from PySide6.QtWidgets import QStyleOptionViewItem
 from qfluentwidgets import FlipImageDelegate
 
-from src.heal.models.config import cfg
+from ...models.config import cfg
 
 
 class CustomFlipItemDelegate(FlipImageDelegate):

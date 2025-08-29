@@ -23,8 +23,8 @@ from PySide6.QtWidgets import (
 )
 from qfluentwidgets import PushButton, SpinBox, TableWidget
 
-from src.heal.common.logging_config import get_logger, log_performance, with_correlation_id
-from src.heal.models.setting_card import CustomInputDialog
+from ...common.logging_config import get_logger, log_performance, with_correlation_id
+from ...models.setting_card import CustomInputDialog
 
 # 使用统一日志配置
 logger = get_logger("nginx_configurator")

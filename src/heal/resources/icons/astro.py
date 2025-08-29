@@ -3,7 +3,7 @@ from enum import Enum, unique
 
 from qfluentwidgets import FluentIconBase, Theme, getIconColor
 
-from src.heal.resources import resource_manager
+from . import resource_manager
 
 
 @unique

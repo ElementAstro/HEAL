@@ -31,7 +31,7 @@ Key Features:
 Example:
     Setting up the common infrastructure:
 
-    >>> from src.heal.common import setup_logging, get_logger
+    >>> from . import setup_logging, get_logger
     >>> setup_logging()
     >>> logger = get_logger('my_module')
     >>> logger.info("Application started")

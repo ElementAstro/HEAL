@@ -4,10 +4,10 @@ Optimization Validation Script - 优化验证脚本
 运行性能测试并生成优化报告
 """
 
-from src.heal.common.logging_config import get_logger
-from src.heal.common.workflow_optimizer import create_workflow
-from src.heal.common.memory_optimizer import global_memory_optimizer, optimize_memory
-from src.heal.common.optimization_validator import global_optimization_validator, benchmark_function
+from ..common.logging_config import get_logger
+from ..common.workflow_optimizer import create_workflow
+from ..common.memory_optimizer import global_memory_optimizer, optimize_memory
+from ..common.optimization_validator import global_optimization_validator, benchmark_function
 import json
 import sys
 import time
@@ -38,7 +38,7 @@ def run_performance_benchmarks() -> Any:
     logger.info("测试JSON处理性能")
 
     def json_processing_test() -> Any:
-        from src.heal.common.json_utils import JsonUtils
+        from ..common.json_utils import JsonUtils
         import tempfile
 
         # 创建测试数据
@@ -71,11 +71,11 @@ def run_performance_benchmarks() -> Any:
     logger.info("测试缓存系统性能")
 
     def cache_performance_test() -> int:
-        from src.heal.common.cache_manager import global_cache_manager
+        from ..common.cache_manager import global_cache_manager
 
         cache = global_cache_manager.get_cache("benchmark_test")
         if not cache:
-            from src.heal.common.cache_manager import LRUCache
+            from ..common.cache_manager import LRUCache
             cache = LRUCache(max_size=1000)
             global_cache_manager.register_cache("benchmark_test", cache)
 

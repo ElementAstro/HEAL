@@ -4,11 +4,11 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QStackedWidget, QVBoxLayout, QWidget
 from qfluentwidgets import FluentIcon, Pivot, ScrollArea, qrouter
 
-from src.heal.common.logging_config import get_logger, log_performance, with_correlation_id
-from src.heal.components.tools.nginx import NginxConfigurator
-from src.heal.components.tools.system_command import CommandCenter
-from src.heal.components.tools.telescope import TelescopeCatalog
-from src.heal.models.style_sheet import StyleSheet
+from ..common.logging_config import get_logger, log_performance, with_correlation_id
+from ..components.tools.nginx import NginxConfigurator
+from ..components.tools.system_command import CommandCenter
+from ..components.tools.telescope import TelescopeCatalog
+from ..models.style_sheet import StyleSheet
 
 # 使用统一日志配置
 logger = get_logger("tool_interface")

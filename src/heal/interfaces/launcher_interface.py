@@ -10,16 +10,16 @@ from qfluentwidgets import (
     qrouter,
 )
 
-from src.heal.common.logging_config import get_logger, log_performance
+from ..common.logging_config import get_logger, log_performance
 
 # Import launcher components
-from src.heal.components.launcher import (
+from ..components.launcher import (
     HyperlinkCardLauncher,
     LauncherNavigationManager,
     LauncherSignalManager,
 )
-from src.heal.models.setting_card import SettingCardGroup
-from src.heal.models.style_sheet import StyleSheet
+from ..models.setting_card import SettingCardGroup
+from ..models.style_sheet import StyleSheet
 
 # 使用统一日志配置
 logger = get_logger(__name__)

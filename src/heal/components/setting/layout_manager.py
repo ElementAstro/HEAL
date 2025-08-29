@@ -4,7 +4,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QStackedWidget, QVBoxLayout, QWidget
 from qfluentwidgets import FluentIcon, Pivot, qrouter
 
-from src.heal.models.setting_card import SettingCardGroup
+from ...models.setting_card import SettingCardGroup
 from .about_component import About
 
 if TYPE_CHECKING:

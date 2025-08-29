@@ -10,9 +10,9 @@ from PySide6.QtGui import QClipboard
 from PySide6.QtWidgets import QApplication, QWidget
 from qfluentwidgets import FluentIcon, HyperlinkButton, PrimaryPushButton
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.config import Info
-from src.heal.models.setting_card import SettingCard
+from ...common.logging_config import get_logger
+from ...models.config import Info
+from ...models.setting_card import SettingCard
 
 
 class HyperlinkCardEnvironment(SettingCard):

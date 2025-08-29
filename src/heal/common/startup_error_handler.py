@@ -169,7 +169,7 @@ class StartupErrorDetector:
             self.logger.warning(f"Failed to collect system info: {e}")
     
     # Error pattern handlers
-    def _handle_file_not_found(self, exception: FileNotFoundError) -> Optional[StartupError]:
+    def _handle_file_not_found(self, exception: Exception) -> Optional[StartupError]:
         """处理文件未找到错误"""
         filename = str(exception).split("'")[1] if "'" in str(exception) else "unknown"
         
@@ -221,7 +221,7 @@ class StartupErrorDetector:
             ]
         )
     
-    def _handle_module_not_found(self, exception: ModuleNotFoundError) -> Optional[StartupError]:
+    def _handle_module_not_found(self, exception: Exception) -> Optional[StartupError]:
         """处理模块未找到错误"""
         module_name = str(exception).split("'")[1] if "'" in str(exception) else "unknown"
         

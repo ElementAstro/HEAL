@@ -8,8 +8,8 @@ from typing import Optional, Union
 from PySide6.QtCore import Qt
 from qfluentwidgets import FluentIcon, HyperlinkButton
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.setting_card import SettingCard
+from ...common.logging_config import get_logger
+from ...models.setting_card import SettingCard
 
 
 class HyperlinkCardLauncher(SettingCard):

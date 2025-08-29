@@ -30,13 +30,13 @@ from qfluentwidgets import (
     qrouter,
 )
 
-from src.heal.common.exception_handler import (
+from ..common.exception_handler import (
     ExceptionType,
     exception_handler,
     global_exception_handler,
 )
-from src.heal.common.i18n import t
-from src.heal.common.logging_config import (
+from ..common.i18n import t
+from ..common.logging_config import (
     get_logger,
     log_download,
     log_exception,
@@ -45,21 +45,21 @@ from src.heal.common.logging_config import (
 )
 
 # Import the new components
-from src.heal.components.download import (
+from ..components.download import (
     DownloadCardManager,
     DownloadConfigManager,
     DownloadHandler,
     DownloadNavigationManager,
     DownloadSearchManager,
 )
-from src.heal.components.download.category_grid import CategoryGridWidget
-from src.heal.components.download.download_panel import DownloadPanel
-from src.heal.components.download.featured_downloads import FeaturedDownloadsSection
-from src.heal.components.download.header_section import DownloadHeaderSection
-from src.heal.components.download.responsive_layout import ResponsiveLayoutManager
-from src.heal.models.config import cfg
-from src.heal.models.setting_card import SettingCardGroup
-from src.heal.models.style_sheet import StyleSheet
+from ..components.download.category_grid import CategoryGridWidget
+from ..components.download.download_panel import DownloadPanel
+from ..components.download.featured_downloads import FeaturedDownloadsSection
+from ..components.download.header_section import DownloadHeaderSection
+from ..components.download.responsive_layout import ResponsiveLayoutManager
+from ..models.config import cfg
+from ..models.setting_card import SettingCardGroup
+from ..models.style_sheet import StyleSheet
 
 # 初始化logger和异常处理器
 logger = get_logger("download_interface")

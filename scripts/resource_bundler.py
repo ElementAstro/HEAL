@@ -19,7 +19,7 @@ class ResourceBundler:
         self.src_dir = project_root / "src" / "heal"
         self.resources_dir = self.src_dir / "resources"
 
-    def bundle_resources(self, output_dir: Path, platform: str = None) -> None:
+    def bundle_resources(self, output_dir: Path, platform: Optional[str] = None) -> None:
         """Bundle all resources for the target platform."""
         if platform is None:
             platform = sys.platform

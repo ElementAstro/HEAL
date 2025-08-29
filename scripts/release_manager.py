@@ -277,7 +277,7 @@ class ReleaseManager:
                 print(f"{tag:15} {'Unknown':12} No information")
 
 
-def main():
+def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(description="HEAL Release Manager")
     parser.add_argument(

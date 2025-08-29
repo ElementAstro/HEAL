@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Sequence
+from typing import Any, Dict, List, Optional, Sequence
 
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QFont
@@ -20,9 +20,9 @@ from qfluentwidgets import (
     setCustomStyleSheet,
 )
 
-from src.heal.common.i18n_ui import tr
-from src.heal.models.config import cfg
-from src.heal.resources import resource_manager
+from ...common.i18n_ui import tr
+from ...models.config import cfg
+from ...resources import resource_manager
 from .compact_banner_widget import CompactBannerWidget
 from .custom_flip_delegate import CustomFlipItemDelegate
 from .quick_action_bar import QuickActionBar

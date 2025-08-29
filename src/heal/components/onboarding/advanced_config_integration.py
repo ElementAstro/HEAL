@@ -18,7 +18,7 @@ from .config_templates import ConfigurationTemplates, UserType, OnboardingPreset
 from .config_plugins import ConfigurationPluginManager, create_default_plugin_manager
 from .config_ui_manager import ConfigurationUIManager
 from .user_state_tracker import UserStateTracker, UserLevel, OnboardingStep
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 
 logger = get_logger(__name__)
 

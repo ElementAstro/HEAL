@@ -38,7 +38,7 @@ from qfluentwidgets import (
     setTheme,
 )
 
-from src.heal.components.utils.dispatch import command_dispatcher
+from ..utils.dispatch import command_dispatcher
 
 
 @dataclass

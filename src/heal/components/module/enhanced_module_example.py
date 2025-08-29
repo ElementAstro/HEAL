@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 from .mod_download import ModDownload
 from .mod_manager import ModManager
 from .module_bulk_operations import BulkOperationType, ModuleBulkOperations

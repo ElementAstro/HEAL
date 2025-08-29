@@ -28,8 +28,8 @@ from qfluentwidgets import (
     ToolButton,
 )
 
-from src.heal.common.i18n import t
-from src.heal.common.logging_config import get_logger
+from ...common.i18n import t
+from ...common.logging_config import get_logger
 
 
 class FeaturedDownloadCard(CardWidget):
@@ -153,7 +153,7 @@ class FeaturedDownloadCard(CardWidget):
         elif icon_name.startswith("Astro."):
             # Import AstroIcon if available
             try:
-                from src.heal.resources.icons.astro import AstroIcon
+                from ...resources.icons.astro import AstroIcon
 
                 return getattr(AstroIcon, icon_name[6:], FluentIcon.DOWNLOAD)
             except ImportError:

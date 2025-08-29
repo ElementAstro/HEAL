@@ -13,7 +13,7 @@ from typing import Any, Callable, Dict, List, Optional, Set
 
 from PySide6.QtCore import QMutex, QMutexLocker, QObject, QThread, Signal
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 from .module_error_handler import (
     ErrorCategory,
     ErrorContext,

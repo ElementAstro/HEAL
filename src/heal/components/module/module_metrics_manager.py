@@ -6,7 +6,7 @@ Handles performance metrics collection and management for modules
 import time
 from typing import Any, Dict, Optional
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 from .module_models import ModuleMetrics
 
 

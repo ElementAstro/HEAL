@@ -8,8 +8,8 @@ from typing import Any
 from PySide6.QtCore import QObject, Qt, Signal
 from qfluentwidgets import HyperlinkButton, InfoBar, InfoBarIcon, InfoBarPosition
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.config import Info, cfg
+from ...common.logging_config import get_logger
+from ...models.config import Info, cfg
 
 
 class UpdateManager(QObject):

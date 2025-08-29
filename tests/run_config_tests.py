@@ -23,7 +23,7 @@ sys.path.insert(0, str(project_root))
 class ConfigurationTestRunner:
     """Comprehensive test runner for configuration system"""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.test_modules = [
             'test_advanced_config_system',
             'test_config_templates',
@@ -31,7 +31,7 @@ class ConfigurationTestRunner:
             'test_config_integration',
             'test_config_performance'
         ]
-        self.results = {}
+        self.results: Dict[str, Any] = {}
         self.total_passed = 0
         self.total_failed = 0
         self.total_duration = 0.0
@@ -114,7 +114,7 @@ class ConfigurationTestRunner:
                 'error': str(e)
             }
     
-    def _run_test_class(self, test_class) -> Tuple[int, int]:
+    def _run_test_class(self, test_class: Any) -> Tuple[int, int]:
         """Run all test methods in a test class"""
         test_instance = test_class()
         test_methods = [method for method in dir(test_instance) 
@@ -152,7 +152,7 @@ class ConfigurationTestRunner:
         
         return passed, failed
     
-    def _print_summary(self):
+    def _print_summary(self) -> None:
         """Print comprehensive test summary"""
         print("=" * 70)
         print("📊 COMPREHENSIVE TEST SUMMARY")
@@ -286,7 +286,7 @@ class ConfigurationTestRunner:
         return total_failed == 0
 
 
-def main():
+def main() -> None:
     """Main entry point for test runner"""
     import argparse
     

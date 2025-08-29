@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 
 from PySide6.QtCore import QObject, Signal
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 from .module_config_manager import ModuleConfigManager
 from .module_event_manager import ModuleEventManager
 from .module_metrics_manager import ModuleMetricsManager

@@ -21,18 +21,18 @@ from qfluentwidgets import (
     setThemeColor,
 )
 
-from src.heal.common.json_utils import JsonUtils
-from src.heal.common.logging_config import get_logger
-from src.heal.models.check_update import check_update
-from src.heal.models.config import Info, cfg
-from src.heal.models.setting_card import CustomDialog, SettingCardGroup
+from ...common.json_utils import JsonUtils
+from ...common.logging_config import get_logger
+from ...models.check_update import check_update
+from ...models.config import Info, cfg
+from ...models.setting_card import CustomDialog, SettingCardGroup
 from .performance_manager import (
     SettingsPerformanceManager,
     get_performance_manager,
     performance_optimized,
 )
 from .setting_cards import LineEditSettingCardPort
-from src.heal.components.tools.editor import JsonEditor
+from ..tools.editor import JsonEditor
 
 if TYPE_CHECKING:
     from ...interfaces.setting_interface import Setting

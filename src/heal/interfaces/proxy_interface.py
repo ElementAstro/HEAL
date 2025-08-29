@@ -11,16 +11,16 @@ from qfluentwidgets import (
     qrouter,
 )
 
-from src.heal.common.logging_config import get_logger
+from ..common.logging_config import get_logger
 
 # Import proxy components
-from src.heal.components.proxy import (
+from ..components.proxy import (
     PrimaryPushSettingCardFiddler,
     ProxyNavigationManager,
     ProxySignalManager,
 )
-from src.heal.models.setting_card import SettingCardGroup
-from src.heal.models.style_sheet import StyleSheet
+from ..models.setting_card import SettingCardGroup
+from ..models.style_sheet import StyleSheet
 
 # 使用统一日志配置
 logger = get_logger("proxy_interface")

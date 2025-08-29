@@ -27,7 +27,7 @@ from qfluentwidgets import (
     setTheme,
 )
 
-from src.heal.common.logging_config import get_logger, log_performance, with_correlation_id
+from ...common.logging_config import get_logger, log_performance, with_correlation_id
 
 # 使用统一日志配置
 logger = get_logger(__name__)

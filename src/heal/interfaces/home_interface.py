@@ -7,11 +7,11 @@ from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QToolBar, QWidget
 from qfluentwidgets import FluentIcon, PrimaryPushButton, TogglePushButton
 
-from src.heal.common.exception_handler import ExceptionHandler
-from src.heal.common.logging_config import get_logger, log_performance, with_correlation_id
-from src.heal.common.resource_manager import register_timer
-from src.heal.common.ui_utils import create_responsive_operation, batch_ui_update
-from src.heal.components.home import (
+from ..common.exception_handler import ExceptionHandler
+from ..common.logging_config import get_logger, log_performance, with_correlation_id
+from ..common.resource_manager import register_timer
+from ..common.ui_utils import create_responsive_operation, batch_ui_update
+from ..components.home import (
     CompactBannerWidget,
     CustomFlipItemDelegate,
     DialogManager,
@@ -22,8 +22,8 @@ from src.heal.components.home import (
     ServerStatusCard,
     StatusOverviewWidget,
 )
-from src.heal.models.config import Info, cfg
-from src.heal.models.process_manager import ProcessManager
+from ..models.config import Info, cfg
+from ..models.process_manager import ProcessManager
 
 # 定义常量避免重复
 ONE_CLICK_START_TEXT = " 一键启动"
@@ -644,7 +644,7 @@ class Home(QWidget):
 
                 # 设置上下文为主页
                 if self.smart_tip_system:
-                    from src.heal.components.onboarding.smart_tip_system import TipContext
+                    from ..components.onboarding.smart_features import SmartFeaturesManager
                     self.smart_tip_system.set_context(TipContext.HOME)
                     self.smart_tip_system.start_rotation()
 

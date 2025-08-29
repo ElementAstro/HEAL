@@ -6,14 +6,14 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QStackedWidget, QVBoxLayout, QWidget
 from qfluentwidgets import Pivot, ScrollArea, qrouter
 
-from src.heal.common.logging_config import get_logger, log_performance, with_correlation_id
-from src.heal.components.setting import SettingsLayoutManager, SettingsManager
-from src.heal.components.setting.search_integration import (
+from ..common.logging_config import get_logger, log_performance, with_correlation_id
+from ..components.setting import SettingsLayoutManager, SettingsManager
+from ..components.setting.search_integration import (
     SearchEnabledSettingsInterface,
     get_search_integrator,
 )
-from src.heal.models.config import cfg
-from src.heal.models.style_sheet import StyleSheet
+from ..models.config import cfg
+from ..models.style_sheet import StyleSheet
 
 # 使用统一日志配置
 logger = get_logger("setting_interface")

@@ -16,20 +16,13 @@ from src.heal.components.onboarding.user_state_tracker import (
     UserStateTracker, UserLevel, OnboardingStep
 )
 from src.heal.components.onboarding.onboarding_manager import OnboardingManager
-from src.heal.components.onboarding.smart_tip_system import (
-    SmartTipSystem, TipCategory, TipContext
+from src.heal.components.onboarding.smart_features import (
+    SmartFeaturesManager, SmartTipSystem, RecommendationEngine,
+    ProgressiveFeatureDiscovery, SmartFeatureType, FeatureCategory
 )
-from src.heal.components.onboarding.contextual_help import (
-    ContextualHelpSystem, HelpType, HelpPriority
-)
-from src.heal.components.onboarding.feature_discovery import (
-    ProgressiveFeatureDiscovery, FeatureCategory, DiscoveryTrigger
-)
-from src.heal.components.onboarding.recommendation_engine import (
-    RecommendationEngine, RecommendationType, RecommendationPriority
-)
-from src.heal.components.onboarding.documentation_integration import (
-    DocumentationIntegration, DocumentationType
+from src.heal.components.onboarding.help_system import (
+    HelpSystem, ContextualHelpSystem, DocumentationIntegration,
+    HelpType, HelpPriority
 )
 
 

@@ -17,7 +17,7 @@ from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QWidget
 from qfluentwidgets import InfoBar, InfoBarPosition, TextEdit
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 from .log_panel import LogPanel
 
 logger = get_logger(__name__)

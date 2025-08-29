@@ -6,7 +6,7 @@ Contains detailed configurations for Windows, macOS, and Linux builds.
 
 import platform
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class PlatformConfig:
@@ -18,7 +18,7 @@ class PlatformConfig:
         self.platform = platform.system().lower()
         self.architecture = platform.machine().lower()
 
-    def get_pyinstaller_config(self, debug: bool = False) -> Dict[str, any]:
+    def get_pyinstaller_config(self, debug: bool = False) -> Dict[str, Any]:
         """Get PyInstaller configuration for current platform."""
         base_config = self._get_base_config()
 
@@ -31,7 +31,7 @@ class PlatformConfig:
         else:
             return base_config
 
-    def _get_base_config(self) -> Dict[str, any]:
+    def _get_base_config(self) -> Dict[str, Any]:
         """Get base configuration common to all platforms."""
         return {
             "name": "HEAL",
@@ -71,7 +71,7 @@ class PlatformConfig:
             ],
         }
 
-    def _get_windows_config(self, base_config: Dict, debug: bool) -> Dict[str, any]:
+    def _get_windows_config(self, base_config: Dict[str, Any], debug: bool) -> Dict[str, Any]:
         """Get Windows-specific configuration."""
         config = base_config.copy()
 
@@ -98,7 +98,7 @@ class PlatformConfig:
 
         return config
 
-    def _get_macos_config(self, base_config: Dict, debug: bool) -> Dict[str, any]:
+    def _get_macos_config(self, base_config: Dict[str, Any], debug: bool) -> Dict[str, Any]:
         """Get macOS-specific configuration."""
         config = base_config.copy()
 
@@ -118,7 +118,7 @@ class PlatformConfig:
 
         return config
 
-    def _get_linux_config(self, base_config: Dict, debug: bool) -> Dict[str, any]:
+    def _get_linux_config(self, base_config: Dict[str, Any], debug: bool) -> Dict[str, Any]:
         """Get Linux-specific configuration."""
         config = base_config.copy()
 
@@ -189,7 +189,8 @@ VSVersionInfo(
         ]
 
         # Add data directories
-        for src, _ in self._get_base_config()["additional_data"]:
+        additional_data = self._get_base_config()["additional_data"]
+        for src, _ in additional_data:
             if src.exists():
                 base_args.append(f"--include-data-dir={src}={src.name}")
 

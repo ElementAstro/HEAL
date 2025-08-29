@@ -36,8 +36,8 @@ Design Principles:
 Example:
     Using components in an interface:
 
-    >>> from src.heal.components.home import ServerButton, HomeLayoutManager
-    >>> from src.heal.components.monitoring import ProcessMonitorWidget
+    >>> from .home import ServerButton, HomeLayoutManager
+    >>> from .monitoring import ProcessMonitorWidget
     >>>
     >>> # Create and configure components
     >>> server_button = ServerButton()
@@ -62,20 +62,24 @@ from .monitoring import DownloadManagerWidget, ProcessMonitorWidget
 
 __all__: list[str] = ["DownloadManagerWidget", "ProcessMonitorWidget"]
 
-# Component package information
-COMPONENT_PACKAGES = [
-    "core",
-    "download",
-    "environment",
-    "home",
-    "launcher",
-    "logging",
-    "main",
-    "module",
-    "monitoring",
-    "plugin",
-    "proxy",
-    "setting",
-    "tools",
-    "utils",
+# Component package information - organized by architectural layers
+COMPONENT_PACKAGES = {
+    # Core Infrastructure
+    "infrastructure": ["core", "utils", "monitoring"],
+
+    # User Interface Components
+    "ui_components": ["main", "home", "launcher", "logging", "setting", "tools"],
+
+    # Feature Modules
+    "feature_modules": ["download", "environment", "module", "proxy", "plugin"],
+
+    # User Experience
+    "user_experience": ["onboarding"],
+}
+
+# Flat list for backward compatibility
+COMPONENT_PACKAGES_LIST = [
+    "core", "download", "environment", "home", "launcher",
+    "logging", "main", "module", "monitoring", "onboarding",
+    "plugin", "proxy", "setting", "tools", "utils"
 ]

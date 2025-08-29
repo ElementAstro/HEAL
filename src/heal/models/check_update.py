@@ -5,7 +5,7 @@ from typing import Optional
 import requests
 from PySide6.QtCore import QThread, Signal
 
-from src.heal.common.logging_config import (
+from ..common.logging_config import (
     get_logger,
     log_exception,
     log_network,

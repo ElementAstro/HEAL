@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 
 
 class ResponsiveLayoutManager(QObject):

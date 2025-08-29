@@ -2,7 +2,7 @@ import json
 
 import requests
 
-from src.heal.common.logging_config import get_logger, log_exception, log_network
+from ..common.logging_config import get_logger, log_exception, log_network
 from .config import get_json
 
 # 使用统一日志配置

@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from PySide6.QtCore import QObject, QTimer, Signal
 
-from src.heal.common.logging_config import (
+from ...common.logging_config import (
     get_logger,
     log_exception,
     log_performance,

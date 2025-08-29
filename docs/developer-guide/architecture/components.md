@@ -10,13 +10,13 @@ This guide provides practical examples for developing new components within the 
 
 ```bash
 # Create new component directory
-mkdir app/components/my_component
+mkdir src/heal/components/my_component
 ```
 
 ### Step 2: Create Component Files
 
 ```python
-# app/components/my_component/__init__.py
+# src/heal/components/my_component/__init__.py
 """
 My Component Module
 Exports for the my_component module

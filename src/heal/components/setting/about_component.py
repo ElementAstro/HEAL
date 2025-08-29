@@ -17,8 +17,8 @@ from PySide6.QtWidgets import (
 )
 from qfluentwidgets import FluentIcon, PushButton, setCustomStyleSheet
 
-from src.heal.models.config import Info, cfg
-from src.heal.resources import resource_manager
+from ...models.config import Info, cfg
+from ...resources import resource_manager
 
 
 class AboutBackground(QWidget):

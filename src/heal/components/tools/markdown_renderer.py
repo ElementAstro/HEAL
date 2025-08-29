@@ -2,7 +2,7 @@
 import markdown
 from PySide6.QtWidgets import QTextBrowser
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 
 logger = get_logger(__name__)
 

@@ -37,7 +37,7 @@ from qfluentwidgets import (
     TitleLabel,
 )
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 from .module_bulk_operations import ModuleBulkOperations
 from .module_error_handler import ModuleErrorHandler
 from .module_metrics_manager import ModuleMetricsManager

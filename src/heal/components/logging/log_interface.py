@@ -9,7 +9,7 @@ from typing import Optional
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QWidget
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 from .log_integration_manager import LogIntegrationManager, get_log_integration_manager
 from .log_panel import LogPanel
 

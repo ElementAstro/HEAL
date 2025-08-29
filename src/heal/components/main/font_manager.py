@@ -10,8 +10,8 @@ from typing import Any
 
 from PySide6.QtCore import QObject, Signal
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.config import Info, cfg
+from ...common.logging_config import get_logger
+from ...models.config import Info, cfg
 
 
 class FontManager(QObject):

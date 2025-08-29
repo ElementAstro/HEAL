@@ -16,7 +16,7 @@ from qfluentwidgets import (
     TitleLabel,
 )
 
-from src.heal.common.logging_config import get_logger, log_download, log_performance
+from ..common.logging_config import get_logger, log_download, log_performance
 from .config import cfg
 from .setting_card import SettingCard
 

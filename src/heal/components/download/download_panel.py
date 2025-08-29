@@ -33,10 +33,10 @@ from qfluentwidgets import (
     ToolButton,
 )
 
-from src.heal.common.i18n import t
-from src.heal.common.logging_config import get_logger
-from src.heal.models.download_manager import DownloadItem, DownloadManager, DownloadStatus
-from src.heal.components.monitoring.download_monitor import DownloadItemCard, DownloadManagerWidget
+from ...common.i18n import t
+from ...common.logging_config import get_logger
+from ...models.download_manager import DownloadItem, DownloadManager, DownloadStatus
+from ..monitoring.download_monitor import DownloadItemCard, DownloadManagerWidget
 
 
 class DownloadStatsCard(CardWidget):

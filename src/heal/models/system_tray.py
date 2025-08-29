@@ -5,7 +5,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QSystemTrayIcon, QWidget
 from qfluentwidgets import Action, FluentIcon, RoundMenu
 
-from src.heal.common.logging_config import get_logger
+from ..common.logging_config import get_logger
 from ..resources import resource_manager
 
 # 使用统一日志配置

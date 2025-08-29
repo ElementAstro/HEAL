@@ -20,7 +20,7 @@ from qfluentwidgets import (
 )
 from qfluentwidgets.components.dialog_box.mask_dialog_base import MaskDialogBase
 
-from src.heal.common.logging_config import get_logger
+from ..common.logging_config import get_logger
 
 # 使用统一日志配置
 logger = get_logger("login_card")

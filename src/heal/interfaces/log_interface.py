@@ -10,11 +10,11 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 from qfluentwidgets import ScrollArea
 
-from src.heal.common.logging_config import get_logger, log_performance, with_correlation_id
+from ..common.logging_config import get_logger, log_performance, with_correlation_id
 
 # Import logging components
-from src.heal.components.logging import LogInterface, create_log_interface
-from src.heal.models.style_sheet import StyleSheet
+from ..components.logging import LogInterface, create_log_interface
+from ..models.style_sheet import StyleSheet
 
 # 使用统一日志配置
 logger = get_logger(__name__)

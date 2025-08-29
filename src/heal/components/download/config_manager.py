@@ -10,10 +10,10 @@ from typing import Any, Dict, List
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QMessageBox, QWidget
 
-from src.heal.common.exception_handler import ExceptionType, exception_handler
-from src.heal.common.i18n import t
-from src.heal.common.json_utils import JsonLoadResult, JsonUtils
-from src.heal.common.logging_config import get_logger
+from ...common.exception_handler import ExceptionType, exception_handler
+from ...common.i18n import t
+from ...common.json_utils import JsonLoadResult, JsonUtils
+from ...common.logging_config import get_logger
 
 
 class DownloadConfigManager(QObject):

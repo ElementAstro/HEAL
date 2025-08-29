@@ -15,8 +15,8 @@ from PySide6.QtWidgets import (
 )
 from qfluentwidgets import PrimaryPushButton, TitleLabel  # 移除了未使用的FluentIcon
 
-from src.heal.common.i18n_ui import setup_component_i18n, tr
-from src.heal.common.logging_config import get_logger
+from ..common.i18n_ui import setup_component_i18n, tr
+from ..common.logging_config import get_logger
 
 # 使用统一日志配置
 logger = get_logger("custom_messagebox")

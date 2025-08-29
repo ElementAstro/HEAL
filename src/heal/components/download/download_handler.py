@@ -12,10 +12,10 @@ from PySide6.QtGui import QClipboard
 from PySide6.QtWidgets import QApplication, QWidget
 from qfluentwidgets import InfoBar, InfoBarPosition
 
-from src.heal.common.i18n import t
-from src.heal.common.logging_config import get_logger
-from src.heal.models.config import cfg
-from src.heal.models.message_download import (
+from ...common.i18n import t
+from ...common.logging_config import get_logger
+from ...models.config import cfg
+from ...models.message_download import (
     MessageDownload,
     MessageFiddler,
     MessageGit,
@@ -156,7 +156,7 @@ class DownloadHandler(QObject):
         """生成下载URL"""
         from pathlib import Path
 
-        from src.heal.models.config import cfg
+        from ...models.config import cfg
 
         file = Path("temp") / Path(repo_url).name
         url_cfg = f"curl -o {file} -L "

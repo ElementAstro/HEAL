@@ -525,7 +525,7 @@ class AutoRecoveryManager:
         self.logger.debug(f"No auto-recovery strategy for {error_type}")
         return False
 
-    def _recover_missing_file(self, error: FileNotFoundError) -> bool:
+    def _recover_missing_file(self, error: Exception) -> bool:
         """恢复缺失文件"""
         error_str = str(error)
 
@@ -571,7 +571,7 @@ class AutoRecoveryManager:
 
         return False
 
-    def _recover_permission_issue(self, error: PermissionError) -> bool:
+    def _recover_permission_issue(self, error: Exception) -> bool:
         """恢复权限问题"""
         error_str = str(error)
 
@@ -611,7 +611,7 @@ class AutoRecoveryManager:
 
         return False
 
-    def _recover_import_error(self, error: ImportError) -> bool:
+    def _recover_import_error(self, error: Exception) -> bool:
         """恢复导入错误"""
         error_str = str(error)
 
@@ -644,7 +644,7 @@ class AutoRecoveryManager:
 
         return False
 
-    def _recover_missing_module(self, error: ModuleNotFoundError) -> bool:
+    def _recover_missing_module(self, error: Exception) -> bool:
         """恢复缺失模块"""
         return self._recover_import_error(error)
 

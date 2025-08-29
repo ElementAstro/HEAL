@@ -29,8 +29,8 @@ from qfluentwidgets import (
     ToolButton,
 )
 
-from src.heal.common.i18n import t
-from src.heal.common.logging_config import get_logger
+from ...common.i18n import t
+from ...common.logging_config import get_logger
 
 
 class QuickDownloadSection(CardWidget):

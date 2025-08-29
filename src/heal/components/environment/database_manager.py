@@ -11,8 +11,8 @@ from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtWidgets import QWidget
 from qfluentwidgets import InfoBar, InfoBarIcon, InfoBarPosition, PrimaryPushButton
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.config import Info
+from ...common.logging_config import get_logger
+from ...models.config import Info
 
 
 class EnvironmentDatabaseManager(QObject):

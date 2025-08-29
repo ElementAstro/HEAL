@@ -8,8 +8,8 @@ from typing import Any, TYPE_CHECKING
 from PySide6.QtCore import QObject, Qt, Signal
 from qfluentwidgets import InfoBar, InfoBarIcon, InfoBarPosition, PrimaryPushButton
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.download_process import SubDownloadCMD
+from ...common.logging_config import get_logger
+from ...models.download_process import SubDownloadCMD
 from .environment_cards import HyperlinkCardEnvironment, PrimaryPushSettingCardDownload
 
 if TYPE_CHECKING:

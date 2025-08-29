@@ -6,11 +6,11 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QButtonGroup, QWidget
 from qfluentwidgets import FluentIcon, TogglePushButton, setCustomStyleSheet
 
-from src.heal.resources.icons.astro import AstroIcon
+from ...resources.icons.astro import AstroIcon
 
-from src.heal.common.exception_handler import ExceptionHandler
-from src.heal.models.config import cfg
-from src.heal.models.process_manager import ProcessManager
+from ...common.exception_handler import ExceptionHandler
+from ...models.config import cfg
+from ...models.process_manager import ProcessManager
 from .server_button import ServerButton
 
 # 定义常量避免重复

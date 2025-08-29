@@ -10,8 +10,8 @@ from PySide6.QtCore import QObject, QTimer, Signal
 from PySide6.QtWidgets import QHBoxLayout, QStackedWidget, QVBoxLayout, QWidget
 from qfluentwidgets import FluentIcon
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.setting_card import SettingCardGroup
+from ...common.logging_config import get_logger
+from ...models.setting_card import SettingCardGroup
 from .performance_manager import get_performance_manager
 from .search_engine import (
     FilterType,

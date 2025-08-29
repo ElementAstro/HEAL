@@ -16,13 +16,13 @@ from urllib.parse import urlparse
 import requests
 from PySide6.QtCore import QObject, QThread, QTimer, Signal
 
-from src.heal.common.logging_config import (
+from ..common.logging_config import (
     get_logger,
     log_download,
     log_exception,
     log_performance,
 )
-from src.heal.common.performance_analyzer import profile_io, profile_performance
+from ..common.performance_analyzer import profile_io, profile_performance
 
 # 使用统一日志配置
 logger = get_logger("download_manager")

@@ -9,7 +9,7 @@ from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QStackedWidget, QWidget
 from qfluentwidgets import FluentIcon, Pivot, qrouter
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 
 
 class ProxyNavigationManager(QObject):

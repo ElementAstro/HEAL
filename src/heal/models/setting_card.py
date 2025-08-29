@@ -14,7 +14,7 @@ from qfluentwidgets import (
     isDarkTheme,
 )
 
-from src.heal.common.logging_config import get_logger
+from ..common.logging_config import get_logger
 
 # 使用统一日志配置
 logger = get_logger("setting_card")

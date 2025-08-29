@@ -25,9 +25,9 @@ from qfluentwidgets import (
     TitleLabel,
 )
 
-from src.heal.common.i18n_ui import setup_component_i18n, tr, tr_button, tr_label
-from src.heal.models.custom_messagebox import CustomMessageBox
-from src.heal.components.utils.scaffold import (
+from ...common.i18n_ui import setup_component_i18n, tr, tr_button, tr_label
+from ...models.custom_messagebox import CustomMessageBox
+from ..utils.scaffold import (
     confirm_details,
     create_cmakelists,
     create_component_cpp,

@@ -7,7 +7,7 @@ from typing import Any
 
 from PySide6.QtWidgets import QFrame, QVBoxLayout
 
-from src.heal.components.tools.scaffold import ScaffoldApp
+from ..tools.scaffold import ScaffoldApp
 
 
 class ScaffoldAppWrapper(QFrame):

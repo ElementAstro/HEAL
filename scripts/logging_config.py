@@ -10,7 +10,7 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 
 class ColoredFormatter(logging.Formatter):
@@ -26,7 +26,7 @@ class ColoredFormatter(logging.Formatter):
         'RESET': '\033[0m'        # Reset
     }
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         # Add color to levelname
         if hasattr(record, 'levelname') and record.levelname in self.COLORS:
             record.levelname = (
@@ -48,12 +48,13 @@ class BuildLogger:
         # Create logger
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)
+        self._base_logger = self.logger
 
         # Prevent duplicate handlers
         if not self.logger.handlers:
             self._setup_handlers()
 
-    def _setup_handlers(self):
+    def _setup_handlers(self) -> None:
         """Set up logging handlers."""
 
         # Console handler with colors
@@ -107,7 +108,7 @@ class BuildLogger:
         """Get the configured logger."""
         return self.logger
 
-    def set_level(self, level: str):
+    def set_level(self, level: str) -> None:
         """Set logging level."""
         numeric_level = getattr(logging, level.upper(), None)
         if not isinstance(numeric_level, int):
@@ -120,16 +121,19 @@ class BuildLogger:
             if isinstance(handler, logging.StreamHandler) and handler.stream == sys.stdout:
                 handler.setLevel(numeric_level)
 
-    def add_context(self, **kwargs):
+    def add_context(self, **kwargs: Any) -> None:
         """Add context to all log messages."""
         for key, value in kwargs.items():
-            self.logger = logging.LoggerAdapter(self.logger, {key: value})
+            # Create a new LoggerAdapter but keep the base logger for handler operations
+            adapter = logging.LoggerAdapter(self._base_logger, {key: value})
+            # Store context for future use
+            setattr(self, f'_context_{key}', value)
 
 
 class JsonFormatter(logging.Formatter):
     """JSON formatter for structured logging."""
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         import json
 
         log_entry = {
@@ -161,19 +165,22 @@ class JsonFormatter(logging.Formatter):
 class ContextManager:
     """Context manager for logging operations."""
 
-    def __init__(self, logger: logging.Logger, operation: str, **context):
+    def __init__(self, logger: logging.Logger, operation: str, **context: Any):
         self.logger = logger
         self.operation = operation
         self.context = context
-        self.start_time = None
+        self.start_time: Optional[datetime] = None
 
-    def __enter__(self):
+    def __enter__(self) -> 'ContextManager':
         self.start_time = datetime.now()
         self.logger.info(f"Starting {self.operation}", extra=self.context)
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        duration = datetime.now() - self.start_time
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        if self.start_time is not None:
+            duration = datetime.now() - self.start_time
+        else:
+            duration = datetime.now() - datetime.now()  # Zero duration fallback
 
         if exc_type is None:
             self.logger.info(
@@ -187,7 +194,7 @@ class ContextManager:
                 exc_info=True
             )
 
-        return False  # Don't suppress exceptions
+        # Don't suppress exceptions
 
 
 def setup_logging(
@@ -216,7 +223,7 @@ def setup_logging(
     return logger
 
 
-def log_system_info(logger: logging.Logger):
+def log_system_info(logger: logging.Logger) -> None:
     """Log system information for debugging."""
     import platform
     import sys
@@ -230,7 +237,7 @@ def log_system_info(logger: logging.Logger):
     })
 
 
-def log_environment_info(logger: logging.Logger):
+def log_environment_info(logger: logging.Logger) -> None:
     """Log relevant environment variables."""
     env_vars = [
         'PATH', 'PYTHONPATH', 'HOME', 'USER', 'SHELL',
@@ -257,7 +264,7 @@ class ErrorHandler:
     def __init__(self, logger: logging.Logger):
         self.logger = logger
 
-    def handle_subprocess_error(self, e: Exception, command: str, context: Dict = None):
+    def handle_subprocess_error(self, e: Exception, command: str, context: Optional[Dict[str, Any]] = None) -> None:
         """Handle subprocess errors with detailed logging."""
         context = context or {}
 
@@ -277,7 +284,7 @@ class ErrorHandler:
         self.logger.error(
             f"Command failed: {command}", extra=error_info, exc_info=True)
 
-    def handle_file_error(self, e: Exception, file_path: str, operation: str):
+    def handle_file_error(self, e: Exception, file_path: str, operation: str) -> None:
         """Handle file operation errors."""
         error_info = {
             'file_path': file_path,
@@ -288,7 +295,7 @@ class ErrorHandler:
         self.logger.error(
             f"File {operation} failed: {file_path}", extra=error_info, exc_info=True)
 
-    def handle_build_error(self, e: Exception, stage: str, platform: str = None):
+    def handle_build_error(self, e: Exception, stage: str, platform: Optional[str] = None) -> None:
         """Handle build process errors."""
         error_info = {
             'stage': stage,
@@ -308,7 +315,7 @@ def get_logger(name: str = "heal-build") -> logging.Logger:
     return setup_logging(name)
 
 
-def log_operation(logger: logging.Logger, operation: str, **context):
+def log_operation(logger: logging.Logger, operation: str, **context: Any) -> ContextManager:
     """Context manager for logging operations."""
     return ContextManager(logger, operation, **context)
 

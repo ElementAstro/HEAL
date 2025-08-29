@@ -42,7 +42,7 @@ from qfluentwidgets import (
     TransparentToolButton,
 )
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 from .search_engine import (
     FilterType,
     SearchFilter,

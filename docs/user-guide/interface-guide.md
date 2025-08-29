@@ -32,13 +32,13 @@ The Module Interface is part of the HEAL application. To use it:
 2. Import the required components:
 
    ```python
-   from app.module_interface import ModuleInterface
+   from src.heal.interfaces.module_interface import Module
    ```
 
 ### Quick Start
 
 ```python
-from app.module_interface import ModuleInterface
+from src.heal.interfaces.module_interface import Module
 
 # Create configuration
 config = {

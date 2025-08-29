@@ -31,8 +31,8 @@ from qfluentwidgets import (
     ToolTip,
 )
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.setting_card import SettingCard, SettingCardGroup
+from ...common.logging_config import get_logger
+from ...models.setting_card import SettingCard, SettingCardGroup
 from .platform_detector import get_current_platform_info
 from .tool_status_manager import ToolInfo, ToolStatus
 

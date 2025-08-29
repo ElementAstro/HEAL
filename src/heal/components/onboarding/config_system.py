@@ -20,7 +20,7 @@ from enum import Enum
 import copy
 from abc import ABC, abstractmethod
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -87,7 +87,8 @@ class JSONConfigProvider(ConfigProvider):
         """Load JSON configuration"""
         try:
             with open(path, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                result: Dict[str, Any] = json.load(f)
+                return result
         except (FileNotFoundError, json.JSONDecodeError) as e:
             logger.warning(f"Failed to load JSON config from {path}: {e}")
             return {}
@@ -139,7 +140,7 @@ class YAMLConfigProvider(ConfigProvider):
 class ConfigValidator:
     """Configuration validator with schema support"""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.schemas: Dict[str, ConfigSchema] = {}
     
     def register_schema(self, schema: ConfigSchema) -> None:
@@ -643,7 +644,7 @@ class AdvancedConfigurationManager:
     
     def get_all_settings(self) -> Dict[str, Any]:
         """Get all configuration settings merged across scopes"""
-        merged_config = {}
+        merged_config: Dict[str, Any] = {}
         
         # Merge in reverse priority order
         for scope in reversed(list(ConfigScope)):
@@ -702,13 +703,13 @@ class ConfigurationMigrator:
         self.migrations: Dict[str, Callable[[Dict[str, Any]], Dict[str, Any]]] = {}
         self._register_default_migrations()
 
-    def _register_default_migrations(self):
+    def _register_default_migrations(self) -> None:
         """Register default configuration migrations"""
         self.register_migration("1.0.0", "1.1.0", self._migrate_1_0_to_1_1)
         self.register_migration("1.1.0", "1.2.0", self._migrate_1_1_to_1_2)
 
     def register_migration(self, from_version: str, to_version: str,
-                          migration_func: Callable[[Dict[str, Any]], Dict[str, Any]]):
+                          migration_func: Callable[[Dict[str, Any]], Dict[str, Any]]) -> None:
         """Register a configuration migration"""
         migration_key = f"{from_version}->{to_version}"
         self.migrations[migration_key] = migration_func

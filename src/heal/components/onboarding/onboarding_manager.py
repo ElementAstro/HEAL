@@ -11,7 +11,7 @@ from datetime import datetime
 from PySide6.QtCore import QObject, QTimer, Signal
 from PySide6.QtWidgets import QWidget
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 from .user_state_tracker import OnboardingStep, UserLevel, UserStateTracker
 from .advanced_config_integration import (
     get_configuration_integrator, ConfigurationIntegrator

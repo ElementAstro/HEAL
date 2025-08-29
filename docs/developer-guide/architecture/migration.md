@@ -109,14 +109,14 @@ class NewInterface(QWidget):
 
 ```bash
 # Create the component directory
-mkdir app/components/your_component
+mkdir src/heal/components/your_component
 
 # Create manager files
-touch app/components/your_component/__init__.py
-touch app/components/your_component/data_manager.py
-touch app/components/your_component/ui_manager.py
-touch app/components/your_component/operation_manager.py
-touch app/components/your_component/signal_manager.py
+touch src/heal/components/your_component/__init__.py
+touch src/heal/components/your_component/data_manager.py
+touch src/heal/components/your_component/ui_manager.py
+touch src/heal/components/your_component/operation_manager.py
+touch src/heal/components/your_component/signal_manager.py
 ```
 
 ### Step 2: Extract Data Management Logic

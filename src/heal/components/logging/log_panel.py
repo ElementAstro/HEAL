@@ -53,13 +53,13 @@ from qfluentwidgets import (
     TitleLabel,
 )
 
-from src.heal.common.logging_config import (
+from ...common.logging_config import (
     get_log_stats,
     get_logger,
     get_logging_config,
     health_check,
 )
-from src.heal.common.ui_utils import UIComponentManager
+from ...common.ui_utils import UIComponentManager
 from .log_exporter import LogExporter
 from .log_filter import LogFilter
 from .log_viewer import LogViewer
@@ -408,7 +408,7 @@ class LogPanel(ScrollArea):
     def cleanup_logs(self) -> None:
         """清理旧日志"""
         try:
-            from src.heal.common.logging_config import cleanup_logs
+            from ...common.logging_config import cleanup_logs
 
             cleanup_logs()
             self.update_stats()
@@ -436,7 +436,7 @@ class LogPanel(ScrollArea):
     def archive_logs(self) -> None:
         """归档日志"""
         try:
-            from src.heal.common.logging_config import archive_logs
+            from ...common.logging_config import archive_logs
 
             archive_logs()
             self.update_stats()

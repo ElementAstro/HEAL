@@ -12,7 +12,7 @@ from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import QWidget
 from qfluentwidgets import InfoBar, InfoBarIcon, InfoBarPosition, PrimaryPushButton
 
-from src.heal.common.logging_config import get_logger
+from ...common.logging_config import get_logger
 
 
 class AudioManager(QObject):

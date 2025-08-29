@@ -20,21 +20,21 @@ from qfluentwidgets import (
     qrouter,
 )
 
-from src.heal.common.logging_config import get_logger, log_performance, with_correlation_id
-from src.heal.components.module import (
+from ..common.logging_config import get_logger, log_performance, with_correlation_id
+from ..components.module import (
     ModuleConfig,
-    ModuleConfigManager,
-    ModuleEventManager,
     ModuleMetrics,
-    ModuleMetricsManager,
     ModuleOperationHandler,
     ModuleState,
     ScaffoldAppWrapper,
 )
-from src.heal.components.module.mod_download import ModDownload
-from src.heal.components.module.mod_manager import ModManager
-from src.heal.models.setting_card import CustomFrameGroup
-from src.heal.models.style_sheet import StyleSheet
+from ..components.module.mod_download import ModDownload
+from ..components.module.mod_manager import ModManager
+from ..components.module.module_config_manager import ModuleConfigManager
+from ..components.module.module_event_manager import ModuleEventManager
+from ..components.module.module_metrics_manager import ModuleMetricsManager
+from ..models.setting_card import CustomFrameGroup
+from ..models.style_sheet import StyleSheet
 
 
 class Module(ScrollArea):

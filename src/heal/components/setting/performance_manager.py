@@ -16,8 +16,8 @@ from typing import Any, Callable, Dict, Optional, Set, Union
 
 from PySide6.QtCore import QMutex, QMutexLocker, QObject, QTimer, Signal
 
-from src.heal.common.json_utils import JsonLoadResult, JsonUtils
-from src.heal.common.logging_config import get_logger
+from ...common.json_utils import JsonLoadResult, JsonUtils
+from ...common.logging_config import get_logger
 
 
 @dataclass

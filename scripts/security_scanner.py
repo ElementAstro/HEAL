@@ -9,7 +9,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class SecurityScanner:
@@ -21,7 +21,7 @@ class SecurityScanner:
         self.reports_dir = project_root / "security-reports"
         self.reports_dir.mkdir(exist_ok=True)
 
-    def run_bandit_scan(self) -> Dict:
+    def run_bandit_scan(self) -> Dict[str, Any]:
         """Run Bandit security scan on source code."""
         print("Running Bandit security scan...")
 
@@ -46,7 +46,7 @@ class SecurityScanner:
             # Load and return results
             if report_file.exists():
                 with open(report_file, 'r') as f:
-                    report = json.load(f)
+                    report: Dict[str, Any] = json.load(f)
 
                 print(
                     f"Bandit scan completed. Found {len(report.get('results', []))} issues.")
@@ -122,7 +122,7 @@ class SecurityScanner:
             # Load and return results
             if report_file.exists():
                 with open(report_file, 'r') as f:
-                    report = json.load(f)
+                    report: Dict[str, Any] = json.load(f)
 
                 vulnerabilities = len(report.get("vulnerabilities", []))
                 print(
@@ -214,11 +214,11 @@ class SecurityScanner:
         print(f"Permission check completed. Found {len(issues)} issues.")
         return {"permission_issues": issues}
 
-    def generate_security_report(self) -> Dict:
+    def generate_security_report(self) -> Dict[str, Any]:
         """Generate comprehensive security report."""
         print("Generating comprehensive security report...")
 
-        report = {
+        report: Dict[str, Any] = {
             "timestamp": subprocess.run([
                 "date", "-u", "+%Y-%m-%dT%H:%M:%SZ"
             ], capture_output=True, text=True).stdout.strip(),
@@ -337,7 +337,7 @@ class SecurityScanner:
         print("\n" + "="*60)
 
 
-def main():
+def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(description="HEAL Security Scanner")
     parser.add_argument(

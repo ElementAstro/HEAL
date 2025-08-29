@@ -10,8 +10,8 @@ from typing import Any
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QWidget
 
-from src.heal.common.logging_config import get_logger
-from src.heal.models.config import Info, cfg
+from ...common.logging_config import get_logger
+from ...models.config import Info, cfg
 
 
 class AuthenticationManager(QObject):
@@ -33,7 +33,7 @@ class AuthenticationManager(QObject):
     def init_login(self) -> bool:
         """初始化登录"""
         if cfg.useLogin.value:
-            from src.heal.models.login_card import MessageLogin
+            from ...models.login_card import MessageLogin
 
             self.login_card = MessageLogin()
             self.login_card.show()
