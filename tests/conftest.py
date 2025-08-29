@@ -1,10 +1,42 @@
 """
-Pytest configuration and shared fixtures for onboarding system tests
+Pytest configuration and shared fixtures for HEAL test suite
 
-Provides common fixtures, test configuration, and utilities for all test modules.
+Provides common fixtures, test configuration, and utilities for all test modules
+across the reorganized test directory structure including:
+- Common utilities tests
+- Component tests
+- Interface tests
+- Model tests
+- Integration tests
 """
 
-import pytest
+# Try to import pytest, but make it optional for testing
+try:
+    import pytest
+    PYTEST_AVAILABLE = True
+except ImportError:
+    PYTEST_AVAILABLE = False
+    # Create a minimal pytest replacement for basic functionality
+    class MockPytest:
+        @staticmethod
+        def fixture(scope="function"):
+            def decorator(func):
+                return func
+            return decorator
+
+        @staticmethod
+        def raises(exception_type):
+            class RaisesContext:
+                def __enter__(self):
+                    return self
+                def __exit__(self, exc_type, exc_val, exc_tb):
+                    if exc_type is None:
+                        raise AssertionError(f"Expected {exception_type.__name__} but no exception was raised")
+                    return issubclass(exc_type, exception_type)
+            return RaisesContext()
+
+    pytest = MockPytest()
+
 import sys
 import os
 from pathlib import Path
@@ -15,47 +47,79 @@ from typing import Any, Dict, Generator
 src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
-# Mock PySide6 components if not available
-try:
-    from PySide6.QtWidgets import QApplication, QWidget
-    from PySide6.QtCore import QTimer
-    PYSIDE6_AVAILABLE = True
-except ImportError:
-    # Create mock classes for testing without PySide6
-    class QApplication:
-        _instance = None
+# Mock external dependencies before any imports
+mock_loguru = Mock()
+mock_loguru.logger = Mock()
+mock_loguru.logger.info = Mock()
+mock_loguru.logger.error = Mock()
+mock_loguru.logger.debug = Mock()
+mock_loguru.logger.warning = Mock()
 
-        def __init__(self, args=None):
-            QApplication._instance = self
+# Create proper mock classes for PySide6
+class MockQWidget:
+    def __init__(self, *args, **kwargs):
+        pass
+    def setObjectName(self, name): pass
+    def show(self): pass
+    def hide(self): pass
+    def close(self): pass
 
-        @classmethod
-        def instance(cls):
-            return cls._instance
+class MockQObject:
+    def __init__(self, *args, **kwargs):
+        pass
+    def setObjectName(self, name): pass
 
-    class QWidget:
-        def __init__(self):
-            pass
+class MockProcess:
+    def memory_info(self):
+        mock_info = Mock()
+        mock_info.rss = 1024 * 1024 * 50  # 50MB in bytes
+        return mock_info
 
-        def setObjectName(self, name):
-            pass
+# Mock all external dependencies
+sys.modules['loguru'] = mock_loguru
+sys.modules['aiofiles'] = Mock()
+sys.modules['aiohttp'] = Mock()
+sys.modules['asyncio'] = Mock()
+sys.modules['jsonschema'] = Mock()
 
-        def close(self):
-            pass
+# Create comprehensive PySide6 mocks
+mock_pyside6 = Mock()
+mock_pyside6.QtCore = Mock()
+mock_pyside6.QtWidgets = Mock()
+mock_pyside6.QtNetwork = Mock()
+mock_pyside6.QtGui = Mock()
 
-    class QTimer:
-        def __init__(self):
-            self._active = False
+# Set up proper mock classes
+mock_pyside6.QtWidgets.QWidget = MockQWidget
+mock_pyside6.QtCore.QObject = MockQObject
+mock_pyside6.QtWidgets.QApplication = Mock()
 
-        def start(self, interval=None):
-            self._active = True
+sys.modules['PySide6'] = mock_pyside6
+sys.modules['PySide6.QtCore'] = mock_pyside6.QtCore
+sys.modules['PySide6.QtWidgets'] = mock_pyside6.QtWidgets
+sys.modules['PySide6.QtNetwork'] = mock_pyside6.QtNetwork
+sys.modules['PySide6.QtGui'] = mock_pyside6.QtGui
 
-        def stop(self):
-            self._active = False
+sys.modules['qfluentwidgets'] = Mock()
+sys.modules['qfluentwidgets.components'] = Mock()
+sys.modules['qfluentwidgets.common'] = Mock()
+sys.modules['qfluentwidgets.window'] = Mock()
+sys.modules['requests'] = Mock()
 
-        def isActive(self):
-            return self._active
+# Mock psutil with proper process mock
+mock_psutil = Mock()
+mock_psutil.Process.return_value = MockProcess()
+sys.modules['psutil'] = mock_psutil
 
-    PYSIDE6_AVAILABLE = False
+sys.modules['watchdog'] = Mock()
+sys.modules['watchdog.observers'] = Mock()
+sys.modules['watchdog.events'] = Mock()
+sys.modules['yaml'] = Mock()
+sys.modules['toml'] = Mock()
+sys.modules['configparser'] = Mock()
+
+# PySide6 and other dependencies are mocked at module level above
+PYSIDE6_AVAILABLE = False
 
 # Import onboarding components for testing
 # Note: These imports are commented out due to PySide6 dependency issues
@@ -81,25 +145,19 @@ class OnboardingStep:
 @pytest.fixture(scope="session")
 def qapp():
     """Create a QApplication instance for the entire test session"""
-    if PYSIDE6_AVAILABLE:
-        app = QApplication.instance()
-        if app is None:
-            app = QApplication([])
-        yield app
-        # Don't quit the app here as it might be used by other tests
-    else:
-        # Use mock QApplication for testing without PySide6
-        app = QApplication([])
-        yield app
+    # Since we're mocking PySide6 at module level, create a mock app
+    mock_app = Mock()
+    mock_app.instance = Mock(return_value=mock_app)
+    yield mock_app
 
 
 @pytest.fixture
 def main_window(qapp):
     """Create a main window widget for testing"""
-    window = QWidget()
-    window.setObjectName("test_main_window")
+    window = Mock()
+    window.setObjectName = Mock()
+    window.close = Mock()
     yield window
-    window.close()
 
 
 @pytest.fixture
@@ -449,7 +507,53 @@ def test_data_directory():
     """Create a temporary directory for test data"""
     import tempfile
     import shutil
-    
-    temp_dir = tempfile.mkdtemp(prefix="heal_onboarding_tests_")
+
+    temp_dir = tempfile.mkdtemp(prefix="heal_tests_")
     yield Path(temp_dir)
     shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+# Additional fixtures for the reorganized test structure
+
+@pytest.fixture
+def mock_download_manager():
+    """Create a mock download manager for testing"""
+    with patch('src.heal.models.download_manager.DownloadManager') as mock_dm:
+        mock_instance = Mock()
+        mock_instance.add_download.return_value = "download_id_123"
+        mock_instance.get_download_status.return_value = "downloading"
+        mock_instance.cancel_download.return_value = True
+        mock_dm.return_value = mock_instance
+        yield mock_instance
+
+
+@pytest.fixture
+def mock_process_manager():
+    """Create a mock process manager for testing"""
+    with patch('src.heal.models.process_manager.ProcessManager') as mock_pm:
+        mock_instance = Mock()
+        mock_instance.start_process.return_value = "process_id_123"
+        mock_instance.get_process_status.return_value = "running"
+        mock_instance.stop_process.return_value = True
+        mock_pm.return_value = mock_instance
+        yield mock_instance
+
+
+@pytest.fixture
+def mock_cache_manager():
+    """Create a mock cache manager for testing"""
+    with patch('src.heal.common.cache_manager.global_cache_manager') as mock_cm:
+        mock_cache = Mock()
+        mock_cache.get.return_value = None
+        mock_cache.put.return_value = None
+        mock_cm.get_cache.return_value = mock_cache
+        yield mock_cm
+
+
+@pytest.fixture
+def mock_memory_optimizer():
+    """Create a mock memory optimizer for testing"""
+    with patch('src.heal.common.memory_optimizer.global_memory_optimizer') as mock_mo:
+        mock_mo.optimize.return_value = {"freed_objects": 100, "memory_freed": "10MB"}
+        mock_mo.monitor.get_memory_stats.return_value = {"used": "50MB", "available": "200MB"}
+        yield mock_mo

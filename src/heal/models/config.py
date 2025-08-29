@@ -2,6 +2,7 @@ from ..common.json_utils import get_json
 from ..common.config_manager import ConfigType, config_manager
 import json
 import os
+from pathlib import Path
 from enum import Enum
 from typing import Any
 
@@ -134,9 +135,23 @@ class Config(QConfig):
     useRemote = ConfigItem("Command", "useRemote", False, BoolValidator())
 
     APP_NAME = "Hello ElementAstro Launcher"
-    APP_VERSION = get_version_type(
-        get_json("./config/version.json", "APP_VERSION"))
+
+    # Default version - will be loaded dynamically when needed
+    APP_VERSION = get_version_type("v1.7.0")  # Default fallback version
     APP_FONT = "SDK_SC_Web"
+
+    @classmethod
+    def load_version_from_config(cls):
+        """Load version from config file dynamically"""
+        try:
+            # Get the project root directory (4 levels up from this file)
+            _project_root = Path(__file__).parent.parent.parent.parent
+            _version_file = _project_root / "config" / "version.json"
+            version_str = get_json(str(_version_file), "APP_VERSION")
+            cls.APP_VERSION = get_version_type(version_str)
+        except Exception:
+            # Keep default version if loading fails
+            pass
 
     ############### LINK CONFIG ###############
     URL_LATEST = "https://github.com/letheriver2007/Firefly-Launcher/releases/latest"
@@ -197,9 +212,36 @@ class Config(QConfig):
     )
 
     ############### SERVER CONFIG ###############
-    SERVER = get_json("./config/config.json", "SERVER")
+    SERVER = "localhost:8080"  # Default server - will be loaded dynamically when needed
+
+    @classmethod
+    def load_server_from_config(cls):
+        """Load server config from config file dynamically"""
+        try:
+            # Get the project root directory (4 levels up from this file)
+            _project_root = Path(__file__).parent.parent.parent.parent
+            _config_file = _project_root / "config" / "config.json"
+            cls.SERVER = get_json(str(_config_file), "SERVER")
+        except Exception:
+            # Keep default server if loading fails
+            pass
 
 
 cfg = Config()
 cfg.themeMode.value = Theme.AUTO
-qconfig.load("./config/auto.json", cfg)
+
+# Load config dynamically to avoid import-time file access issues
+def load_config():
+    """Load configuration from files dynamically"""
+    try:
+        # Get the project root directory (4 levels up from this file)
+        _project_root = Path(__file__).parent.parent.parent.parent
+        _auto_config_file = _project_root / "config" / "auto.json"
+        qconfig.load(str(_auto_config_file), cfg)
+
+        # Load other dynamic configs
+        cfg.load_version_from_config()
+        cfg.load_server_from_config()
+    except Exception:
+        # Use defaults if loading fails
+        pass

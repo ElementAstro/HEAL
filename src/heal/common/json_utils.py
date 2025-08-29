@@ -391,6 +391,10 @@ def get_json(file_path: Union[str, Path], key: str) -> Any:
         # 使用新的JSON工具加载文件
         result = JsonUtils.load_json_file(file_path)
 
+        # Handle case where result is None (from exception handler)
+        if result is None:
+            raise Exception(f"Failed to load JSON file: {file_path}")
+
         if not result.success or result.data is None:
             raise Exception(result.error or "Failed to load JSON file")
 

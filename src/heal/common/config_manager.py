@@ -557,6 +557,60 @@ class ConfigManager:
 
         return results
 
+    # Compatibility methods for tests
+    def load_config(self, config_type: ConfigType) -> Optional[Dict[str, Any]]:
+        """
+        Load configuration data (compatibility method).
+
+        Args:
+            config_type: Type of configuration to load
+
+        Returns:
+            Configuration data or None if not found
+        """
+        try:
+            return self.get_config(config_type)
+        except Exception as e:
+            self.logger.error(f"Failed to load config {config_type.value}: {e}")
+            return None
+
+    def save_config(self, config_type: ConfigType, data: Dict[str, Any]) -> bool:
+        """
+        Save configuration data (compatibility method).
+
+        Args:
+            config_type: Type of configuration to save
+            data: Configuration data to save
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            self.set_config(config_type, data)
+            return True
+        except Exception as e:
+            self.logger.error(f"Failed to save config {config_type.value}: {e}")
+            return False
+
+    def get_cached_config(self, config_type: ConfigType) -> Optional[Dict[str, Any]]:
+        """
+        Get cached configuration data (compatibility method).
+
+        Args:
+            config_type: Type of configuration to retrieve
+
+        Returns:
+            Cached configuration data or None if not cached
+        """
+        if not self.enable_cache or config_type not in self.config_cache:
+            return None
+
+        cache_entry = self.config_cache[config_type]
+        cache_entry.access_count += 1
+        cache_entry.last_access = time.time()
+
+        return cache_entry.data
+
 
 # Global configuration manager instance with caching enabled
 config_manager = ConfigManager(enable_cache=True)

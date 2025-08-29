@@ -584,11 +584,16 @@ def network_exception_handler(func: Any) -> Any:
 
 
 def file_exception_handler(func: Any) -> Any:
+    # For JSON operations, return a failed JsonLoadResult instead of None
+    from .json_utils import JsonLoadResult
+    default_return = JsonLoadResult(success=False, error="File operation failed")
+
     return exception_handler(
         exc_type=ExceptionType.FILE_ERROR,
         severity=ExceptionSeverity.MEDIUM,
         user_message="文件操作失败",
         recovery_suggestions=["检查文件权限", "确认路径正确", "检查磁盘空间"],
+        return_value=default_return,
     )(func)
 
 
